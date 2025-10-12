@@ -1,0 +1,47 @@
+
+# --- Node.js / Express / Backend ---
+hopelink-backend/node_modules/
+hopelink-backend/.env
+hopelink-backend/.env.local
+hopelink-backend/npm-debug.log*
+hopelink-backend/yarn-debug.log*
+hopelink-backend/yarn-error.log*
+hopelink-backend/.DS_Store
+
+# --- Flutter / Dart (all apps) ---
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/pubspec.lock
+**/coverage/
+**/android/app/debug/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/ServiceDefinitions.json
+**/ios/Pods/
+**/ios/.symlinks/
+**/macos/Pods/
+**/windows/runner/Debug/
+**/windows/runner/Release/
+
+# --- IDE / Editor / Qodo files ---
+.vscode/
+.idea/
+*.iml
+.qodo/
+
+# --- System files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / Temp files ---
+*.log
+*.tmp
+
+# --- Misc / Environment ---
+.env
+.env.*
+*.lock
+*.bak
