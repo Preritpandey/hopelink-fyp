@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
-import 'package:hope_link/core/extensions/num_extension.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -65,12 +66,16 @@ class _SplashScreenState extends State<SplashScreen>
         );
 
     /// Navigate after 4 seconds
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+    Future.delayed(const Duration(seconds: 4), () async {
+      if (!mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
+      final loggedIn = prefs.getBool('is_logged_in') ?? false;
+
+      if (loggedIn && token.isNotEmpty) {
+        Get.offAllNamed('/home');
+      } else {
+        Get.offAllNamed('/login');
       }
     });
   }
@@ -171,7 +176,7 @@ class _SplashScreenState extends State<SplashScreen>
                           text: const TextSpan(
                             children: [
                               TextSpan(
-                                text: 'metro',
+                                text: 'Hope',
                                 style: TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.w300,
@@ -180,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                               ),
                               TextSpan(
-                                text: 'cery',
+                                text: 'Link',
                                 style: TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.w600,

@@ -1,0 +1,175 @@
+{
+  "info": {
+    "name": "Organization Registration API Tests",
+    "_postman_id": "f1a9a9f4-77bc-44a8-b03c-2d4c6b37c111",
+    "description": "Test organization registration endpoint with multipart/form-data uploads.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register Organization",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "organizationName",
+              "value": "Helping Hands Nepal",
+              "type": "text"
+            },
+            {
+              "key": "organizationType",
+              "value": "Non-Profit",
+              "type": "text"
+            },
+            {
+              "key": "registrationNumber",
+              "value": "REG-2025-0001",
+              "type": "text"
+            },
+            {
+              "key": "dateOfRegistration",
+              "value": "2020-05-10",
+              "type": "text"
+            },
+            {
+              "key": "officialEmail",
+              "value": "contact@helpinghands.org",
+              "type": "text"
+            },
+            {
+              "key": "officialPhone",
+              "value": "+9779812345678",
+              "type": "text"
+            },
+            {
+              "key": "website",
+              "value": "https://helpinghands.org",
+              "type": "text"
+            },
+            {
+              "key": "country",
+              "value": "Nepal",
+              "type": "text"
+            },
+            {
+              "key": "city",
+              "value": "Kathmandu",
+              "type": "text"
+            },
+            {
+              "key": "registeredAddress",
+              "value": "Baneshwor, Kathmandu",
+              "type": "text"
+            },
+            {
+              "key": "representativeName",
+              "value": "Prerit Pandey",
+              "type": "text"
+            },
+            {
+              "key": "designation",
+              "value": "Director",
+              "type": "text"
+            },
+            {
+              "key": "primaryCause",
+              "value": "Child Education",
+              "type": "text"
+            },
+            {
+              "key": "missionStatement",
+              "value": "We aim to provide education to underprivileged children in rural Nepal.",
+              "type": "text"
+            },
+            {
+              "key": "activeMembers",
+              "value": "25",
+              "type": "text"
+            },
+            {
+              "key": "recentCampaigns",
+              "value": "Back to School 2025",
+              "type": "text"
+            },
+            {
+              "key": "bankName",
+              "value": "Nepal Investment Bank",
+              "type": "text"
+            },
+            {
+              "key": "accountHolderName",
+              "value": "Helping Hands Nepal",
+              "type": "text"
+            },
+            {
+              "key": "accountNumber",
+              "value": "001122334455",
+              "type": "text"
+            },
+            {
+              "key": "bankBranch",
+              "value": "New Baneshwor",
+              "type": "text"
+            },
+            {
+              "key": "facebook",
+              "value": "https://facebook.com/helpinghandsnp",
+              "type": "text"
+            },
+            {
+              "key": "instagram",
+              "value": "https://instagram.com/helpinghandsnp",
+              "type": "text"
+            },
+            {
+              "key": "linkedin",
+              "value": "https://linkedin.com/company/helpinghandsnp",
+              "type": "text"
+            },
+            {
+              "key": "registrationCertificate",
+              "type": "file",
+              "src": "/path/to/registration_certificate.pdf"
+            },
+            {
+              "key": "taxCertificate",
+              "type": "file",
+              "src": "/path/to/tax_certificate.pdf"
+            },
+            {
+              "key": "constitutionFile",
+              "type": "file",
+              "src": "/path/to/constitution.pdf"
+            },
+            {
+              "key": "proofOfAddress",
+              "type": "file",
+              "src": "/path/to/address_proof.pdf"
+            },
+            {
+              "key": "voidCheque",
+              "type": "file",
+              "src": "/path/to/void_cheque.jpg"
+            },
+            {
+              "key": "logo",
+              "type": "file",
+              "src": "/path/to/logo.png"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/v1/organizations/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "v1", "organizations", "register"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
