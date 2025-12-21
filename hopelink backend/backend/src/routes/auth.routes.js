@@ -11,7 +11,8 @@ import {
   updatePassword,
   updateDetails,
   verifyOtp,
-  resendOtp
+  resendOtp,
+  resetPasswordWithOtp  
 } from '../controllers/auth.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 
@@ -26,7 +27,7 @@ router.get('/verify-email/:token', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 router.post('/verify-otp', verifyOtp);
 router.post('/resend-otp', resendOtp);
-
+router.post('/reset-password', resetPasswordWithOtp);
 // Protected routes (require authentication)
 router.use(authenticate);
 

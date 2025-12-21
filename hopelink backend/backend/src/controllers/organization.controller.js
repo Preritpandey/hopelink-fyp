@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
+// import Organization from '../models/organization.model.js';
+// import User from '../models/user.model.js';
+
 import Organization from '../models/organization.model.js';
 import User from '../models/user.model.js';
+
 import {
   BadRequestError,
   NotFoundError,
@@ -48,6 +52,10 @@ const handleFileUpload = async (file, folder = 'organization-documents') => {
 // @access Public
 // ================================
 export const registerOrganization = async (req, res) => {
+  console.log('Starting organization registration...');
+  console.log('Request body keys:', Object.keys(req.body));
+  console.log('Request files:', req.files ? Object.keys(req.files) : 'No files');
+  
   // Check for existing organizations with same email or registration number
   const existingOrgs = await Organization.find({
     $or: [
@@ -55,6 +63,8 @@ export const registerOrganization = async (req, res) => {
       { registrationNumber: req.body.registrationNumber }
     ]
   });
+
+  console.log('Found existing orgs:', existingOrgs.length);
 
   // Check for duplicate email
   const existingEmail = existingOrgs.find(org => 
@@ -147,42 +157,38 @@ export const registerOrganization = async (req, res) => {
   let constitutionFile = null;
   let proofOfAddress = null;
   let voidCheque = null;
-  let uploadError = null;
 
-  try {
-    // Upload files sequentially to avoid overwhelming the server
+  // Upload files sequentially to avoid overwhelming the server
+  logo = await handleFileUpload(req.files?.logo?.[0], 'organization-logos');
+  registrationCertificate = await handleFileUpload(req.files?.registrationCertificate?.[0]);
+  taxCertificate = await handleFileUpload(req.files?.taxCertificate?.[0]);
+  constitutionFile = await handleFileUpload(req.files?.constitutionFile?.[0]);
+  proofOfAddress = await handleFileUpload(req.files?.proofOfAddress?.[0]);
+  voidCheque = await handleFileUpload(req.files?.voidCheque?.[0]);
+
+  // Parse recent campaigns
+  let recentCampaigns = [];
+  if (req.body.recentCampaigns) {
     try {
-      logo = await handleFileUpload(req.files?.logo?.[0], 'organization-logos');
-      registrationCertificate = await handleFileUpload(req.files?.registrationCertificate?.[0]);
-      taxCertificate = await handleFileUpload(req.files?.taxCertificate?.[0]);
-      constitutionFile = await handleFileUpload(req.files?.constitutionFile?.[0]);
-      proofOfAddress = await handleFileUpload(req.files?.proofOfAddress?.[0]);
-      voidCheque = await handleFileUpload(req.files?.voidCheque?.[0]);
-    } catch (uploadError) {
-      console.error('Error during file uploads:', uploadError);
-      uploadError = uploadError;
-      throw uploadError; // This will be caught by the outer try-catch
-    }
-
-    // Parse recent campaigns
-    let recentCampaigns = [];
-    if (req.body.recentCampaigns) {
-      try {
-        // If it's a string, try to parse it as JSON array
-        if (typeof req.body.recentCampaigns === 'string') {
-          recentCampaigns = JSON.parse(req.body.recentCampaigns);
-        } else if (Array.isArray(req.body.recentCampaigns)) {
-          recentCampaigns = req.body.recentCampaigns;
-        }
-        // Ensure it's an array of strings
-        recentCampaigns = recentCampaigns.map(String).filter(Boolean);
-      } catch (err) {
-        console.warn('Failed to parse recentCampaigns, using empty array');
-        recentCampaigns = [];
+      // If it's a string, try to parse it as JSON array
+      if (typeof req.body.recentCampaigns === 'string') {
+        recentCampaigns = JSON.parse(req.body.recentCampaigns);
+      } else if (Array.isArray(req.body.recentCampaigns)) {
+        recentCampaigns = req.body.recentCampaigns;
       }
+      // Ensure it's an array of strings
+      recentCampaigns = recentCampaigns.map(String).filter(Boolean);
+    } catch (err) {
+      console.warn('Failed to parse recentCampaigns, using empty array');
+      recentCampaigns = [];
     }
+  }
 
     // Create organization record
+    console.log('Creating organization with data...');
+    console.log('Organization name:', req.body.organizationName);
+    console.log('Registration number:', req.body.registrationNumber);
+    
     const organization = await Organization.create({
       organizationName: req.body.organizationName,
       organizationType: req.body.organizationType,
@@ -221,6 +227,9 @@ export const registerOrganization = async (req, res) => {
       isVerified: false,
     });
 
+    console.log('Organization created successfully:', organization._id);
+    console.log('Organization status:', organization.status);
+
     return res.status(StatusCodes.CREATED).json({
       success: true,
       message:
@@ -231,36 +240,6 @@ export const registerOrganization = async (req, res) => {
         status: organization.status,
       },
     });
-  } catch (err) {
-    // Cleanup uploaded files if something fails
-    const uploadedFiles = [
-      logo,
-      registrationCertificate,
-      taxCertificate,
-      constitutionFile,
-      proofOfAddress,
-      voidCheque,
-    ].filter(Boolean);
-
-    if (uploadedFiles.length > 0) {
-      console.log('Cleaning up uploaded files due to error...');
-      const publicIds = uploadedFiles
-        .map(file => file?.publicId)
-        .filter(Boolean);
-      
-      if (publicIds.length > 0) {
-        await deleteMultipleFromCloudinary(publicIds);
-      }
-    }
-
-    // If we have a validation error, pass it through
-    if (err.name === 'ValidationError') {
-      throw new BadRequestError(err.message);
-    }
-
-    throw new Error('Failed to process organization registration: ' + err.message);
-    throw err;
-  }
 };
 
 // ================================
@@ -400,34 +379,59 @@ export const updateOrganizationProfile = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true, data: org });
 };
 
-// ================================
-// @desc Approve organization (Admin only)
-// @route PUT /api/v1/organizations/:id/approve
-// ================================
+// ===== approve organizations
 export const approveOrganization = async (req, res) => {
-  const org = await Organization.findById(req.params.id);
-  if (!org) throw new NotFoundError('Organization not found');
-  if (org.status === 'approved')
-    throw new BadRequestError('Organization is already approved');
-
-  if (await User.findOne({ email: org.officialEmail }))
-    throw new BadRequestError('A user with this email already exists');
-
-  const password = generateRandomPassword(12);
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const user = new User({
-      name: org.representativeName,
-      email: org.officialEmail,
-      password,
-      role: 'organization',
-      phoneNumber: org.officialPhone,
-      isVerified: true,
-    });
-    await user.save({ session });
+    // Get models directly from mongoose (they should be already registered during app startup)
+    const Organization = mongoose.model('Organization');
+    const User = mongoose.model('User');
 
+    const org = await Organization.findById(req.params.id).session(session);
+    if (!org) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new NotFoundError('Organization not found');
+    }
+    
+    if (org.status === 'approved') {
+      await session.abortTransaction();
+      session.endSession();
+      throw new BadRequestError('Organization is already approved');
+    }
+
+    // Find the user associated with this organization
+    const user = await User.findById(org.user).session(session);
+    
+    if (!user) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new NotFoundError('Associated user account not found');
+    }
+
+    if (!user) {
+      // If user doesn't exist, create a new one
+      const password = generateRandomPassword(12);
+      user = new User({
+        name: org.representativeName,
+        email: org.officialEmail,
+        password,
+        role: 'organization',
+        phoneNumber: org.officialPhone,
+        isVerified: true,
+      });
+      await user.save({ session });
+      
+      // Send approval email with the new password
+      await sendApprovalEmail(org, password);
+    } else if (user.role !== 'organization') {
+      // If user exists but is not an organization, throw an error
+      throw new BadRequestError('A user with this email already has a different role');
+    }
+
+    // Update organization
     org.user = user._id;
     org.status = 'approved';
     org.isVerified = true;
@@ -438,20 +442,32 @@ export const approveOrganization = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    sendApprovalEmail(org, password).catch(console.error);
-
     res.status(StatusCodes.OK).json({
       success: true,
-      message:
-        'Organization approved successfully. Credentials sent to organization email.',
-      data: { id: org._id, name: org.organizationName, status: org.status },
+      message: 'Organization approved successfully.',
+      data: { 
+        id: org._id, 
+        name: org.organizationName, 
+        status: org.status,
+        userId: user._id
+      },
     });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    throw err;
+    console.error('Error in approveOrganization:', err);
+    
+    // Handle specific error cases
+    if (err.name === 'ValidationError') {
+      throw new BadRequestError(err.message);
+    } else if (err.name === 'MongoError' && err.code === 11000) {
+      throw new BadRequestError('A user with this email already exists');
+    }
+    
+    throw new Error(`Error approving organization: ${err.message}`);
   }
 };
+
 
 // ================================
 // @desc Reject organization

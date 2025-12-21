@@ -8,7 +8,10 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables from the root .env file
 dotenv.config({ path: path.resolve(__dirname, '.env') });
-import mongoose from 'mongoose';
+
+// Import models to register them with Mongoose
+import './src/models/index.js';
+
 import express from 'express';
 import connectDB from './src/config/database.config.js';
 import mainRouter from './src/routes/index.js';
@@ -20,29 +23,8 @@ const swaggerDocument = YAML.load('./swagger.yaml');
 
 const app = express();
 
-// Connect to DB and clear model cache
-connectDB().then(() => {
-  if (process.env.NODE_ENV !== 'production') {
-    const clearModelCache = () => {
-      if (mongoose.connection.models) {
-        const modelNames = Object.keys(mongoose.connection.models);
-        modelNames.forEach(modelName => {
-          delete mongoose.connection.models[modelName];
-        });
-      }
-      
-      if (mongoose.connection.base && mongoose.connection.base.modelSchemas) {
-        const schemaNames = Object.keys(mongoose.connection.base.modelSchemas);
-        schemaNames.forEach(schemaName => {
-          delete mongoose.connection.base.modelSchemas[schemaName];
-        });
-      }
-    };
-    
-    // Clear the cache after connection is established
-    clearModelCache();
-  }
-}).catch(err => {
+// Connect to DB
+connectDB().catch(err => {
   console.error('Failed to connect to MongoDB', err);
   process.exit(1);
 });

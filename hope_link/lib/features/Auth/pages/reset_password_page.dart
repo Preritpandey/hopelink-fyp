@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:hope_link/features/Auth/pages/forgot_password_page.dart';
-import 'package:hope_link/features/Home/pages/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
 import 'package:hope_link/core/widgets/app_text_field.dart';
-import 'package:hope_link/features/Auth/controllers/login_controller.dart';
+import 'package:hope_link/features/Auth/controllers/forgot_password_controller.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  final String email;
+
+  const ResetPasswordPage({super.key, required this.email});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _ResetPasswordPageState extends State<ResetPasswordPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _controller = Get.put(LoginController());
+  final _otpController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _controller = Get.find<ForgotPasswordController>();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  final RxBool _obscurePassword = true.obs;
+  final RxBool _obscureNewPassword = true.obs;
+  final RxBool _obscureConfirmPassword = true.obs;
 
   @override
   void initState() {
@@ -39,25 +41,36 @@ class _LoginPageState extends State<LoginPage>
     );
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
     _animationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
+    _otpController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColorToken.primary.color),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -84,11 +97,11 @@ class _LoginPageState extends State<LoginPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        header(),
+                        _buildHeader(),
                         const SizedBox(height: 48),
-                        loginForm(),
+                        _buildResetForm(),
                         const SizedBox(height: 24),
-                        signUpPrompt(),
+                        _buildResendOTP(),
                       ],
                     ),
                   ),
@@ -101,7 +114,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget header() {
+  Widget _buildHeader() {
     return Column(
       children: [
         Container(
@@ -112,14 +125,14 @@ class _LoginPageState extends State<LoginPage>
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.volunteer_activism_rounded,
+            Icons.verified_user_rounded,
             size: 40,
             color: AppColorToken.primary.color,
           ),
         ),
         const SizedBox(height: 24),
         Text(
-          'Welcome Back',
+          'Verify & Reset',
           style: AppTextStyle.h3.bold.copyWith(
             fontSize: 32,
             color: AppColorToken.primary.color,
@@ -128,10 +141,20 @@ class _LoginPageState extends State<LoginPage>
         ),
         const SizedBox(height: 8),
         Text(
-          'Continue making a difference',
+          'Enter the OTP sent to',
           style: AppTextStyle.bodySmall.copyWith(
             color: Colors.grey[600],
+            fontSize: 14,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          widget.email,
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColorToken.primary.color,
             fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,
         ),
@@ -139,7 +162,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget loginForm() {
+  Widget _buildResetForm() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -158,49 +181,35 @@ class _LoginPageState extends State<LoginPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Sign In', style: AppTextStyle.h3.bold.copyWith(fontSize: 24)),
+            Text(
+              'Create New Password',
+              style: AppTextStyle.h3.bold.copyWith(fontSize: 24),
+            ),
             const SizedBox(height: 8),
             Text(
-              'Enter your credentials to continue',
+              'Your new password must be different from previous passwords',
               style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
-            _buildEmailField(),
+            _buildOTPField(),
             const SizedBox(height: 16),
-            _buildPasswordField(),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => Get.to(() => ForgotPasswordPage()),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Forgot Password?',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColorToken.primary.color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
+            _buildNewPasswordField(),
+            const SizedBox(height: 16),
+            _buildConfirmPasswordField(),
             const SizedBox(height: 24),
-            _buildLoginButton(),
+            _buildResetButton(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildOTPField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Email',
+          'OTP Code',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
             color: Colors.grey[700],
@@ -208,14 +217,21 @@ class _LoginPageState extends State<LoginPage>
         ),
         const SizedBox(height: 8),
         AppTextField(
-          controller: _emailController,
+          controller: _otpController,
           borderRadius: 12,
-          hintText: 'your.email@example.com',
-          keyboardType: TextInputType.emailAddress,
+          hintText: 'Enter 6-digit OTP',
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
           validator: (value) {
-            if (value == null || value.isEmpty)
-              return 'Please enter your email';
-            if (!GetUtils.isEmail(value)) return 'Please enter a valid email';
+            if (value == null || value.isEmpty) {
+              return 'Please enter OTP';
+            }
+            if (value.length != 6) {
+              return 'OTP must be 6 digits';
+            }
             return null;
           },
         ),
@@ -223,12 +239,12 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildNewPasswordField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Password',
+          'New Password',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
             color: Colors.grey[700],
@@ -237,26 +253,29 @@ class _LoginPageState extends State<LoginPage>
         const SizedBox(height: 8),
         Obx(
           () => AppTextField(
-            controller: _passwordController,
+            controller: _newPasswordController,
             borderRadius: 12,
             hintText: '••••••••',
             keyboardType: TextInputType.visiblePassword,
-            obscureText: _obscurePassword.value,
+            obscureText: _obscureNewPassword.value,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your password';
+                return 'Please enter new password';
+              }
+              if (value.length < 8) {
+                return 'Password must be at least 8 characters';
               }
               return null;
             },
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword.value
+                _obscureNewPassword.value
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
                 color: Colors.grey[600],
               ),
               onPressed: () {
-                _obscurePassword.toggle();
+                _obscureNewPassword.toggle();
               },
             ),
           ),
@@ -265,44 +284,93 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  // Widget _buildP
-  Widget _buildLoginButton() {
+  Widget _buildConfirmPasswordField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Confirm Password',
+          style: AppTextStyle.bodySmall.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(
+          () => AppTextField(
+            controller: _confirmPasswordController,
+            borderRadius: 12,
+            hintText: '••••••••',
+            keyboardType: TextInputType.visiblePassword,
+            obscureText: _obscureConfirmPassword.value,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please confirm your password';
+              }
+              if (value != _newPasswordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirmPassword.value
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+                color: Colors.grey[600],
+              ),
+              onPressed: () {
+                _obscureConfirmPassword.toggle();
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResetButton() {
     return Obx(
       () => AppButton(
-        title: _controller.isLoading.value ? 'Signing in...' : 'Sign In',
+        title: _controller.isLoading.value
+            ? 'Resetting Password...'
+            : 'Reset Password',
         backgroundColor: AppColorToken.primary.color,
-        onPressed: _controller.isLoading.value ? null : _onLogin,
+        onPressed: _controller.isLoading.value ? null : _onResetPassword,
         width: double.infinity,
         radius: 12,
       ),
     );
   }
 
-  Widget signUpPrompt() {
+  Widget _buildResendOTP() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: Colors.grey.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Don't have an account?",
+            "Didn't receive the code?",
             style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(width: 4),
           TextButton(
-            onPressed: () => Get.offAllNamed('/signup'),
+            onPressed: _onResendOTP,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: const Size(0, 0),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Sign Up',
+              'Resend OTP',
               style: AppTextStyle.bodySmall.copyWith(
                 color: AppColorToken.primary.color,
                 fontWeight: FontWeight.bold,
@@ -314,27 +382,63 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Future<void> _onLogin() async {
+  Future<void> _onResetPassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final ok = await _controller.login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
+    final success = await _controller.resetPassword(
+      email: widget.email,
+      otp: _otpController.text.trim(),
+      newPassword: _newPasswordController.text,
     );
 
-    if (ok) {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-      if (token != null && token.isNotEmpty) {
-        // Get.offAllNamed('/home', arguments: {'token': token});
-        // Get.to(() => ProfilePage(token: token));
-        Get.to(() => HomePage(token: token));
-      } else {
+    if (success) {
+      Get.snackbar(
+        'Success',
+        'Password reset successful! Please login with your new password.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColorToken.primary.color.withValues(alpha: 0.1),
+        colorText: AppColorToken.primary.color,
+        borderRadius: 12,
+        margin: const EdgeInsets.all(16),
+        icon: Icon(Icons.check_circle_outline, color: AppColorToken.primary.color),
+        duration: const Duration(seconds: 3),
+      );
+      
+      // Navigate back to login after a short delay
+      Future.delayed(const Duration(seconds: 2), () {
         Get.offAllNamed('/login');
-      }
+      });
     } else {
       Get.snackbar(
-        'Login Failed',
+        'Error',
+        _controller.errorMessage.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColorToken.error.color.withValues(alpha: 0.1),
+        colorText: AppColorToken.error.color,
+        borderRadius: 12,
+        margin: const EdgeInsets.all(16),
+        icon: Icon(Icons.error_outline, color: AppColorToken.error.color),
+      );
+    }
+  }
+
+  Future<void> _onResendOTP() async {
+    final success = await _controller.sendOTP(email: widget.email);
+
+    if (success) {
+      Get.snackbar(
+        'Success',
+        'OTP resent to your email',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColorToken.primary.color.withValues(alpha: 0.1),
+        colorText: AppColorToken.primary.color,
+        borderRadius: 12,
+        margin: const EdgeInsets.all(16),
+        icon: Icon(Icons.check_circle_outline, color: AppColorToken.primary.color),
+      );
+    } else {
+      Get.snackbar(
+        'Error',
         _controller.errorMessage.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColorToken.error.color.withValues(alpha: 0.1),

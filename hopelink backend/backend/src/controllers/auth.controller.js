@@ -376,6 +376,7 @@ export const updatePassword = async (req, res) => {
   });
 };
 
+
 // @desc    Forgot password
 // @route   POST /api/v1/auth/forgot-password
 // @access  Public
@@ -388,33 +389,39 @@ export const forgotPassword = async (req, res) => {
     throw new NotFoundError('No user found with this email');
   }
 
-  // Get reset token
-  const resetToken = user.getResetPasswordToken();
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  // Save OTP to user
+  user.otp = otp;
+  user.otpExpire = otpExpire;
   await user.save({ validateBeforeSave: false });
-
-  // Create reset URL
-  const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
-
-  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
   try {
     await sendEmail({
       to: user.email,
-      subject: 'Password Reset Token',
-      text: message,
+      subject: 'Password Reset OTP',
+      template: 'password-reset-otp',
+      context: {
+        name: user.name,
+        otp,
+        supportEmail: process.env.SUPPORT_EMAIL || 'support@hopelink.com'
+      }
     });
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: 'Email sent',
+      message: 'OTP sent to your email',
+      data: { email: user.email }
     });
   } catch (error) {
-    console.error('Error sending email:', error);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    console.error('Error sending OTP email:', error);
+    user.otp = undefined;
+    user.otpExpire = undefined;
     await user.save({ validateBeforeSave: false });
 
-    throw new Error('Email could not be sent');
+    throw new Error('Failed to send OTP email');
   }
 };
 
@@ -466,6 +473,101 @@ export const resetPassword = async (req, res) => {
     success: true,
     token,
   });
+};
+
+
+//// resetpassword with new otp
+// @desc    Reset password with OTP
+// @route   POST /api/v1/auth/reset-password
+// @access  Public
+// export const resetPasswordWithOtp = async (req, res) => {
+//   const { email, otp, newPassword } = req.body;
+
+//   const user = await User.findOne({
+//     email,
+//     otp,
+//     otpExpire: { $gt: Date.now() }
+//   });
+
+//   if (!user) {
+//     throw new BadRequestError('Invalid or expired OTP');
+//   }
+
+//   // Set new password
+//   user.password = newPassword;
+//   user.otp = undefined;
+//   user.otpExpire = undefined;
+//   await user.save();
+
+//   res.status(StatusCodes.OK).json({
+//     success: true,
+//     message: 'Password reset successful'
+//   });
+// };
+// @desc    Reset password with OTP
+// @route   POST /api/v1/auth/reset-password
+// @access  Public
+// @desc    Reset password with OTP
+// @route   POST /api/v1/auth/reset-password
+// @access  Public
+export const resetPasswordWithOtp = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    // Input validation
+    if (!email || !otp || !newPassword) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: 'Validation Error',
+        message: 'Email, OTP, and new password are required'
+      });
+    }
+
+    // Find user with matching email and unexpired OTP
+    const user = await User.findOne({
+      email,
+      otp,
+      otpExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: 'Invalid or expired OTP',
+        message: 'The OTP you entered is invalid or has expired. Please request a new one.'
+      });
+    }
+
+    // Set new password and clear OTP fields
+    user.password = newPassword;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    // Send success response
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Password has been reset successfully'
+    });
+  } catch (error) {
+    console.error('Error in resetPasswordWithOtp:', error);
+    
+    // Handle known errors
+    if (error.name === 'ValidationError') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: 'Validation Error',
+        message: error.message
+      });
+    }
+
+    // Handle other errors
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: 'Server Error',
+      message: 'An error occurred while resetting your password. Please try again later.'
+    });
+  }
 };
 
 // @desc    Verify email

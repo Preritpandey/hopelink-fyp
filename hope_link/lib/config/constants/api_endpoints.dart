@@ -1,6 +1,8 @@
 class ApiEndpoints {
-  // static const String baseUrl = 'http://localhost:3008/api/v1';
-  static const String baseUrl = 'http://192.168.1.95:3008/api/v1'; // cg2.4
+  static const String baseUrl = 'http://localhost:3008/api/v1';
+  // static const String baseUrl = 'http://172.20.10.3:3008/api/v1';
+
+  // static const String baseUrl = 'http://192.168.1.95:3008/api/v1'; // cg2.4
 
   // Auth endpoints
   static String get login => '$baseUrl/auth/login';

@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import {
   registerOrganization,
   getOrganizationProfile,
@@ -25,17 +26,17 @@ router.post(
     { name: 'proofOfAddress', maxCount: 1 },
     { name: 'voidCheque', maxCount: 1 },
   ]),
-  registerOrganization
+  asyncHandler(registerOrganization)
 );
 
-router.get('/', getOrganizations);
-router.get('/:id', getOrganization);
+router.get('/', asyncHandler(getOrganizations));
+router.get('/:id', asyncHandler(getOrganization));
 
 // Protected routes (require authentication)
 router.use(authenticate);
 
 // Organization profile routes
-router.get('/profile/me', getOrganizationProfile);
+router.get('/profile/me', asyncHandler(getOrganizationProfile));
 router.put(
   '/profile/me',
   handleFileUpload([
@@ -45,7 +46,7 @@ router.put(
     { name: 'constitutionFile', maxCount: 1 },
     { name: 'proofOfAddress', maxCount: 1 },
   ]),
-  updateOrganizationProfile
+  asyncHandler(updateOrganizationProfile)
 );
 
 // Organization CRUD routes (organization owner or admin)
@@ -66,14 +67,14 @@ router.use(authorize('admin'));
 
 // The getOrganizations function handles status filtering via query parameters
 // You can use /organizations?status=pending or /organizations?status=approved, etc.
-router.get('/status/:status', (req, res, next) => {
+router.get('/status/:status', asyncHandler((req, res, next) => {
   // Map the route parameter to a query parameter
   req.query.status = req.params.status;
   return getOrganizations(req, res, next);
-});
+}));
 
-router.put('/:id/approve', approveOrganization);
-router.put('/:id/reject', rejectOrganization);
-router.delete('/:id', deleteOrganization);
+router.put('/:id/approve', asyncHandler(approveOrganization));
+router.put('/:id/reject', asyncHandler(rejectOrganization));
+router.delete('/:id', asyncHandler(deleteOrganization));
 
 export default router;

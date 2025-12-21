@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProfileShimmer extends StatelessWidget {
@@ -14,11 +15,11 @@ class ProfileShimmer extends StatelessWidget {
         child: Column(
           children: [
             const CircleAvatar(radius: 50),
-            const SizedBox(height: 20),
+            20.verticalSpace,
             Container(height: 20, width: 200, color: Colors.white),
-            const SizedBox(height: 10),
+            10.verticalSpace,
             Container(height: 16, width: 150, color: Colors.white),
-            const SizedBox(height: 20),
+            20.verticalSpace,
             Container(height: 50, width: double.infinity, color: Colors.white),
           ],
         ),

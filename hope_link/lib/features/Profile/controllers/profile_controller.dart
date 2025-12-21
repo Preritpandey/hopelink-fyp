@@ -36,6 +36,7 @@
 //   }
 // }
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/profile_service.dart';
 
@@ -58,8 +59,17 @@ class ProfileController extends GetxController {
       isLoading.value = true;
       final res = await ProfileService.getProfile(token);
       user.value = UserModel.fromJson(res['user']);
-    } catch (_) {
-      Get.snackbar('Error', 'Failed to fetch profile data');
+    } catch (e) {
+      if (e is Map && e['code'] == 401) {
+        // User is not authenticated, log them out
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('auth_token');
+        await prefs.remove('is_logged_in');
+        Get.offAllNamed('/login');
+        Get.snackbar('Session Expired', 'Please log in again');
+      } else {
+        Get.snackbar('Error', 'Failed to fetch profile data');
+      }
     } finally {
       isLoading.value = false;
     }

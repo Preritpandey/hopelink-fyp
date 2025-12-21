@@ -13,7 +13,6 @@ const categorySchema = new mongoose.Schema(
       type: String,
       unique: true,
       lowercase: true,
-      index: true,
     },
     description: {
       type: String,
@@ -86,7 +85,6 @@ categorySchema.pre('remove', async function (next) {
 
 // Indexes for better query performance
 categorySchema.index({ name: 'text', description: 'text' });
-categorySchema.index({ slug: 1 });
 categorySchema.index({ parent: 1 });
 categorySchema.index({ isActive: 1, featured: 1 });
 

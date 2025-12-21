@@ -103,13 +103,83 @@ class ProfileService {
     }
   }
 
+  // static Future<void> uploadCV(String token, File file) async {
+  //   final request = http.MultipartRequest(
+  //     "PUT",
+  //     Uri.parse(ApiEndpoints.uploadCV),
+  //   );
+  //   request.headers["Authorization"] = "Bearer $token";
+  //   request.files.add(await http.MultipartFile.fromPath("cv", file.path));
+  //   await request.send();
+  // }
   static Future<void> uploadCV(String token, File file) async {
-    final request = http.MultipartRequest(
-      "PUT",
-      Uri.parse(ApiEndpoints.uploadCV),
-    );
-    request.headers["Authorization"] = "Bearer $token";
-    request.files.add(await http.MultipartFile.fromPath("cv", file.path));
-    await request.send();
+    try {
+      print('Starting CV upload...');
+      print('File path: ${file.path}');
+      print('File exists: ${await file.exists()}');
+
+      // Validate file type
+      final fileExtension = file.path.split('.').last.toLowerCase();
+      if (!['pdf', 'doc', 'docx'].contains(fileExtension)) {
+        throw Exception(
+          'Invalid file type. Only PDF, DOC, and DOCX are allowed.',
+        );
+      }
+
+      final request = http.MultipartRequest(
+        "POST",
+        Uri.parse(ApiEndpoints.uploadCV),
+      );
+
+      request.headers["Authorization"] = "Bearer $token";
+
+      final multipartFile = await http.MultipartFile.fromPath(
+        "cv", // Field name should be "cv" as per API requirement
+        file.path,
+        contentType: MediaType(
+          'application',
+          fileExtension == 'pdf' ? 'pdf' : 'msword', // For .doc and .docx
+        ),
+      );
+      request.files.add(multipartFile);
+
+      print('Sending request to: ${ApiEndpoints.uploadCV}');
+      final streamedResponse = await request.send();
+
+      final responseData = await streamedResponse.stream.bytesToString();
+      print('Response status: ${streamedResponse.statusCode}');
+      print('Response body: $responseData');
+
+      if (streamedResponse.statusCode != 200) {
+        try {
+          final error = jsonDecode(responseData);
+          throw Exception(
+            'Server error (${streamedResponse.statusCode}): ${error['message'] ?? 'Unknown error'}',
+          );
+        } catch (e) {
+          throw Exception(
+            'Server error (${streamedResponse.statusCode}): $responseData',
+          );
+        }
+      }
+
+      // Verify the response contains the expected data
+      try {
+        final responseJson = jsonDecode(responseData);
+        if (responseJson['cvUrl'] == null) {
+          print('Warning: Server response does not contain cvUrl');
+        }
+      } catch (e) {
+        print('Warning: Could not parse server response as JSON');
+      }
+    } catch (e) {
+      print('Error in uploadCV: ${e.toString()}');
+      print('Error type: ${e.runtimeType}');
+      if (e is http.ClientException) {
+        print('HTTP Client Exception: ${e.message}');
+        print('URI: ${e.uri}');
+      }
+      rethrow;
+    }
   }
 }

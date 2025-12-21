@@ -76,5 +76,12 @@ const organizationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Organization = mongoose.model("Organization", organizationSchema);
+// Check if the model has already been registered
+let Organization;
+if (mongoose.models.Organization) {
+  Organization = mongoose.model('Organization');
+} else {
+  Organization = mongoose.model('Organization', organizationSchema);
+}
+
 export default Organization;

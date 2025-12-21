@@ -179,6 +179,12 @@ userSchema.methods.generateAuthToken = function () {
   );
 };
 
-const User = mongoose.model('User', userSchema);
+// Check if the model has already been registered
+let User;
+if (mongoose.models.User) {
+  User = mongoose.model('User');
+} else {
+  User = mongoose.model('User', userSchema);
+}
 
 export default User;

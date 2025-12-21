@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hope_link/features/Auth/pages/forgot_password_page.dart';
-import 'package:hope_link/features/Home/pages/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
 import 'package:hope_link/core/widgets/app_text_field.dart';
-import 'package:hope_link/features/Auth/controllers/login_controller.dart';
+import 'package:hope_link/features/Auth/controllers/forgot_password_controller.dart';
+import 'package:hope_link/features/Auth/pages/reset_password_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _controller = Get.put(LoginController());
+  final _controller = Get.put(ForgotPasswordController());
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  final RxBool _obscurePassword = true.obs;
 
   @override
   void initState() {
@@ -51,13 +47,24 @@ class _LoginPageState extends State<LoginPage>
   void dispose() {
     _animationController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColorToken.primary.color,
+          ),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -84,11 +91,11 @@ class _LoginPageState extends State<LoginPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        header(),
+                        _buildHeader(),
                         const SizedBox(height: 48),
-                        loginForm(),
+                        _buildEmailForm(),
                         const SizedBox(height: 24),
-                        signUpPrompt(),
+                        _buildBackToLogin(),
                       ],
                     ),
                   ),
@@ -101,7 +108,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget header() {
+  Widget _buildHeader() {
     return Column(
       children: [
         Container(
@@ -112,14 +119,14 @@ class _LoginPageState extends State<LoginPage>
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.volunteer_activism_rounded,
+            Icons.lock_reset_rounded,
             size: 40,
             color: AppColorToken.primary.color,
           ),
         ),
         const SizedBox(height: 24),
         Text(
-          'Welcome Back',
+          'Forgot Password?',
           style: AppTextStyle.h3.bold.copyWith(
             fontSize: 32,
             color: AppColorToken.primary.color,
@@ -128,7 +135,7 @@ class _LoginPageState extends State<LoginPage>
         ),
         const SizedBox(height: 8),
         Text(
-          'Continue making a difference',
+          'No worries, we\'ll send you reset instructions',
           style: AppTextStyle.bodySmall.copyWith(
             color: Colors.grey[600],
             fontSize: 16,
@@ -139,7 +146,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget loginForm() {
+  Widget _buildEmailForm() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -158,37 +165,19 @@ class _LoginPageState extends State<LoginPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Sign In', style: AppTextStyle.h3.bold.copyWith(fontSize: 24)),
+            Text(
+              'Reset Password',
+              style: AppTextStyle.h3.bold.copyWith(fontSize: 24),
+            ),
             const SizedBox(height: 8),
             Text(
-              'Enter your credentials to continue',
+              'Enter your email address and we\'ll send you an OTP',
               style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
             _buildEmailField(),
-            const SizedBox(height: 16),
-            _buildPasswordField(),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => Get.to(() => ForgotPasswordPage()),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Forgot Password?',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColorToken.primary.color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
             const SizedBox(height: 24),
-            _buildLoginButton(),
+            _buildSendOTPButton(),
           ],
         ),
       ),
@@ -213,9 +202,12 @@ class _LoginPageState extends State<LoginPage>
           hintText: 'your.email@example.com',
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value == null || value.isEmpty)
+            if (value == null || value.isEmpty) {
               return 'Please enter your email';
-            if (!GetUtils.isEmail(value)) return 'Please enter a valid email';
+            }
+            if (!GetUtils.isEmail(value)) {
+              return 'Please enter a valid email';
+            }
             return null;
           },
         ),
@@ -223,62 +215,19 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget _buildPasswordField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Password',
-          style: AppTextStyle.bodySmall.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Obx(
-          () => AppTextField(
-            controller: _passwordController,
-            borderRadius: 12,
-            hintText: '••••••••',
-            keyboardType: TextInputType.visiblePassword,
-            obscureText: _obscurePassword.value,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              return null;
-            },
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword.value
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: Colors.grey[600],
-              ),
-              onPressed: () {
-                _obscurePassword.toggle();
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Widget _buildP
-  Widget _buildLoginButton() {
+  Widget _buildSendOTPButton() {
     return Obx(
       () => AppButton(
-        title: _controller.isLoading.value ? 'Signing in...' : 'Sign In',
+        title: _controller.isLoading.value ? 'Sending OTP...' : 'Send OTP',
         backgroundColor: AppColorToken.primary.color,
-        onPressed: _controller.isLoading.value ? null : _onLogin,
+        onPressed: _controller.isLoading.value ? null : _onSendOTP,
         width: double.infinity,
         radius: 12,
       ),
     );
   }
 
-  Widget signUpPrompt() {
+  Widget _buildBackToLogin() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
@@ -289,20 +238,21 @@ class _LoginPageState extends State<LoginPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            "Don't have an account?",
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          Icon(
+            Icons.arrow_back_rounded,
+            size: 18,
+            color: AppColorToken.primary.color,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           TextButton(
-            onPressed: () => Get.offAllNamed('/signup'),
+            onPressed: () => Get.back(),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.zero,
               minimumSize: const Size(0, 0),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Sign Up',
+              'Back to Login',
               style: AppTextStyle.bodySmall.copyWith(
                 color: AppColorToken.primary.color,
                 fontWeight: FontWeight.bold,
@@ -314,27 +264,35 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Future<void> _onLogin() async {
+  Future<void> _onSendOTP() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final ok = await _controller.login(
+    final success = await _controller.sendOTP(
       email: _emailController.text.trim(),
-      password: _passwordController.text,
     );
 
-    if (ok) {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-      if (token != null && token.isNotEmpty) {
-        // Get.offAllNamed('/home', arguments: {'token': token});
-        // Get.to(() => ProfilePage(token: token));
-        Get.to(() => HomePage(token: token));
-      } else {
-        Get.offAllNamed('/login');
-      }
+    if (success) {
+      Get.to(
+        () => ResetPasswordPage(email: _emailController.text.trim()),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 300),
+      );
+      Get.snackbar(
+        'Success',
+        'OTP sent to your email',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColorToken.primary.color.withValues(alpha: 0.1),
+        colorText: AppColorToken.primary.color,
+        borderRadius: 12,
+        margin: const EdgeInsets.all(16),
+        icon: Icon(
+          Icons.check_circle_outline,
+          color: AppColorToken.primary.color,
+        ),
+      );
     } else {
       Get.snackbar(
-        'Login Failed',
+        'Error',
         _controller.errorMessage.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColorToken.error.color.withValues(alpha: 0.1),
