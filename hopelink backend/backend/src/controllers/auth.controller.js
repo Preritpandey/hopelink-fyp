@@ -244,15 +244,22 @@ export const login = async (req, res, next) => {
       email: user.email,
       role: user.role,
       isVerified: user.isVerified,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      isActive: user.isActive
     };
 
     // Add organization data if user is an organization
     if (user.role === 'organization') {
-      const organization = await Organization.findById(user.organization).select('-__v');
-      userData.organization = organization;
+      const organization = await Organization.findById(user.organization)
+        .select('organizationName organizationType status');
+      
+      if (organization) {
+        userData.organization = {
+          _id: organization._id,
+          name: organization.organizationName,
+          type: organization.organizationType,
+          status: organization.status
+        };
+      }
     }
 
     res.status(StatusCodes.OK).json({

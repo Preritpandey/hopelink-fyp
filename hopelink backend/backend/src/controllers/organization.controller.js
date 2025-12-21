@@ -17,6 +17,7 @@ import {
   deleteMultipleFromCloudinary
 } from '../config/cloudinary.config.js';
 import { sendEmail } from '../services/email.service.js';
+import { generateRandomPassword } from '../utils/helpers.js';
 
 // ================================
 // Helper: Upload file to Cloudinary
@@ -322,7 +323,7 @@ export const getOrganization = async (req, res) => {
 // @access Private
 // ================================
 export const getOrganizationProfile = async (req, res) => {
-  const org = await Organization.findOne({ user: req.user.userId }).populate(
+  const org = await Organization.findOne({ user: req.user._id }).populate(
     'user',
     'name email role'
   );
@@ -370,7 +371,7 @@ export const updateOrganizationProfile = async (req, res) => {
   }
 
   const org = await Organization.findOneAndUpdate(
-    { user: req.user.userId },
+    { user: req.user._id },
     updates,
     { new: true, runValidators: true }
   ).populate('user', 'name email role');
@@ -380,12 +381,103 @@ export const updateOrganizationProfile = async (req, res) => {
 };
 
 // ===== approve organizations
+// export const approveOrganization = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     // Get models directly from mongoose (they should be already registered during app startup)
+//     const Organization = mongoose.model('Organization');
+//     const User = mongoose.model('User');
+
+//     const org = await Organization.findById(req.params.id).session(session);
+//     if (!org) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       throw new NotFoundError('Organization not found');
+//     }
+    
+//     if (org.status === 'approved') {
+//       await session.abortTransaction();
+//       session.endSession();
+//       throw new BadRequestError('Organization is already approved');
+//     }
+
+//     // Find the user associated with this organization
+//     const user = await User.findById(org.user).session(session);
+    
+//     if (!user) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       throw new NotFoundError('Associated user account not found');
+//     }
+
+//     if (!user) {
+//       // If user doesn't exist, create a new one
+//       const password = generateRandomPassword(12);
+//       user = new User({
+//         name: org.representativeName,
+//         email: org.officialEmail,
+//         password,
+//         role: 'organization',
+//         phoneNumber: org.officialPhone,
+//         isVerified: true,
+//       });
+//       await user.save({ session });
+      
+//       // Send approval email with the new password
+//       await sendApprovalEmail(org, password);
+//     } else if (user.role !== 'organization') {
+//       // If user exists but is not an organization, throw an error
+//       throw new BadRequestError('A user with this email already has a different role');
+//     }
+
+//     // Update organization
+//     org.user = user._id;
+//     org.status = 'approved';
+//     org.isVerified = true;
+//     org.approvedBy = req.user.userId;
+//     org.approvedAt = new Date();
+//     await org.save({ session });
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     res.status(StatusCodes.OK).json({
+//       success: true,
+//       message: 'Organization approved successfully.',
+//       data: { 
+//         id: org._id, 
+//         name: org.organizationName, 
+//         status: org.status,
+//         userId: user._id
+//       },
+//     });
+//   } catch (err) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error('Error in approveOrganization:', err);
+    
+//     // Handle specific error cases
+//     if (err.name === 'ValidationError') {
+//       throw new BadRequestError(err.message);
+//     } else if (err.name === 'MongoError' && err.code === 11000) {
+//       throw new BadRequestError('A user with this email already exists');
+//     }
+    
+//     throw new Error(`Error approving organization: ${err.message}`);
+//   }
+// };
+//// new code
+// @desc    Approve organization
+// @route   PUT /api/organizations/:id/approve
+// @access  Private/Admin
 export const approveOrganization = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Get models directly from mongoose (they should be already registered during app startup)
+    // Get models directly from mongoose
     const Organization = mongoose.model('Organization');
     const User = mongoose.model('User');
 
@@ -402,17 +494,11 @@ export const approveOrganization = async (req, res) => {
       throw new BadRequestError('Organization is already approved');
     }
 
-    // Find the user associated with this organization
-    const user = await User.findById(org.user).session(session);
+    // Find or create user
+    let user = await User.findOne({ email: org.officialEmail }).session(session);
     
     if (!user) {
-      await session.abortTransaction();
-      session.endSession();
-      throw new NotFoundError('Associated user account not found');
-    }
-
-    if (!user) {
-      // If user doesn't exist, create a new one
+      // Create new user
       const password = generateRandomPassword(12);
       user = new User({
         name: org.representativeName,
@@ -421,13 +507,15 @@ export const approveOrganization = async (req, res) => {
         role: 'organization',
         phoneNumber: org.officialPhone,
         isVerified: true,
+        isPasswordAutogenerated: true
       });
       await user.save({ session });
       
       // Send approval email with the new password
       await sendApprovalEmail(org, password);
     } else if (user.role !== 'organization') {
-      // If user exists but is not an organization, throw an error
+      await session.abortTransaction();
+      session.endSession();
       throw new BadRequestError('A user with this email already has a different role');
     }
 
@@ -435,7 +523,7 @@ export const approveOrganization = async (req, res) => {
     org.user = user._id;
     org.status = 'approved';
     org.isVerified = true;
-    org.approvedBy = req.user.userId;
+    org.approvedBy = req.user?._id || 'system'; // Fallback to 'system' if no user in request
     org.approvedAt = new Date();
     await org.save({ session });
 
@@ -444,7 +532,7 @@ export const approveOrganization = async (req, res) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: 'Organization approved successfully.',
+      message: 'Organization approved successfully',
       data: { 
         id: org._id, 
         name: org.organizationName, 
@@ -457,7 +545,6 @@ export const approveOrganization = async (req, res) => {
     session.endSession();
     console.error('Error in approveOrganization:', err);
     
-    // Handle specific error cases
     if (err.name === 'ValidationError') {
       throw new BadRequestError(err.message);
     } else if (err.name === 'MongoError' && err.code === 11000) {
@@ -467,7 +554,6 @@ export const approveOrganization = async (req, res) => {
     throw new Error(`Error approving organization: ${err.message}`);
   }
 };
-
 
 // ================================
 // @desc Reject organization
@@ -544,11 +630,8 @@ export const deleteOrganization = async (req, res) => {
 // ================================
 // Helpers
 // ================================
-const generateRandomPassword = (length = 12) => {
-  const chars =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-};
+// function remove 
+
 
 const sendApprovalEmail = async (org, password) => {
   try {

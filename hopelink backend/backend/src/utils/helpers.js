@@ -11,7 +11,7 @@ import crypto from 'crypto';
  * @returns {string} Randomly generated password
  */
 export const generateRandomPassword = (length = 12) => {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]\\:;?><,./-=';
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
   let password = '';
   const values = new Uint32Array(length);
   crypto.getRandomValues(values);
@@ -30,7 +30,7 @@ export const generateRandomPassword = (length = 12) => {
   if (!/[0-9]/.test(password)) {
     password = password.slice(0, -1) + '1';
   }
-  if (!/[!@#$%^&*()_+~`|}{[\]\\:;?><,./\-=]/.test(password)) {
+  if (!/[!@#$%^&*]/.test(password)) {
     password = password.slice(0, -1) + '!';
   }
   
