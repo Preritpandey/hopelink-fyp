@@ -15,6 +15,7 @@ const router = express.Router();
 // router.get('/', getDonations);
 
 // Protected routes (require authentication)
+router.get('/', getDonations);
 router.use(authenticate);
 
 // User routes
@@ -26,7 +27,6 @@ router.get('/:id', getDonation);
 router.get('/campaign/:campaignId', authorize('organization', 'admin'), getDonationsForCampaign);
 
 // Admin routes
-router.get('/', authorize('admin'), getDonations);
 router.put('/:id/status', authorize('admin', 'organization'), updateDonationStatus);
 
 // Get donations for a specific user (admin or the user themselves)

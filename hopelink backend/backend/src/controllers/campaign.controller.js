@@ -5,6 +5,7 @@ import Donation from '../models/donation.model.js';
 import Event from '../models/event.model.js';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/index.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
+import { model } from 'mongoose';
 
 // @desc    Create a new campaign
 // @route   POST /api/v1/campaigns
@@ -71,10 +72,14 @@ export const getCampaigns = async (req, res) => {
   queryStr = queryStr.replace(/(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
 
   // Finding resource
-  let query = Campaign.find(JSON.parse(queryStr)).populate(
-    'organization',
-    'organizationName logo'
-  );
+  let query = Campaign.find(JSON.parse(queryStr)).populate({
+
+    path: 'organization',
+    select: 'organizationName',
+    model: Organization,
+  })
+  
+
 
   // Select Fields
   if (req.query.select) {
@@ -132,8 +137,12 @@ export const getCampaigns = async (req, res) => {
 // @access  Public
 export const getCampaign = async (req, res) => {
   const campaign = await Campaign.findById(req.params.id)
-    .populate('organization', 'organizationName logo')
-    .populate('category', 'name');
+    .populate({
+
+      path : 'organization',
+      select: 'organizationName',
+      model :Organization
+    })
 
   if (!campaign) {
     throw new NotFoundError(`No campaign with the id of ${req.params.id}`);
