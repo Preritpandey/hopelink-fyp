@@ -3,6 +3,25 @@ import Campaign from '../models/campaign.model.js';
 import Organization from '../models/organization.model.js';
 import Donation from '../models/donation.model.js';
 import Event from '../models/event.model.js';
+
+// Utility function to transform campaign data
+const transformCampaign = (campaign) => {
+  const campaignObj = campaign.toObject ? campaign.toObject() : campaign;
+  
+  return {
+    ...campaignObj,
+    images: campaignObj.images.map(img => img.url),
+    updates: campaignObj.updates.map(({ title, description, date }) => ({
+      title,
+      description,
+      date
+    })),
+    faqs: campaignObj.faqs.map(({ question, answer }) => ({
+      question,
+      answer
+    }))
+  };
+};
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/index.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
 import { model } from 'mongoose';
@@ -48,7 +67,7 @@ export const createCampaign = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
-    data: campaign,
+    data: transformCampaign(campaign),
   });
 };
 
@@ -124,11 +143,13 @@ export const getCampaigns = async (req, res) => {
     };
   }
 
+  const transformedCampaigns = campaigns.map(campaign => transformCampaign(campaign));
+  
   res.status(StatusCodes.OK).json({
     success: true,
-    count: campaigns.length,
+    count: transformedCampaigns.length,
     pagination,
-    data: campaigns,
+    data: transformedCampaigns,
   });
 };
 
@@ -266,26 +287,41 @@ export const uploadCampaignImages = async (req, res) => {
   }
 
   // Make sure user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to update this campaign`
-    );
-  }
+  // if (
+  //   campaign.organization.toString() !== req.user.organization &&
+  //   req.user.role !== 'admin'
+  // ) {
+  //   throw new UnauthorizedError(
+  //     `User ${req.user.id} is not authorized to update this campaign`
+  //   );
+  // }
+if (
+  campaign.organization.toString() !== req.user.organization?.toString() &&
+  req.user.role !== 'admin'
+) {
+  throw new UnauthorizedError(
+    `User ${req.user.id} is not authorized to update this campaign`
+  );
+}
 
   // Upload new images
-  const uploadedImages = await Promise.all(
-    req.files.images.map(async (file) => {
-      const result = await uploadToCloudinary(file.path, 'campaigns');
+const uploadedImages = await Promise.all(
+  req.files.images.map(async (file) => {
+    try {
+      console.log('Processing file:', file.originalname);
+      const result = await uploadToCloudinary(file, 'campaigns');
+      console.log('Upload result:', result);
       return {
-        url: result.secure_url,
+        url: result.url,  // Changed from result.secure_url to result.url
         publicId: result.public_id,
         isPrimary: false,
       };
-    })
-  );
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error; // Rethrow to be caught by the outer try-catch
+    }
+  })
+);
 
   // Add new images to the campaign
   campaign.images = [...campaign.images, ...uploadedImages];
@@ -430,9 +466,21 @@ export const getCampaignsWithDonationsAndEvents = async (req, res) => {
 
     // Combine the data
     const result = campaigns.map(campaign => ({
-      ...campaign,
-      donations: donationsByCampaign[campaign._id] || [],
-      events: eventsByCampaign[campaign._id] || [],
+      ...transformCampaign(campaign),
+      donations: (donationsByCampaign[campaign._id] || []).map(donation => ({
+        amount: donation.amount,
+        donor: donation.donor,
+        message: donation.message,
+        isAnonymous: donation.isAnonymous,
+        date: donation.createdAt
+      })),
+      events: (eventsByCampaign[campaign._id] || []).map(event => ({
+        title: event.title,
+        description: event.description,
+        date: event.date,
+        location: event.location,
+        image: event.image
+      })),
       totalDonations: (donationsByCampaign[campaign._id] || []).reduce(
         (sum, donation) => sum + donation.amount,
         0
@@ -447,6 +495,110 @@ export const getCampaignsWithDonationsAndEvents = async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting campaigns with details:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: 'Server error',
+    });
+  }
+};
+
+// @desc    Add campaign update
+// @route   POST /api/v1/campaigns/:id/updates
+// @access  Private (Organization owner or admin)
+export const addCampaignUpdate = async (req, res) => {
+  const { title, description } = req.body;
+  
+  try {
+    const campaign = await Campaign.findById(req.params.id);
+    if (!campaign) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Campaign not found',
+      });
+    }
+
+    // Check if user is the organization owner or admin
+    const organization = await Organization.findById(campaign.organization);
+    if (!organization) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Organization not found',
+      });
+    }
+
+    if (organization.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: 'Not authorized to update this campaign',
+      });
+    }
+
+    const newUpdate = {
+      title,
+      description,
+    };
+
+    campaign.updates.push(newUpdate);
+    await campaign.save();
+
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: campaign.updates[campaign.updates.length - 1],
+    });
+  } catch (error) {
+    console.error('Error adding campaign update:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: 'Server error',
+    });
+  }
+};
+
+// @desc    Add campaign FAQ
+// @route   POST /api/v1/campaigns/:id/faqs
+// @access  Private (Organization owner or admin)
+export const addCampaignFaq = async (req, res) => {
+  const { question, answer } = req.body;
+  
+  try {
+    const campaign = await Campaign.findById(req.params.id);
+    if (!campaign) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Campaign not found',
+      });
+    }
+
+    // Check if user is the organization owner or admin
+    const organization = await Organization.findById(campaign.organization);
+    if (!organization) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Organization not found',
+      });
+    }
+
+    if (organization.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: 'Not authorized to update this campaign',
+      });
+    }
+
+    const newFaq = {
+      question,
+      answer,
+    };
+
+    campaign.faqs.push(newFaq);
+    await campaign.save();
+
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: campaign.faqs[campaign.faqs.length - 1],
+    });
+  } catch (error) {
+    console.error('Error adding campaign FAQ:', error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: 'Server error',

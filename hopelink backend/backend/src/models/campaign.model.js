@@ -55,7 +55,7 @@ const campaignSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['draft', 'active', 'completed', 'cancelled'],
-      default: 'draft',
+      default: 'active',
     },
     isFeatured: {
       type: Boolean,

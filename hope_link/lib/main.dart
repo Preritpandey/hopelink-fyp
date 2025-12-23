@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/config/hive_config.dart';
 import 'package:hope_link/features/Auth/pages/otp_verification_page.dart';
 import 'package:hope_link/features/Auth/pages/user_registration_page.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
+import 'package:hope_link/features/Donate%20Funds/pages/campaign_details_page.dart';
+import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
+import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
 import 'package:hope_link/features/Home/pages/home_screen.dart';
 import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
-import 'package:hope_link/features/Profile/pages/profile_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Hive
+  await HiveConfig.initialize();
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('auth_token') ?? '';
@@ -37,6 +42,22 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/splash', page: () => const SplashScreen()),
         GetPage(name: '/signup', page: () => const SignUpPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
+
+        GetPage(
+          name: '/campaigns',
+          page: () => const CampaignsListPage(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/campaign-details',
+          page: () => const CampaignDetailsPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/donate',
+          page: () => const DonatePage(),
+          transition: Transition.rightToLeft,
+        ),
         GetPage(
           name: '/verify-otp',
           page: () => OtpVerificationPage(

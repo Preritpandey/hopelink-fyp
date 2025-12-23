@@ -9,6 +9,8 @@ import {
   deleteCampaignImage,
   setPrimaryCampaignImage,
   getCampaignsWithDonationsAndEvents,
+  addCampaignUpdate,
+  addCampaignFaq,
 } from '../controllers/campaign.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { handleFileUpload } from '../config/multer.config.js';
@@ -59,5 +61,9 @@ router.put(
   authorize('organization'),
   setPrimaryCampaignImage
 );
+
+// Campaign updates and FAQs
+router.post('/:id/updates', authorize('organization'), addCampaignUpdate);
+router.post('/:id/faqs', authorize('organization'), addCampaignFaq);
 
 export default router;
