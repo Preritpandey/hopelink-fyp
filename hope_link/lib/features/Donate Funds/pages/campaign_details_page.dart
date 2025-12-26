@@ -195,11 +195,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       return Container(
         height: 300,
         color: Colors.grey[200],
-        child: Icon(
-          Icons.image_outlined,
-          size: 80,
-          color: Colors.grey[400],
-        ),
+        child: Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
       );
     }
 
@@ -232,24 +228,26 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         ),
         if (campaign!.images.length > 1) ...[
           12.verticalSpace,
-          Obx(() => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  campaign!.images.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _selectedImageIndex.value == index ? 24 : 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _selectedImageIndex.value == index
-                          ? AppColorToken.primary.color
-                          : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                campaign!.images.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _selectedImageIndex.value == index ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _selectedImageIndex.value == index
+                        ? AppColorToken.primary.color
+                        : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-              )),
+              ),
+            ),
+          ),
         ],
       ],
     );
@@ -461,11 +459,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                 '$daysLeft days',
                 'left',
               ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.grey[200],
-              ),
+              Container(width: 1, height: 40, color: Colors.grey[200]),
               _buildStatItem(
                 Icons.date_range_rounded,
                 _formatDate(campaign!.endDate),
@@ -496,9 +490,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             2.verticalSpace,
             Text(
               label,
-              style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[500],
-              ),
+              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[500]),
             ),
           ],
         ),
@@ -509,26 +501,28 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   Widget _buildTabBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Obx(() => Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColorToken.primary.color.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _buildTabItem('About', 0),
-                _buildTabItem('Updates', 1),
-                _buildTabItem('FAQs', 2),
-              ],
-            ),
-          )),
+      child: Obx(
+        () => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColorToken.primary.color.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              _buildTabItem('About', 0),
+              _buildTabItem('Updates', 1),
+              _buildTabItem('FAQs', 2),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -659,9 +653,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             16.verticalSpace,
             Text(
               'No updates yet',
-              style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),
@@ -711,8 +703,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                       children: [
                         Text(
                           update.title,
-                          style: AppTextStyle.bodySmall
-                          .copyWith(
+                          style: AppTextStyle.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[900],
                           ),
@@ -754,17 +745,11 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         ),
         child: Column(
           children: [
-            Icon(
-              Icons.help_outline_rounded,
-              size: 64,
-              color: Colors.grey[300],
-            ),
+            Icon(Icons.help_outline_rounded, size: 64, color: Colors.grey[300]),
             16.verticalSpace,
             Text(
               'No FAQs yet',
-              style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),
@@ -776,61 +761,63 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         final faq = entry.value;
         final isExpanded = RxBool(false);
 
-        return Obx(() => Container(
-              margin: EdgeInsets.only(
-                bottom: entry.key < campaign!.faqs.length - 1 ? 12 : 0,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColorToken.primary.color.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+        return Obx(
+          () => Container(
+            margin: EdgeInsets.only(
+              bottom: entry.key < campaign!.faqs.length - 1 ? 12 : 0,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColorToken.primary.color.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                title: Text(
+                  faq.question,
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                trailing: Icon(
+                  isExpanded.value
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  color: AppColorToken.primary.color,
+                ),
+                onExpansionChanged: (expanded) {
+                  isExpanded.value = expanded;
+                },
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Text(
+                      faq.answer,
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        color: Colors.grey[600],
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  dividerColor: Colors.transparent,
-                ),
-                child: ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  title: Text(
-                    faq.question,
-                    style: AppTextStyle.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  trailing: Icon(
-                    isExpanded.value
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
-                    color: AppColorToken.primary.color,
-                  ),
-                  onExpansionChanged: (expanded) {
-                    isExpanded.value = expanded;
-                  },
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: Text(
-                        faq.answer,
-                        style: AppTextStyle.bodyMedium.copyWith(
-                          color: Colors.grey[600],
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ));
+            ),
+          ),
+        );
       }).toList(),
     );
   }

@@ -63,7 +63,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const ProfileShimmer();
+          // return const ProfileShimmer();
+          return const Center(child: CircularProgressIndicator());
         }
         if (controller.user.value == null) {
           return const Center(child: CircularProgressIndicator());
@@ -119,45 +120,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
-
-              // file upload feature here just for testing -----> THIS WILL BE REMOVED AFTER ALL TESTS COMPLETES
-              // if (controller.isEditMode.value) ...[
-              //   const SizedBox(height: 16),
-              //   Obx(() {
-              //     return Column(
-              //       children: [
-              //         if (controller.user.value?.cv != null)
-              //           // TextButton(
-              //           //   onPressed: () => openCV(controller.user.value!.cv),
-              //           //   child: const Text('View Current CV'),
-              //           // ),
-              //           ElevatedButton(
-              //             onPressed: cvCtrl.uploading.value
-              //                 ? null
-              //                 : () async {
-              //                     final file = await Pickers.pickPDF();
-              //                     if (file != null) {
-              //                       await cvCtrl.upload(file);
-              //                       // Refresh profile data after upload
-              //                       await controller.fetchProfile();
-              //                     }
-              //                   },
-              //             child: cvCtrl.uploading.value
-              //                 ? const CircularProgressIndicator()
-              //                 : const Text('Upload New CV'),
-              //           ),
-              //         if (cvCtrl.error.value.isNotEmpty)
-              //           Padding(
-              //             padding: const EdgeInsets.only(top: 8.0),
-              //             child: Text(
-              //               cvCtrl.error.value,
-              //               style: const TextStyle(color: Colors.red),
-              //             ),
-              //           ),
-              //       ],
-              //     );
-              //   }),
-              // ],
               Text(user.name, style: const TextStyle(fontSize: 18)),
               Text(user.email, style: const TextStyle(color: Colors.grey)),
 
@@ -276,27 +238,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ],
               ),
-
-              // Row(
-              //   children: [
-              //     ElevatedButton.icon(
-              //       icon: const Icon(Icons.picture_as_pdf),
-              //       label: const Text("View CV"),
-              //       onPressed: user.cv.isEmpty ? null : () => openCV(user.cv),
-              //     ),
-              //     const SizedBox(width: 12),
-              //     if (controller.isEditMode.value)
-              //       TextButton(
-              //         onPressed: () async {
-              //           final pdf = await Pickers.pickPDF();
-              //           if (pdf != null) {
-              //             await cvCtrl.upload(pdf);
-              //           }
-              //         },
-              //         child: const Text("Upload New"),
-              //       ),
-              //   ],
-              // ),
               if (controller.isEditMode.value)
                 Padding(
                   padding: const EdgeInsets.only(top: 24),

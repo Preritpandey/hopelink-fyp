@@ -103,15 +103,6 @@ class ProfileService {
     }
   }
 
-  // static Future<void> uploadCV(String token, File file) async {
-  //   final request = http.MultipartRequest(
-  //     "PUT",
-  //     Uri.parse(ApiEndpoints.uploadCV),
-  //   );
-  //   request.headers["Authorization"] = "Bearer $token";
-  //   request.files.add(await http.MultipartFile.fromPath("cv", file.path));
-  //   await request.send();
-  // }
   static Future<void> uploadCV(String token, File file) async {
     try {
       print('Starting CV upload...');

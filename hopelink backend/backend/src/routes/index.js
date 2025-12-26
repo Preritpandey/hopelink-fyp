@@ -38,4 +38,15 @@ router.use('/donations', donationRoutes);
 router.use('/campaigns', campaignRoutes);
 router.use('/user/profile', profileRoutes);
 
+// E-commerce Routes
+import productRoutes from './ecommerce/product.routes.js';
+import cartRoutes from './ecommerce/cart.routes.js';
+import orderRoutes from './ecommerce/order.routes.js';
+import reviewRoutes from './ecommerce/review.routes.js';
+
+router.use('/products', productRoutes);
+router.use('/cart', cartRoutes);
+router.use('/orders', orderRoutes);
+router.use('/reviews', reviewRoutes);
+
 export default router;

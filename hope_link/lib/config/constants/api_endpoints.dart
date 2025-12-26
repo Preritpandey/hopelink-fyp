@@ -1,5 +1,7 @@
 class ApiEndpoints {
   static const String baseUrl = 'http://localhost:3008/api/v1';
+  // static const String baseUrl = 'http://192.168.1.94:3008/api/v1';// cg5.
+
   // static const String baseUrl = 'http://172.20.10.3:3008/api/v1';
 
   // static const String baseUrl = 'http://192.168.1.95:3008/api/v1'; // cg2.4
@@ -10,6 +12,7 @@ class ApiEndpoints {
   static String get getProfile => '$baseUrl/auth/me';
   static String get verifyOtp => '$baseUrl/auth/verify-otp';
   static String get resendOtp => '$baseUrl/auth/resend-otp';
+  static String get campaigns => '$baseUrl/campaigns';
 
   // User profile endpoints
   static String get updateProfile => '$baseUrl/user/profile';

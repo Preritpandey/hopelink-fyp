@@ -1,16 +1,10 @@
 import 'dart:convert';
+import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 import '../models/campaign_model.dart';
 
 class CampaignService {
-  // Update this URL based on your environment
-  static const String baseUrl = 'http://localhost:3008/api/v1';
-
-  // For Android Emulator use: 'http://10.0.2.2:3008/api/v1'
-  // For iOS Simulator use: 'http://localhost:3008/api/v1'
-  // For Real Device use: 'http://YOUR_IP:3008/api/v1'
-
   static const String campaignsBox = 'campaigns_box';
   static const String lastSyncKey = 'last_sync';
 
@@ -19,7 +13,7 @@ class CampaignService {
     try {
       final response = await http
           .get(
-            Uri.parse('$baseUrl/campaigns'),
+            Uri.parse(ApiEndpoints.campaigns),
             headers: {'Content-Type': 'application/json'},
           )
           .timeout(const Duration(seconds: 10));
@@ -85,7 +79,7 @@ class CampaignService {
     try {
       final response = await http
           .get(
-            Uri.parse('$baseUrl/campaigns/$id'),
+            Uri.parse('${ApiEndpoints.campaigns}/$id'),
             headers: {'Content-Type': 'application/json'},
           )
           .timeout(const Duration(seconds: 10));

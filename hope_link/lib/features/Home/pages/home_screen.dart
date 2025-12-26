@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/features/Auth/pages/forgot_password_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
-import 'package:hope_link/features/Profile/pages/profile_page.dart';
+import 'package:hope_link/features/Profile/pages/profile_view_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widgets/app_button.dart';
@@ -110,7 +110,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       case 2:
         return ForgotPasswordPage();
       case 3:
-        return ProfilePage(token: widget.token);
+        // return ProfilePage(token: widget.token);
+        return ProfileViewPage(token: widget.token);
+
       default:
         return homePage();
     }
