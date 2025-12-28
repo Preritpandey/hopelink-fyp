@@ -2,7 +2,7 @@ class ApiEndpoints {
   static const String baseUrl = 'http://localhost:3008/api/v1';
   // static const String baseUrl = 'http://192.168.1.94:3008/api/v1';// cg5.
 
-  // static const String baseUrl = 'http://172.20.10.3:3008/api/v1';
+  // static const String baseUrl = 'http://10.21.6.154:3008/api/v1';
 
   // static const String baseUrl = 'http://192.168.1.95:3008/api/v1'; // cg2.4
 

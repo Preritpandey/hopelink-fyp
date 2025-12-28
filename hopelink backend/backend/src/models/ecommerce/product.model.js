@@ -79,13 +79,7 @@ toJSON: {
   virtuals: true,
   transform: function(doc, ret) {
     // First, handle the populated organization data
-    if (ret.orgId && typeof ret.orgId === 'object') {
-      ret.organization = {
-        id: ret.orgId._id,
-        name: ret.orgId.organizationName
-      };
-      delete ret.orgId; // Remove the original orgId field
-    }
+
     
     // Transform images array if needed
     if (ret.images && Array.isArray(ret.images)) {

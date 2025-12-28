@@ -38,6 +38,7 @@ class CampaignsListWidget extends StatelessWidget {
       onRefresh: controller.refreshCampaigns,
       color: AppColorToken.primary.color,
       child: ListView.builder(
+        scrollDirection: Axis.vertical,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         physics: const BouncingScrollPhysics(),
         itemCount: controller.filteredCampaigns.length,

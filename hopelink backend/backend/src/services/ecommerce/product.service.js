@@ -4,8 +4,13 @@ import Category from '../../models/category.model.js';
 import Organization from '../../models/organization.model.js';
 
 export const createProduct = async (productData, variantsData) => {
-  // Transaction removed for standalone MongoDB compatibility
   try {
+      const organization = await Organization.findById(productData.orgId);
+      if (!organization) {
+        throw new Error('Organization not found');
+      }
+
+
     const product = new Product(productData);
     await product.save();
 
@@ -24,7 +29,6 @@ export const createProduct = async (productData, variantsData) => {
 };
 
 export const updateProduct = async (productId, productUpdates, variantsUpdates) => {
-  // Transaction removed for standalone MongoDB compatibility
   try {
     const product = await Product.findByIdAndUpdate(productId, productUpdates, { new: true });
     
@@ -46,10 +50,6 @@ export const updateProduct = async (productId, productUpdates, variantsUpdates) 
   }
 };
 
-
-
-// ... (existing imports)
-
 export const getProductById = async (id) => {
   return await Product.findById(id)
     .populate({
@@ -61,34 +61,11 @@ export const getProductById = async (id) => {
       model: Category
     })
     .populate({
-      path: 'orgId',
+      path: 'organization',
       model: Organization,
       select: 'organizationName'
     });
 };
-
-// export const listProducts = async (filters, page = 1, limit = 10) => {
-//   const skip = (page - 1) * limit;
-//   const query = { isDeleted: false, ...filters };
-  
-//   const products = await Product.find(query)
-//     .populate({
-//       path: 'variants',
-//       model: ProductVariant
-//     })
-//     .populate({
-//       path: 'orgId',
-//       model: Organization,
-//       select: 'organizationName'
-//     })
-//     .skip(skip)
-//     .limit(limit)
-//     .sort({ createdAt: -1 });
-    
-//   const total = await Product.countDocuments(query);
-  
-//   return { products, total, totalPages: Math.ceil(total / limit) };
-// };
 
 export const listProducts = async (filters, page = 1, limit = 10) => {
   const skip = (page - 1) * limit;
@@ -97,42 +74,22 @@ export const listProducts = async (filters, page = 1, limit = 10) => {
   const products = await Product.find(query)
     .populate({
       path: 'variants',
-      model: ProductVariant,
-      match: { isDeleted: false }
+      model: ProductVariant
     })
     .populate({
       path: 'orgId',
       model: Organization,
       select: 'organizationName'
-    })
-    .populate({
-      path: 'category',
-      model: Category,
-      select: 'name'
-    })
+    }).select('-createdAt  -updatedAt -__v  -images.publicId  -images.altText' ) 
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean(); // Add lean() for better performance
+    .sort({ createdAt: -1 });
     
   const total = await Product.countDocuments(query);
   
-  return { 
-    products: products.map(product => {
-      // Ensure organization data is properly structured
-      if (product.orgId) {
-        product.organization = {
-          id: product.orgId._id,
-          name: product.orgId.organizationName
-        };
-        delete product.orgId;
-      }
-      return product;
-    }), 
-    total, 
-    totalPages: Math.ceil(total / limit) 
-  };
+  return { products, total, totalPages: Math.ceil(total / limit) };
 };
+
 
 export const softDeleteProduct = async (id) => {
   return await Product.findByIdAndUpdate(id, { isDeleted: true }, { new: true });

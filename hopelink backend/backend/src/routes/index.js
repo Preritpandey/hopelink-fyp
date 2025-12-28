@@ -6,6 +6,7 @@ import categoryRoutes from './category.routes.js';
 import donationRoutes from './donation.routes.js';
 import campaignRoutes from './campaign.routes.js';
 import profileRoutes from './profile.routes.js';
+import eventRoutes from './event.routes.js';
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ router.use('/admin', adminRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/donations', donationRoutes);
 router.use('/campaigns', campaignRoutes);
+router.use('/events', eventRoutes);
 router.use('/user/profile', profileRoutes);
 
 // E-commerce Routes

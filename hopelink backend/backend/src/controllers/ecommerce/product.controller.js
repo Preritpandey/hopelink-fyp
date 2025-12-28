@@ -49,17 +49,6 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // Handle New Image Uploads (Append to existing?)
-    // Logic: If new images, upload and add to list. 
-    // If client wants to replace, they might send a new list of images including old ones?
-    // Mongoose update usually overwrites arrays if set.
-    // Complex Update Strategy:
-    // 1. If `images` in body is empty/undefined but files exist -> Append new files.
-    // 2. If `images` in body exists (array of objects/urls) -> Keep those, add new files.
-    
-    // Simplest for now: Just add new files to whatever is in DB (via $push in service?) or retrieve, merge, save.
-    // But ProductService.updateProduct uses findByIdAndUpdate which is simple.
-    // Let's assume we append new images to the array passed in productUpdates (if any) or create one.
     
     if (req.files && req.files.length > 0) {
       const uploadResults = await handleMultipleFileUploads(req.files, 'hopelink/products');
@@ -69,19 +58,7 @@ export const updateProduct = async (req, res) => {
         altText: productUpdates.name || 'Product Image'
       }));
       
-      // If productUpdates already has images (e.g. kept existing ones), push new ones.
-      // Note: productUpdates.images might come as JSON string if multipart, need parsing too?
-      // Usually arrays in multipart key[index] or just key.
-      
-      // We will rely on $push logic or getting current product.
-      // To keep it stateless here: we will PUT 'images' into productUpdates using $each if Mongoose allowed,
-      // but here we are passing object.
-      // If we want to APPEND, we need to know existing. 
-      // Decision: Let's fetch product OR assume this is a PATCH-like update where we just construct the array.
-      // If ProductService treats `images` as replacement, we lose old ones unless sent.
-      // Common pattern: Client sends `existingImages` (JSON) + new files.
-      // Let's assume CLIENT sends everything they want to KEEP in `images` (parsed) + new files.
-
+    
       if (productUpdates.images && typeof productUpdates.images === 'string') {
           productUpdates.images = JSON.parse(productUpdates.images);
       }

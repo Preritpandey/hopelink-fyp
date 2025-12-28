@@ -7,6 +7,7 @@ import Campaign from './campaign.model.js';
 import Category from './category.model.js';
 import Donation from './donation.model.js';
 import Event from './event.model.js';
+import VolunteerEnrollment from './volunteerEnrollment.model.js';
 
 // E-commerce Models
 import Product from './ecommerce/product.model.js';
@@ -23,6 +24,7 @@ const models = {
   Category: mongoose.models.Category || Category,
   Donation: mongoose.models.Donation || Donation,
   Event: mongoose.models.Event || Event,
+  VolunteerEnrollment: mongoose.models.VolunteerEnrollment || VolunteerEnrollment,
   Product: mongoose.models.Product || Product,
   ProductVariant: mongoose.models.ProductVariant || ProductVariant,
   Cart: mongoose.models.Cart || Cart,
@@ -38,6 +40,7 @@ export {
   Category,
   Donation,
   Event,
+  VolunteerEnrollment,
   Product,
   ProductVariant,
   Cart,

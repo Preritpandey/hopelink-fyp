@@ -3,69 +3,6 @@ import User from '../models/user.model.js';
 import { BadRequestError, UnauthorizedError } from '../errors/index.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
 
-// @desc    Update user profile
-// @route   PUT /api/v1/user/profile
-// @access  Private (User role only)
-// export const updateProfile = async (req, res) => {
-//   // Check if user has the correct role
-//   if (req.user.role !== 'user') {
-//     throw new UnauthorizedError('Only regular users can update their profile');
-//   }
-
-//   const { name, phone, interest, status, gender, description, bio, location } = req.body;
-  
-//   // Create update object with only the fields that are provided
-//   const updateFields = {};
-//       if (name) updateData.name = name;
-
-//   if (phone !== undefined) updateFields.phone = phone;
-//   if (interest !== undefined) updateFields.interest = Array.isArray(interest) ? interest : [interest];
-//   if (status !== undefined) updateFields.status = status;
-//   if (gender !== undefined) updateFields.gender = gender;
-//   if (description !== undefined) updateFields.description = description;
-//   if (bio !== undefined) updateFields.bio = bio;
-  
-//   // Handle location updates
-//   if (location) {
-//     // Create a new location object with only the fields that are provided
-//     const locationUpdate = {};
-//     if (location.country !== undefined) locationUpdate.country = location.country;
-//     if (location.city !== undefined) locationUpdate.city = location.city;
-//     if (location.address !== undefined) locationUpdate.address = location.address;
-    
-//     // Set the entire location object at once
-//     updateFields.location = locationUpdate;
-//   }
-
-//   // Update user
-//   const user = await User.findByIdAndUpdate(
-//     req.user._id,
-//     { $set: updateFields },
-//     { new: true, runValidators: true }
-//   );
-
-//   res.status(StatusCodes.OK).json({
-//     success: true,
-//     user: {
-//       _id: user._id,
-//       name: user.name,
-//       email: user.email,
-//       phone: user.phone,
-//       interest: user.interest,
-//       status: user.status,
-//       gender: user.gender,
-//       description: user.description,
-//       profileImage: user.profileImage,
-//       cv: user.cv,
-//       role: user.role,
-//       isVerified: user.isVerified,
-//       isActive: user.isActive,
-//       createdAt: user.createdAt,
-//       updatedAt: user.updatedAt
-//     }
-//   });
-// };
-////--------------------------new code with name update
 // In profile.controller.js
 export const updateProfile = async (req, res) => {
   try {
