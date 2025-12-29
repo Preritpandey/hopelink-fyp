@@ -3,12 +3,12 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
+import '../../../config/constants/api_endpoints.dart';
 import '../models/event_model.dart';
 
 class EventController extends GetxController {
   final Dio _dio = Dio();
-  final String baseUrl = 'http://localhost:3008/api/v1';
-  
+
   // Observables
   var events = <Event>[].obs;
   var filteredEvents = <Event>[].obs;
@@ -18,16 +18,16 @@ class EventController extends GetxController {
   var selectedFilter = 'all'.obs;
   var hasError = false.obs;
   var errorMessage = ''.obs;
-  
+
   // Hive box
   late Box<Event> eventBox;
-  
+
   @override
   void onInit() {
     super.onInit();
     initHive();
   }
-  
+
   Future<void> initHive() async {
     try {
       eventBox = await Hive.openBox<Event>('events');
@@ -38,28 +38,28 @@ class EventController extends GetxController {
       fetchEvents();
     }
   }
-  
+
   void loadEventsFromCache() {
     if (eventBox.isNotEmpty) {
       events.value = eventBox.values.toList();
       filteredEvents.value = events;
     }
   }
-  
+
   Future<void> fetchEvents() async {
     try {
       isLoading.value = true;
       hasError.value = false;
-      
-      final response = await _dio.get('$baseUrl/events');
-      
+
+      final response = await _dio.get(ApiEndpoints.events);
+
       if (response.statusCode == 200) {
         final eventResponse = EventResponse.fromJson(response.data);
         events.value = eventResponse.data;
-        
+
         // Save to Hive for offline access
         await saveEventsToCache(eventResponse.data);
-        
+
         applyFilters();
       }
     } on DioException catch (e) {
@@ -79,7 +79,7 @@ class EventController extends GetxController {
       isLoading.value = false;
     }
   }
-  
+
   Future<void> saveEventsToCache(List<Event> eventsList) async {
     try {
       await eventBox.clear();
@@ -90,54 +90,63 @@ class EventController extends GetxController {
       print('Error saving to cache: $e');
     }
   }
-  
+
   void searchEvents(String query) {
     searchQuery.value = query;
     applyFilters();
   }
-  
+
   void setFilter(String filter) {
     selectedFilter.value = filter;
     applyFilters();
   }
-  
+
   void applyFilters() {
     var filtered = events.toList();
-    
+
     // Apply search filter
     if (searchQuery.value.isNotEmpty) {
       filtered = filtered.where((event) {
-        return event.title.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-            event.description.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-            event.category.toLowerCase().contains(searchQuery.value.toLowerCase());
+        return event.title.toLowerCase().contains(
+              searchQuery.value.toLowerCase(),
+            ) ||
+            event.description.toLowerCase().contains(
+              searchQuery.value.toLowerCase(),
+            ) ||
+            event.category.toLowerCase().contains(
+              searchQuery.value.toLowerCase(),
+            );
       }).toList();
     }
-    
+
     // Apply category filter
     if (selectedFilter.value != 'all') {
       if (selectedFilter.value == 'featured') {
         filtered = filtered.where((event) => event.isFeatured).toList();
       } else if (selectedFilter.value == 'active') {
-        filtered = filtered.where((event) => 
-          event.status == 'published' && 
-          event.startDate.isAfter(DateTime.now())
-        ).toList();
+        filtered = filtered
+            .where(
+              (event) =>
+                  event.status == 'published' &&
+                  event.startDate.isAfter(DateTime.now()),
+            )
+            .toList();
       }
     }
-    
+
     filteredEvents.value = filtered;
   }
-  
+
   Future<bool> enrollInEvent(String eventId) async {
     try {
       isEnrolling.value = true;
-      
+
       final response = await _dio.post(
-        '$baseUrl/events/$eventId/enroll',
+        '${ApiEndpoints.events}/$eventId/enroll',
         // Add your auth token here if needed
         // options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      
+
       if (response.statusCode == 200) {
         Get.snackbar(
           'Success',
@@ -146,7 +155,7 @@ class EventController extends GetxController {
           backgroundColor: Get.theme.primaryColor,
           colorText: Get.theme.colorScheme.onPrimary,
         );
-        
+
         // Refresh events
         await fetchEvents();
         return true;
@@ -174,11 +183,11 @@ class EventController extends GetxController {
       isEnrolling.value = false;
     }
   }
-  
+
   Future<void> refreshEvents() async {
     await fetchEvents();
   }
-  
+
   @override
   void onClose() {
     eventBox.close();

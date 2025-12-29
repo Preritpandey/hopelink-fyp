@@ -3,14 +3,24 @@ import Donation from '../models/donation.model.js';
 import Campaign from '../models/campaign.model.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
-import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/index.js';
+import {
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../errors/index.js';
 import { sendEmail } from '../services/email.service.js';
 
 // @desc    Create a new donation
 // @route   POST /api/v1/donations
 // @access  Private
 export const createDonation = async (req, res) => {
-  const { campaign: campaignId, amount, paymentMethod, isAnonymous, message } = req.body;
+  const {
+    campaign: campaignId,
+    amount,
+    paymentMethod,
+    isAnonymous,
+    message,
+  } = req.body;
   const userId = req.user.userId;
 
   // Check if campaign exists and is active
@@ -55,7 +65,9 @@ export const createDonation = async (req, res) => {
       userName: user.name,
       amount,
       campaignTitle: campaign.title,
-      organizationName: organization ? organization.organizationName : 'Unknown Organization',
+      organizationName: organization
+        ? organization.organizationName
+        : 'Unknown Organization',
       donationId: donation._id,
       date: new Date(),
       isAnonymous,
@@ -88,7 +100,10 @@ export const getDonations = async (req, res) => {
   let queryStr = JSON.stringify(reqQuery);
 
   // Create operators ($gt, $gte, etc)
-  queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`,
+  );
 
   // Finding resource
   let query = Donation.find(JSON.parse(queryStr))
@@ -212,7 +227,11 @@ export const getUserDonations = async (req, res) => {
   let userId = req.params.userId || req.user.userId;
 
   // Check if user is authorized
-  if (req.params.userId && req.params.userId !== req.user.userId && req.user.role !== 'admin') {
+  if (
+    req.params.userId &&
+    req.params.userId !== req.user.userId &&
+    req.user.role !== 'admin'
+  ) {
     throw new UnauthorizedError('Not authorized to view these donations');
   }
 
@@ -233,13 +252,13 @@ export const getUserDonations = async (req, res) => {
 // @access  Private (Admin or Organization)
 export const updateDonationStatus = async (req, res) => {
   const { status } = req.body;
-  
+
   if (!status) {
     throw new BadRequestError('Please provide a status');
   }
 
   const donation = await Donation.findById(req.params.id);
-  
+
   if (!donation) {
     throw new NotFoundError(`No donation with id ${req.params.id}`);
   }
@@ -353,10 +372,11 @@ const sendDonationStatusUpdate = async ({
     cancelled: 'has been cancelled',
   };
 
-  const statusMessage = statusMessages[status] || `has been updated to ${status}`;
+  const statusMessage =
+    statusMessages[status] || `has been updated to ${status}`;
 
   const subject = `Your Donation ${statusMessage.split(' ')[0]} ${statusMessage.split(' ')[1] === 'has' ? statusMessage : ''}`;
-  
+
   const text = `
     Dear ${userName},
     
@@ -383,10 +403,15 @@ const sendDonationStatusUpdate = async ({
         <p>Donation ID: ${donationId}</p>
         <p>Amount: $${amount.toFixed(2)}</p>
         <p>Status: <span style="color: ${
-          status === 'completed' ? '#28a745' : 
-          status === 'failed' ? '#dc3545' : 
-          status === 'refunded' ? '#ffc107' : 
-          status === 'cancelled' ? '#6c757d' : '#007bff'
+          status === 'completed'
+            ? '#28a745'
+            : status === 'failed'
+              ? '#dc3545'
+              : status === 'refunded'
+                ? '#ffc107'
+                : status === 'cancelled'
+                  ? '#6c757d'
+                  : '#007bff'
         };">${status.charAt(0).toUpperCase() + status.slice(1)}</span></p>
       </div>
       

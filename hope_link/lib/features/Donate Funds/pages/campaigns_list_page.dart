@@ -6,9 +6,9 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../controllers/event_controller.dart';
-import '../widgets/campaigns_list_widget.dart';
 import '../widgets/donation_header.dart';
-import '../widgets/event_list_widget.dart';
+import '../widgets/horizontal_campaign_card.dart';
+import '../widgets/horizontal_event_card.dart';
 
 class CampaignsListPage extends StatefulWidget {
   const CampaignsListPage({super.key});
@@ -22,9 +22,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
   final CampaignController _campaignController = Get.put(CampaignController());
   final EventController _eventController = Get.put(EventController());
   final TextEditingController _searchController = TextEditingController();
+  final RxString _searchText = ''.obs;
 
   late AnimationController _animationController;
-  final RxInt _selectedTab = 0.obs;
 
   @override
   void initState() {
@@ -34,6 +34,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
       duration: const Duration(milliseconds: 800),
     );
     _animationController.forward();
+    _searchController.addListener(() {
+      _searchText.value = _searchController.text;
+    });
   }
 
   @override
@@ -62,106 +65,10 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           child: Column(
             children: [
               DonationHeader(),
-              _buildTabSelector(),
-              16.verticalSpace,
               _buildSearchAndFilter(),
               Expanded(child: _buildContent()),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabSelector() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColorToken.primary.color.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Obx(
-        () => Row(
-          children: [
-            Expanded(
-              child: _buildTabButton(
-                label: 'Donations',
-                index: 0,
-                icon: Icons.favorite_rounded,
-              ),
-            ),
-            Expanded(
-              child: _buildTabButton(
-                label: 'Events',
-                index: 1,
-                icon: Icons.event_rounded,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabButton({
-    required String label,
-    required int index,
-    required IconData icon,
-  }) {
-    final isSelected = _selectedTab.value == index;
-
-    return GestureDetector(
-      onTap: () {
-        _selectedTab.value = index;
-        _searchController.clear();
-        if (index == 0) {
-          _campaignController.searchCampaigns('');
-        } else {
-          _eventController.searchEvents('');
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColorToken.primary.color : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColorToken.primary.color.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.grey[600],
-              size: 20,
-            ),
-            8.horizontalSpace,
-            Text(
-              label,
-              style: AppTextStyle.bodyMedium.copyWith(
-                color: isSelected ? Colors.white : Colors.grey[600],
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -188,16 +95,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               () => TextField(
                 controller: _searchController,
                 onChanged: (value) {
-                  if (_selectedTab.value == 0) {
-                    _campaignController.searchCampaigns(value);
-                  } else {
-                    _eventController.searchEvents(value);
-                  }
+                  _searchText.value = value;
+                  _campaignController.searchCampaigns(value);
+                  _eventController.searchEvents(value);
                 },
                 decoration: InputDecoration(
-                  hintText: _selectedTab.value == 0
-                      ? 'Search campaigns...'
-                      : 'Search events...',
+                  hintText: 'Search campaigns and events...',
                   hintStyle: AppTextStyle.bodyMedium.copyWith(
                     color: Colors.grey[400],
                   ),
@@ -205,9 +108,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     Icons.search_rounded,
                     color: Colors.grey[400],
                   ),
-                  suffixIcon:
-                      _selectedTab.value >= 0 &&
-                          _searchController.text.isNotEmpty
+                  suffixIcon: _searchText.value.isNotEmpty
                       ? IconButton(
                           icon: Icon(
                             Icons.clear_rounded,
@@ -215,11 +116,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                           ),
                           onPressed: () {
                             _searchController.clear();
-                            if (_selectedTab.value == 0) {
-                              _campaignController.searchCampaigns('');
-                            } else {
-                              _eventController.searchEvents('');
-                            }
+                            _searchText.value = '';
+                            _campaignController.searchCampaigns('');
+                            _eventController.searchEvents('');
                           },
                         )
                       : const SizedBox.shrink(),
@@ -253,19 +152,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
   }
 
   Widget _buildFilterChip(String label, String value) {
-    // Use Obx to reactively check which tab is selected and get the right controller
     return Obx(() {
-      final isSelected = _selectedTab.value == 0
-          ? _campaignController.selectedFilter.value == value
-          : _eventController.selectedFilter.value == value;
+      final isSelected = _campaignController.selectedFilter.value == value;
 
       return GestureDetector(
         onTap: () {
-          if (_selectedTab.value == 0) {
-            _campaignController.setFilter(value);
-          } else {
-            _eventController.setFilter(value);
-          }
+          _campaignController.setFilter(value);
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -300,20 +192,137 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     });
   }
 
-
   Widget _buildContent() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Trending',
+                  style: AppTextStyle.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[900],
+                  ),
+                ),
+                8.verticalSpace,
+                Text(
+                  'Discover impactful campaigns and events',
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          16.verticalSpace,
+          _buildHorizontalCampaignsSection(),
+          24.verticalSpace,
+          _buildHorizontalEventsSection(),
+          24.verticalSpace,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalCampaignsSection() {
     return Obx(() {
-      if (_selectedTab.value == 0) {
-        return CampaignsListWidget(
-          controller: _campaignController,
-          animationController: _animationController,
-        );
-      } else {
-        return EventsListWidget(
-          controller: _eventController,
-          animationController: _animationController,
+      if (_campaignController.isLoading.value &&
+          _campaignController.filteredCampaigns.isEmpty) {
+        return const SizedBox(
+          height: 320,
+          child: Center(child: CircularProgressIndicator()),
         );
       }
+
+      if (_campaignController.filteredCampaigns.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'No campaigns found',
+            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 320,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: _campaignController.filteredCampaigns.length,
+          itemBuilder: (context, index) {
+            final campaign = _campaignController.filteredCampaigns[index];
+            return HorizontalCampaignCard(
+              campaign: campaign,
+              index: index,
+              animationController: _animationController,
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildHorizontalEventsSection() {
+    return Obx(() {
+      if (_eventController.isLoading.value &&
+          _eventController.filteredEvents.isEmpty) {
+        return const SizedBox(
+          height: 320,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (_eventController.filteredEvents.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'No events found',
+            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+          ),
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              'Upcoming Events',
+              style: AppTextStyle.h4.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.grey[900],
+              ),
+            ),
+          ),
+          12.verticalSpace,
+          SizedBox(
+            height: 320,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _eventController.filteredEvents.length,
+              itemBuilder: (context, index) {
+                final event = _eventController.filteredEvents[index];
+                return HorizontalEventCard(
+                  event: event,
+                  index: index,
+                  animationController: _animationController,
+                );
+              },
+            ),
+          ),
+        ],
+      );
     });
   }
 }

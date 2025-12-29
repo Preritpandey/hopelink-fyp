@@ -104,9 +104,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _getPageContent() {
     switch (_currentIndex) {
       case 0:
-        return homePage();
-      case 1:
         return CampaignsListPage();
+      case 1:
+        return homePage();
       case 2:
         return ForgotPasswordPage();
       case 3:

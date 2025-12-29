@@ -31,15 +31,14 @@ class DonationHeader extends StatelessWidget {
                       color: AppColorToken.primary.color,
                     ),
                   ),
-                  4.verticalSpace,
-                  Obx(
-                    () => Text(
-                      '${campaignController.filteredCampaigns.length} active campaigns',
-                      style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
+                  // Obx(
+                  //   () => Text(
+                  //     '${campaignController.filteredCampaigns.length} active campaigns',
+                  //     style: AppTextStyle.bodySmall.copyWith(
+                  //       color: Colors.grey[600],
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               Obx(
@@ -79,18 +78,18 @@ class DonationHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (campaignController.lastSyncTime.value != null) ...[
-            8.verticalSpace,
-            Obx(
-              () => Text(
-                'Last updated: ${_formatLastSync(campaignController.lastSyncTime.value!)}',
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[500],
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ],
+          // if (campaignController.lastSyncTime.value != null) ...[
+          //   8.verticalSpace,
+          //   // Obx(
+          //   //   () => Text(
+          //   //     'Last updated: ${_formatLastSync(campaignController.lastSyncTime.value!)}',
+          //   //     style: AppTextStyle.bodySmall.copyWith(
+          //   //       color: Colors.grey[500],
+          //   //       fontSize: 11,
+          //   //     ),
+          //   //   ),
+          //   // ),
+          // ],
         ],
       ),
     );

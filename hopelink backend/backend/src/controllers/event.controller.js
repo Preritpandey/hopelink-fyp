@@ -1,7 +1,14 @@
 // controllers/event.controller.js
 import { Event, VolunteerEnrollment } from '../models/index.js';
-import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
-import { BadRequestError, NotFoundError, ForbiddenError } from '../errors/index.js';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from '../services/cloudinary.service.js';
+import {
+  BadRequestError,
+  NotFoundError,
+  ForbiddenError,
+} from '../errors/index.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
 export const createEvent = async (req, res, next) => {
@@ -27,8 +34,10 @@ export const createEvent = async (req, res, next) => {
       throw new BadRequestError('Please provide all required fields');
     }
 
-    const organizerType = req.user.role === 'organization' ? 'Organization' : 'User';
-    const organizerId = req.user.role === 'organization' ? req.user.organization : req.user._id;
+    const organizerType =
+      req.user.role === 'organization' ? 'Organization' : 'User';
+    const organizerId =
+      req.user.role === 'organization' ? req.user.organization : req.user._id;
 
     // Handle file uploads
     let images = [];
@@ -37,11 +46,11 @@ export const createEvent = async (req, res, next) => {
         // Upload each file to Cloudinary
         for (const file of req.files) {
           const result = await uploadToCloudinary(file, 'events');
-          
+
           images.push({
             url: result.url,
             publicId: result.public_id,
-            isPrimary: images.length === 0 // First image is primary
+            isPrimary: images.length === 0, // First image is primary
           });
         }
       } catch (uploadError) {
@@ -59,16 +68,18 @@ export const createEvent = async (req, res, next) => {
         address,
         city,
         state,
-        coordinates: coordinates ? {
-          type: 'Point',
-          coordinates: coordinates.split(',').map(Number)
-        } : undefined
+        coordinates: coordinates
+          ? {
+              type: 'Point',
+              coordinates: coordinates.split(',').map(Number),
+            }
+          : undefined,
       },
       startDate,
       endDate: endDate || startDate,
       maxVolunteers: maxVolunteers ? Number(maxVolunteers) : undefined,
-      requiredSkills: Array.isArray(requiredSkills) 
-        ? requiredSkills 
+      requiredSkills: Array.isArray(requiredSkills)
+        ? requiredSkills
         : [requiredSkills].filter(Boolean),
       eligibility,
       organizerType,
@@ -95,10 +106,10 @@ export const createEvent = async (req, res, next) => {
         id: populatedEvent.organizer._id.toString(),
         name: populatedEvent.organizer.name,
         type: organizerType,
-        ...(populatedEvent.organizer.logo && { 
-          logo: populatedEvent.organizer.logo 
-        })
-      }
+        ...(populatedEvent.organizer.logo && {
+          logo: populatedEvent.organizer.logo,
+        }),
+      },
     };
 
     // Remove the populated organizer field
@@ -108,7 +119,6 @@ export const createEvent = async (req, res, next) => {
       success: true,
       data: response,
     });
-
   } catch (error) {
     next(error);
   }
@@ -141,7 +151,7 @@ export const getEvents = async (req, res, next) => {
     if (category) query.category = category;
     if (location) query['location.city'] = new RegExp(location, 'i');
     if (organizerType) query.organizerType = organizerType;
-    
+
     // Handle date filtering
     const now = new Date();
     if (status === 'upcoming') {
@@ -165,21 +175,21 @@ export const getEvents = async (req, res, next) => {
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
       .lean();
-      
+
     // Manually populate organizer based on organizerType (dynamic reference)
     for (let event of events) {
-      console.log('Populating organizer for event:', event._id);
       if (event.organizerType === 'organization') {
-        console.log("populating organization");
-        const organizer = await Organization.findById(event.organizer).select('organizationName officialEmail logo').lean();
+        const organizer = await Organization.findById(event.organizer)
+          .select('organizationName officialEmail logo')
+          .lean();
         event.organizer = organizer;
       } else if (event.organizerType === 'user') {
-        const organizer = await User.findById(event.organizer).select('name email logo').lean();
+        const organizer = await User.findById(event.organizer)
+          .select('name email logo')
+          .lean();
         event.organizer = organizer;
       }
     }
-
-
 
     // Transform the response to include creator info consistently
     // events.forEach(event => {
@@ -201,8 +211,7 @@ export const getEvents = async (req, res, next) => {
       total,
       page: parseInt(page),
       pages: Math.ceil(total / limit),
-      data: events
-
+      data: events,
     });
   } catch (error) {
     next(error);
@@ -217,18 +226,25 @@ export const getEvents = async (req, res, next) => {
  */
 export const getEventById = async (req, res, next) => {
   try {
-    const event = await Event.findById(req.params.id)
-      .populate({
-        path: 'volunteers',
-        select: 'name email phone profileImage',
-        options: { limit: 10 }
-      });
-    
+    const event = await Event.findById(req.params.id).populate({
+      path: 'volunteers',
+      select: 'name email phone profileImage',
+      options: { limit: 10 },
+    });
+
     // Manually populate organizer based on organizerType (dynamic reference)
     if (event && event.organizerType === 'Organization') {
-      await event.populate({ path: 'organizer', model: 'Organization', select: 'name email phone logo description' });
+      await event.populate({
+        path: 'organizer',
+        model: 'Organization',
+        select: 'name email phone logo description',
+      });
     } else if (event && event.organizerType === 'User') {
-      await event.populate({ path: 'organizer', model: 'User', select: 'name email phone logo description' });
+      await event.populate({
+        path: 'organizer',
+        model: 'User',
+        select: 'name email phone logo description',
+      });
     }
 
     if (!event) {
@@ -265,15 +281,16 @@ export const getEventById = async (req, res, next) => {
 export const updateEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       throw new NotFoundError('Event not found');
     }
 
     // Check if user is the organizer or admin
-    const isOrganizer = event.organizerType === 'user' 
-      ? event.organizer.toString() === req.user._id.toString()
-      : event.organizer.toString() === req.user.organization?.toString();
+    const isOrganizer =
+      event.organizerType === 'user'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
 
     if (!isOrganizer && req.user.role !== 'admin') {
       throw new ForbiddenError('Not authorized to update this event');
@@ -281,12 +298,21 @@ export const updateEvent = async (req, res, next) => {
 
     const updates = Object.keys(req.body);
     const allowedUpdates = [
-      'title', 'description', 'category', 'eventType', 'location',
-      'startDate', 'endDate', 'maxVolunteers', 'requiredSkills',
-      'eligibility', 'status', 'images'
+      'title',
+      'description',
+      'category',
+      'eventType',
+      'location',
+      'startDate',
+      'endDate',
+      'maxVolunteers',
+      'requiredSkills',
+      'eligibility',
+      'status',
+      'images',
     ];
 
-    updates.forEach(update => {
+    updates.forEach((update) => {
       if (allowedUpdates.includes(update)) {
         event[update] = req.body[update];
       }
@@ -312,15 +338,16 @@ export const updateEvent = async (req, res, next) => {
 export const deleteEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       throw new NotFoundError('Event not found');
     }
 
     // Check if user is the organizer or admin
-    const isOrganizer = event.organizerType === 'User' 
-      ? event.organizer.toString() === req.user._id.toString()
-      : event.organizer.toString() === req.user.organization?.toString();
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
 
     if (!isOrganizer && req.user.role !== 'admin') {
       throw new ForbiddenError('Not authorized to delete this event');
@@ -349,7 +376,7 @@ export const deleteEvent = async (req, res, next) => {
 export const enrollInEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       throw new NotFoundError('Event not found');
     }
@@ -399,7 +426,7 @@ export const enrollInEvent = async (req, res, next) => {
 
     // Add to event's volunteers array
     await Event.findByIdAndUpdate(event._id, {
-      $addToSet: { volunteers: req.user._id }
+      $addToSet: { volunteers: req.user._id },
     });
 
     res.status(201).json({
@@ -439,7 +466,7 @@ export const withdrawEnrollment = async (req, res, next) => {
 
     // Remove from event's volunteers array
     await Event.findByIdAndUpdate(enrollment.event, {
-      $pull: { volunteers: req.user._id }
+      $pull: { volunteers: req.user._id },
     });
 
     res.json({
@@ -460,23 +487,26 @@ export const withdrawEnrollment = async (req, res, next) => {
 export const getEventVolunteers = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       throw new NotFoundError('Event not found');
     }
 
     // Check if user is the organizer or admin
-    const isOrganizer = event.organizerType === 'User' 
-      ? event.organizer.toString() === req.user._id.toString()
-      : event.organizer.toString() === req.user.organization?.toString();
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
 
     if (!isOrganizer && req.user.role !== 'admin') {
-      throw new ForbiddenError('Not authorized to view volunteers for this event');
+      throw new ForbiddenError(
+        'Not authorized to view volunteers for this event',
+      );
     }
 
     const { status, page = 1, limit = 20 } = req.query;
     const query = { event: event._id };
-    
+
     if (status) {
       query.status = status;
     }
@@ -514,12 +544,14 @@ export const getEventVolunteers = async (req, res, next) => {
 export const updateVolunteerStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    
+
     if (!['approved', 'rejected', 'attended'].includes(status)) {
       throw new BadRequestError('Invalid status');
     }
 
-    const enrollment = await VolunteerEnrollment.findById(req.params.enrollmentId)
+    const enrollment = await VolunteerEnrollment.findById(
+      req.params.enrollmentId,
+    )
       .populate('event')
       .populate('user', 'name email');
 
@@ -529,9 +561,10 @@ export const updateVolunteerStatus = async (req, res, next) => {
 
     // Check if user is the event organizer or admin
     const event = enrollment.event;
-    const isOrganizer = event.organizerType === 'User' 
-      ? event.organizer.toString() === req.user._id.toString()
-      : event.organizer.toString() === req.user.organization?.toString();
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
 
     if (!isOrganizer && req.user.role !== 'admin') {
       throw new ForbiddenError('Not authorized to update this enrollment');
@@ -543,7 +576,7 @@ export const updateVolunteerStatus = async (req, res, next) => {
     // If approved, add to event's volunteers array if not already there
     if (status === 'approved') {
       await Event.findByIdAndUpdate(event._id, {
-        $addToSet: { volunteers: enrollment.user._id }
+        $addToSet: { volunteers: enrollment.user._id },
       });
     }
 
@@ -556,7 +589,6 @@ export const updateVolunteerStatus = async (req, res, next) => {
   }
 };
 
-
 /**
  * Get user's enrolled events
  * @param {Object} req - Express request object
@@ -567,7 +599,7 @@ export const getMyEnrollments = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
     const query = { user: req.user._id };
-    
+
     if (status) {
       query.status = status;
     }
@@ -598,10 +630,9 @@ export const getMyEnrollments = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 // Export all controller methods
 export default {
   createEvent,
   // export other methods
 };
-
