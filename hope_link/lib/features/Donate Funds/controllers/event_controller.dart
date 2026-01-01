@@ -1,5 +1,3 @@
-// lib/features/events/controllers/event_controller.dart
-
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
@@ -48,10 +46,12 @@ class EventController extends GetxController {
 
   Future<void> fetchEvents() async {
     try {
+      print('Fetching events...');
       isLoading.value = true;
       hasError.value = false;
 
       final response = await _dio.get(ApiEndpoints.events);
+      print(response.data);
 
       if (response.statusCode == 200) {
         final eventResponse = EventResponse.fromJson(response.data);

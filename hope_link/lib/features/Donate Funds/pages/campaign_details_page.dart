@@ -4,6 +4,7 @@ import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
+import 'package:hope_link/features/Donate%20Funds/widgets/campaign_info_widget.dart';
 import 'package:intl/intl.dart';
 
 import '../controllers/campaign_controller.dart';
@@ -110,6 +111,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                 children: [
                   _buildImageCarousel(),
                   _buildMainInfo(),
+                  // CampaignInfoWidget(),
                   _buildProgressSection(),
                   _buildTabBar(),
                   _buildTabContent(),
@@ -132,46 +134,15 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: AppColorToken.primary.color,
-          ),
+        icon: Icon(
+          Icons.arrow_back_rounded,
+          color: AppColorToken.primary.color,
         ),
         onPressed: () => Get.back(),
       ),
       actions: [
         IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.share_rounded,
-              color: AppColorToken.primary.color,
-            ),
-          ),
+          icon: Icon(Icons.share_rounded, color: AppColorToken.primary.color),
           onPressed: () {
             // Share functionality
             Get.snackbar(
@@ -202,28 +173,30 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     return Column(
       children: [
         SizedBox(
-          height: 300,
-          child: PageView.builder(
-            itemCount: campaign!.images.length,
-            onPageChanged: (index) {
-              _selectedImageIndex.value = index;
-            },
-            itemBuilder: (context, index) {
-              return Image.network(
-                campaign!.images[index],
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
-                  );
-                },
-              );
-            },
+          child: SizedBox(
+            height: 300,
+            child: PageView.builder(
+              itemCount: campaign!.images.length,
+              onPageChanged: (index) {
+                _selectedImageIndex.value = index;
+              },
+              itemBuilder: (context, index) {
+                return Image.network(
+                  campaign!.images[index],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[200],
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
         if (campaign!.images.length > 1) ...[

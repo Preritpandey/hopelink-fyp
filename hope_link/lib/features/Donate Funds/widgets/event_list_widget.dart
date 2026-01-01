@@ -1,5 +1,3 @@
-// lib/features/events/widgets/events_list_widget.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

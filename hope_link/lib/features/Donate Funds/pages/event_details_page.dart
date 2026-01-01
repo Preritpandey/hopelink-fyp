@@ -646,7 +646,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                   radius: 30,
                   backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
                   child: Text(
-                    widget.event.organizer.organizationName[0].toUpperCase(),
+                    widget.event.organizer.organizationName.isNotEmpty
+                        ? widget.event.organizer.organizationName[0]
+                              .toUpperCase()
+                        : 'O',
                     style: AppTextStyle.h2.copyWith(
                       color: AppColorToken.primary.color,
                       fontWeight: FontWeight.w800,
@@ -659,14 +662,18 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.event.organizer.organizationName,
+                        widget.event.organizer.organizationName.isNotEmpty
+                            ? widget.event.organizer.organizationName
+                            : 'Organizer',
                         style: AppTextStyle.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       4.verticalSpace,
                       Text(
-                        widget.event.organizer.officialEmail,
+                        widget.event.organizer.officialEmail.isNotEmpty
+                            ? widget.event.organizer.officialEmail
+                            : 'contact@organizer.com',
                         style: AppTextStyle.bodySmall.copyWith(
                           color: Colors.grey[600],
                         ),

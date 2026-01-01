@@ -113,7 +113,13 @@ class Event {
           [],
       eligibility: json['eligibility'] ?? '',
       organizerType: json['organizerType'] ?? '',
-      organizer: EventOrganizer.fromJson(json['organizer'] ?? {}),
+      organizer: json['organizer'] is String
+          ? EventOrganizer(
+              id: json['organizer'],
+              organizationName: '',
+              officialEmail: '',
+            )
+          : EventOrganizer.fromJson(json['organizer'] ?? {}),
       volunteers:
           (json['volunteers'] as List?)?.map((v) => v.toString()).toList() ??
           [],
