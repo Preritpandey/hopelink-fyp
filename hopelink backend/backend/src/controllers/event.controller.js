@@ -141,7 +141,7 @@ export const getEvents = async (req, res, next) => {
       startDate,
       endDate,
       organizerType,
-      status = 'upcoming',
+      status,
       page = 1,
       limit = 10,
     } = req.query;
@@ -152,15 +152,17 @@ export const getEvents = async (req, res, next) => {
     if (location) query['location.city'] = new RegExp(location, 'i');
     if (organizerType) query.organizerType = organizerType;
 
-    // Handle date filtering
-    const now = new Date();
-    if (status === 'upcoming') {
-      query.startDate = { $gte: now };
-    } else if (status === 'ongoing') {
-      query.startDate = { $lte: now };
-      query.endDate = { $gte: now };
-    } else if (status === 'past') {
-      query.endDate = { $lt: now };
+    // Handle date filtering (only when a status filter is provided)
+    if (status) {
+      const now = new Date();
+      if (status === 'upcoming') {
+        query.startDate = { $gte: now };
+      } else if (status === 'ongoing') {
+        query.startDate = { $lte: now };
+        query.endDate = { $gte: now };
+      } else if (status === 'past') {
+        query.endDate = { $lt: now };
+      }
     }
 
     if (startDate && endDate) {
@@ -178,12 +180,12 @@ export const getEvents = async (req, res, next) => {
 
     // Manually populate organizer based on organizerType (dynamic reference)
     for (let event of events) {
-      if (event.organizerType === 'organization') {
+      if (event.organizerType === 'Organization') {
         const organizer = await Organization.findById(event.organizer)
           .select('organizationName officialEmail logo')
           .lean();
         event.organizer = organizer;
-      } else if (event.organizerType === 'user') {
+      } else if (event.organizerType === 'User') {
         const organizer = await User.findById(event.organizer)
           .select('name email logo')
           .lean();

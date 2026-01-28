@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Campaign from './campaign.model.js';
 
 const donationSchema = new mongoose.Schema(
   {
@@ -78,7 +79,7 @@ donationSchema.statics.getTotalDonations = async function (campaignId) {
   ]);
 
   try {
-    await this.model('Campaign').findByIdAndUpdate(campaignId, {
+    await Campaign.findByIdAndUpdate(campaignId, {
       currentAmount: result[0]?.totalAmount || 0,
       $inc: { donationCount: result[0]?.count || 0 }
     });

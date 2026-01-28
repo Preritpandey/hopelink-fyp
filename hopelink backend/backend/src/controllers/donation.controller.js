@@ -14,6 +14,8 @@ import { sendEmail } from '../services/email.service.js';
 // @route   POST /api/v1/donations
 // @access  Private
 export const createDonation = async (req, res) => {
+  console.log('Request body:', req.body); // Debug log
+  
   const {
     campaign: campaignId,
     amount,
@@ -21,7 +23,11 @@ export const createDonation = async (req, res) => {
     isAnonymous,
     message,
   } = req.body;
-  const userId = req.user.userId;
+  
+  console.log('Extracted campaignId:', campaignId); // Debug log
+  console.log('User object:', req.user); // Debug log
+  
+  const userId = req.user._id || req.user.id;
 
   // Check if campaign exists and is active
   const campaign = await Campaign.findById(campaignId);
@@ -40,11 +46,12 @@ export const createDonation = async (req, res) => {
 
   // Create donation
   const donation = await Donation.create({
-    user: userId,
+    donor: userId,
     campaign: campaignId,
     organization: campaign.organization,
     amount,
     paymentMethod,
+    paymentId: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a unique payment ID
     isAnonymous: isAnonymous || false,
     message: message || '',
   });
@@ -107,7 +114,7 @@ export const getDonations = async (req, res) => {
 
   // Finding resource
   let query = Donation.find(JSON.parse(queryStr))
-    .populate('user', 'name email')
+    .populate('donor', 'name email')
     .populate('campaign', 'title')
     .populate('organization', 'organizationName');
 
@@ -167,7 +174,7 @@ export const getDonations = async (req, res) => {
 // @access  Private
 export const getDonation = async (req, res) => {
   const donation = await Donation.findById(req.params.id)
-    .populate('user', 'name email')
+    .populate('donor', 'name email')
     .populate('campaign', 'title')
     .populate('organization', 'organizationName');
 
@@ -177,7 +184,7 @@ export const getDonation = async (req, res) => {
 
   // Make sure user is the donor, organization owner, or admin
   if (
-    donation.user._id.toString() !== req.user.userId &&
+    donation.donor._id.toString() !== req.user._id.toString() &&
     donation.organization._id.toString() !== req.user.organization &&
     req.user.role !== 'admin'
   ) {
@@ -209,7 +216,7 @@ export const getDonationsForCampaign = async (req, res) => {
   }
 
   const donations = await Donation.find({ campaign: req.params.campaignId })
-    .populate('user', 'name email')
+    .populate('donor', 'name email')
     .sort('-createdAt');
 
   res.status(StatusCodes.OK).json({
@@ -224,18 +231,18 @@ export const getDonationsForCampaign = async (req, res) => {
 // @route   GET /api/v1/users/:userId/donations
 // @access  Private
 export const getUserDonations = async (req, res) => {
-  let userId = req.params.userId || req.user.userId;
+  let userId = req.params.userId || req.user._id;
 
   // Check if user is authorized
   if (
     req.params.userId &&
-    req.params.userId !== req.user.userId &&
+    req.params.userId !== req.user._id.toString() &&
     req.user.role !== 'admin'
   ) {
     throw new UnauthorizedError('Not authorized to view these donations');
   }
 
-  const donations = await Donation.find({ user: userId })
+  const donations = await Donation.find({ donor: userId })
     .populate('campaign', 'title image')
     .populate('organization', 'organizationName')
     .sort('-createdAt');
@@ -277,7 +284,7 @@ export const updateDonationStatus = async (req, res) => {
 
   // Send status update email to donor if not anonymous
   if (!donation.isAnonymous) {
-    const user = await User.findById(donation.user);
+    const user = await User.findById(donation.donor);
     if (user) {
       try {
         await sendDonationStatusUpdate({
