@@ -4,7 +4,6 @@ import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
-import 'package:hope_link/features/Donate%20Funds/widgets/campaign_info_widget.dart';
 import 'package:intl/intl.dart';
 
 import '../controllers/campaign_controller.dart';

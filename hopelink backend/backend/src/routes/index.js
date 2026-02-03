@@ -7,6 +7,7 @@ import donationRoutes from './donation.routes.js';
 import campaignRoutes from './campaign.routes.js';
 import profileRoutes from './profile.routes.js';
 import eventRoutes from './event.routes.js';
+import paymentRoutes from './payment.routes.js';
 
 const router = express.Router();
 
@@ -39,6 +40,7 @@ router.use('/donations', donationRoutes);
 router.use('/campaigns', campaignRoutes);
 router.use('/events', eventRoutes);
 router.use('/user/profile', profileRoutes);
+router.use('/payments', paymentRoutes);
 
 // E-commerce Routes
 import productRoutes from './ecommerce/product.routes.js';

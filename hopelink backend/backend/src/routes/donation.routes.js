@@ -7,6 +7,8 @@ import {
   getDonationsForCampaign,
   getUserDonations,
   updateDonationStatus,
+  getOrgDonationSummary,
+  getDonationsSummaryByOrg,
 } from '../controllers/donation.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
@@ -27,6 +29,18 @@ router.get('/:id', asyncHandler(getDonation));
 
 // Organization routes (organization admins)
 router.get('/campaign/:campaignId', authorize('organization', 'admin'), asyncHandler(getDonationsForCampaign));
+router.get(
+  '/summary/org',
+  authorize('organization', 'admin'),
+  asyncHandler(getOrgDonationSummary),
+);
+
+// Donation summaries (admin)
+router.get(
+  '/summary/all',
+  authorize('admin'),
+  asyncHandler(getDonationsSummaryByOrg),
+);
 
 // Admin routes
 router.put('/:id/status', authorize('admin', 'organization'), asyncHandler(updateDonationStatus));

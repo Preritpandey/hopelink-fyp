@@ -9,6 +9,7 @@ import {
   UnauthorizedError,
 } from '../errors/index.js';
 import { sendEmail } from '../services/email.service.js';
+import mongoose from 'mongoose';
 
 // @desc    Create a new donation
 // @route   POST /api/v1/donations
@@ -20,6 +21,7 @@ export const createDonation = async (req, res) => {
     campaign: campaignId,
     amount,
     paymentMethod,
+    paymentId,
     isAnonymous,
     message,
   } = req.body;
@@ -51,7 +53,11 @@ export const createDonation = async (req, res) => {
     organization: campaign.organization,
     amount,
     paymentMethod,
-    paymentId: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a unique payment ID
+    paymentId:
+      paymentId ||
+      `payment_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`, // Fallback unique payment ID if not provided
     isAnonymous: isAnonymous || false,
     message: message || '',
   });
@@ -87,6 +93,68 @@ export const createDonation = async (req, res) => {
   res.status(StatusCodes.CREATED).json({
     success: true,
     data: donation,
+  });
+};
+
+// @desc    Get donation summary for current organization
+// @route   GET /api/v1/donations/summary/org
+// @access  Private (Organization, Admin)
+export const getOrgDonationSummary = async (req, res) => {
+  const orgId = req.user.organization;
+
+  if (!orgId) {
+    throw new BadRequestError('Organization not found on user');
+  }
+
+  const [summary] = await Donation.aggregate([
+    {
+      $match: {
+        organization: new mongoose.Types.ObjectId(orgId),
+        status: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: '$organization',
+        totalAmount: { $sum: '$amount' },
+        donationCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data:
+      summary || {
+        _id: orgId,
+        totalAmount: 0,
+        donationCount: 0,
+      },
+  });
+};
+
+// @desc    Get donation summary grouped by organization (admin)
+// @route   GET /api/v1/donations/summary/all
+// @access  Private (Admin)
+export const getDonationsSummaryByOrg = async (req, res) => {
+  const summary = await Donation.aggregate([
+    {
+      $match: {
+        status: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: '$organization',
+        totalAmount: { $sum: '$amount' },
+        donationCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: summary,
   });
 };
 

@@ -26,7 +26,16 @@ const donationSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       required: [true, 'Please provide a payment method'],
-      enum: ['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'crypto', 'other'],
+      enum: [
+        'credit_card',
+        'debit_card',
+        'paypal',
+        'bank_transfer',
+        'crypto',
+        'stripe',
+        'khalti',
+        'other',
+      ],
     },
     paymentId: {
       type: String,

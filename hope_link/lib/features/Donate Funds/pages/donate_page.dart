@@ -332,107 +332,6 @@ class _DonatePageState extends State<DonatePage>
                     ),
                   ),
                 ),
-                24.verticalSpace,
-                Text(
-                  'Donor Information',
-                  style: AppTextStyle.h4.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[900],
-                  ),
-                ),
-                16.verticalSpace,
-                Text(
-                  'Full Name',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                8.verticalSpace,
-                AppTextField(
-                  controller: _controller.nameController,
-                  borderRadius: 12,
-                  hintText: 'John Doe',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
-                ),
-                16.verticalSpace,
-                Text(
-                  'Email',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                8.verticalSpace,
-                AppTextField(
-                  controller: _controller.emailController,
-                  borderRadius: 12,
-                  hintText: 'your.email@example.com',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!GetUtils.isEmail(value)) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                16.verticalSpace,
-                Text(
-                  'Phone Number (Optional)',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                8.verticalSpace,
-                AppTextField(
-                  controller: _controller.phoneController,
-                  borderRadius: 12,
-                  hintText: '+977 9800000000',
-                  keyboardType: TextInputType.phone,
-                ),
-                16.verticalSpace,
-                Text(
-                  'Message (Optional)',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                8.verticalSpace,
-                AppTextField(
-                  controller: _controller.messageController,
-                  borderRadius: 12,
-                  hintText: 'Leave a message of support...',
-                  maxLines: 4,
-                ),
-                20.verticalSpace,
-                Obx(
-                  () => CheckboxListTile(
-                    value: _controller.isAnonymous.value,
-                    onChanged: (value) {
-                      _controller.isAnonymous.value = value ?? false;
-                    },
-                    title: Text(
-                      'Make this donation anonymous',
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    activeColor: AppColorToken.primary.color,
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
-                ),
               ],
             ),
           ),
@@ -456,7 +355,7 @@ class _DonatePageState extends State<DonatePage>
                 12.horizontalSpace,
                 Expanded(
                   child: Text(
-                    'Your donation will help support ${campaign.title}',
+                    'Card details will be collected on the next screen',
                     style: AppTextStyle.bodySmall.copyWith(
                       color: Colors.grey[700],
                       height: 1.5,
@@ -540,7 +439,7 @@ class _DonatePageState extends State<DonatePage>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Total Donation',
+                        'Amount to Pay',
                         style: AppTextStyle.bodyLarge.copyWith(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.w600,
@@ -563,14 +462,33 @@ class _DonatePageState extends State<DonatePage>
               () => AppButton(
                 title: _controller.isProcessing.value
                     ? 'Processing...'
-                    : 'Complete Donation',
+                    : 'Proceed to Payment',
                 backgroundColor: AppColorToken.primary.color,
                 onPressed: _controller.isProcessing.value
                     ? null
                     : () {
-                        if (_formKey.currentState!.validate()) {
-                          _controller.processDonation();
+                        // Check if amount is selected either from quick buttons or custom input
+                        final hasAmount =
+                            _controller.selectedAmount.value > 0 ||
+                            (int.tryParse(_controller.amountController.text) ??
+                                    0) >
+                                0;
+
+                        if (!hasAmount) {
+                          Get.snackbar(
+                            'Invalid Amount',
+                            'Please select or enter a donation amount',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red.withOpacity(0.9),
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(16),
+                            borderRadius: 12,
+                          );
+                          return;
                         }
+
+                        // Directly start donation process (payment sheet will open)
+                        _controller.processDonation();
                       },
                 width: double.infinity,
                 radius: 16,

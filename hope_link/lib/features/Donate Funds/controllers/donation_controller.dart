@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:hope_link/config/stripe_config.dart';
 
 import '../models/campaign_model.dart';
 
@@ -49,113 +53,204 @@ class DonationController extends GetxController {
         return;
       }
 
-      // Create donation record
-      final donation = {
-        'campaignId': campaign!.id,
-        'campaignTitle': campaign!.title,
-        'amount': amount,
-        'donorName': isAnonymous.value ? 'Anonymous' : nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text.isEmpty ? null : phoneController.text,
-        'message': messageController.text.isEmpty
-            ? null
-            : messageController.text,
-        'isAnonymous': isAnonymous.value,
-        'timestamp': DateTime.now().toIso8601String(),
-        'status': 'pending', // In real app, this would be updated after payment
-      };
+      // Validate Stripe is initialized
+      if (Stripe.publishableKey.isEmpty) {
+        Get.snackbar(
+          'Configuration Error',
+          'Payment system not initialized. Please restart the app.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.9),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+        return;
+      }
 
-      // Save to local storage (Hive)
-      final box = await Hive.openBox('donations');
-      final donationId = DateTime.now().millisecondsSinceEpoch.toString();
-      await box.put(donationId, donation);
+      // Call backend to create Stripe PaymentIntent
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Show success dialog
-      Get.dialog(
-        Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.green,
-                    size: 64,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Thank You!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Your donation of NPR ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} has been received.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'You will receive a confirmation email shortly.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.back(); // Close dialog
-                      Get.back(); // Go back to campaign details
-                      Get.back(); // Go back to campaigns list
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6B4CE6),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Done',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: StripeConfig.baseUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
         ),
-        barrierDismissible: false,
       );
 
-      // Clear form
-      _clearForm();
+      final amountInPaisa = amount * 100; // convert NPR to paisa
+
+      print('[Donation] Creating payment intent with amount: $amountInPaisa');
+
+      final res = await dio.post(
+        '/api/v1/payments/stripe/init',
+        data: {
+          'amount': amountInPaisa,
+          'currency': 'npr',
+          'type': 'donation',
+          'campaignId': campaign!.id,
+        },
+      );
+
+      print('[Donation] Payment intent response: ${res.data}');
+
+      final intent = res.data['data'];
+      final clientSecret = intent['clientSecret'] as String?;
+      final paymentIntentId = intent['id'] as String?;
+
+      if (clientSecret == null || paymentIntentId == null) {
+        throw Exception(
+          'Failed to create payment intent. Missing clientSecret or paymentIntentId',
+        );
+      }
+
+      print('[Donation] Client secret: $clientSecret');
+      print('[Donation] Payment intent ID: $paymentIntentId');
+
+      // Initialize and present payment sheet
+      try {
+        print('[Donation] Initializing payment sheet...');
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: clientSecret,
+            merchantDisplayName: 'Hope Link',
+            applePay: PaymentSheetApplePay(merchantCountryCode: 'NP'),
+            googlePay: PaymentSheetGooglePay(
+              merchantCountryCode: 'NP',
+              testEnv: true,
+            ),
+            style: ThemeMode.light,
+          ),
+        );
+
+        print('[Donation] Presenting payment sheet...');
+        await Stripe.instance.presentPaymentSheet();
+        print('[Donation] Payment sheet presented successfully');
+      } catch (e) {
+        print('[Donation] Payment sheet error: $e');
+        // Payment failed / canceled
+        if (e is StripeException) {
+          Get.snackbar(
+            'Payment Failed',
+            e.error.message ?? 'Payment was cancelled',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withOpacity(0.9),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 12,
+          );
+          return;
+        }
+        rethrow;
+      }
+
+      print('[Donation] Verifying payment on server...');
+
+      // Verify on server
+      final verifyRes = await dio.post(
+        '/api/v1/payments/stripe/verify',
+        data: {'paymentIntentId': paymentIntentId},
+      );
+
+      print('[Donation] Verify response: ${verifyRes.data}');
+
+      final verified = verifyRes.data['data'];
+
+      // Show success dialog only if server confirms succeeded
+      if (verified != null && (verified['status'] as String?) == 'succeeded') {
+        print('[Donation] Payment successful!');
+
+        Get.dialog(
+          Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.green,
+                      size: 64,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Thank You!',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Your donation of NPR ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} has been received.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'You will receive a confirmation email shortly.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back(); // Close dialog
+                        Get.back(); // Go back to campaign details
+                        Get.back(); // Go back to campaigns list
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6B4CE6),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          barrierDismissible: false,
+        );
+
+        // Clear form
+        _clearForm();
+      } else {
+        throw Exception(
+          'Payment verification failed. Status: ${verified?['status'] ?? 'unknown'}',
+        );
+      }
     } catch (e) {
+      print('[Donation] Error: $e');
       Get.snackbar(
         'Error',
-        'Failed to process donation. Please try again.',
+        'Failed to process donation: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withOpacity(0.9),
         colorText: Colors.white,

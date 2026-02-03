@@ -10,6 +10,8 @@ import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
 import 'package:hope_link/features/Home/pages/home_screen.dart';
 import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'config/stripe_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,15 @@ void main() async {
   final token = prefs.getString('auth_token') ?? '';
   final isLoggedIn =
       (prefs.getBool('is_logged_in') ?? false) && token.isNotEmpty;
+  // Fetch publishable key from backend before starting app
+  await StripeConfig.fetchPublishableKey();
+  // Configure Stripe publishable key (may be null if fetch failed)
+  if (StripeConfig.publishableKey != null &&
+      StripeConfig.publishableKey!.isNotEmpty) {
+    Stripe.publishableKey = StripeConfig.publishableKey!;
+    Stripe.merchantIdentifier = 'merchant.com.example';
+    await Stripe.instance.applySettings();
+  }
 
   runApp(MyApp(prefs: prefs, isLoggedIn: isLoggedIn));
 }

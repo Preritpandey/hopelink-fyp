@@ -72,6 +72,7 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentData) 
         shippingFee,
         totalAmount: orderData.subTotal + shippingFee,
         status: 'paid', // Assuming payment success for now
+        paymentStatus: 'completed',
         shippingAddress,
         paidAt: new Date()
       });
@@ -104,4 +105,55 @@ export const getOrdersByUser = async (userId) => {
 
 export const getOrdersByOrg = async (orgId) => {
   return await Order.find({ orgId }).sort({ createdAt: -1 });
+};
+
+export const getOrgSalesSummary = async (orgId) => {
+  const mongooseOrgId = new mongoose.Types.ObjectId(orgId);
+
+  const [summary] = await Order.aggregate([
+    {
+      $match: {
+        orgId: mongooseOrgId,
+        paymentStatus: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: '$orgId',
+        totalRevenue: { $sum: '$totalAmount' },
+        orderCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  return (
+    summary || {
+      _id: mongooseOrgId,
+      totalRevenue: 0,
+      orderCount: 0,
+    }
+  );
+};
+
+export const getOrgProductSalesSummary = async (orgId) => {
+  const mongooseOrgId = new mongoose.Types.ObjectId(orgId);
+
+  const summary = await Order.aggregate([
+    {
+      $match: {
+        orgId: mongooseOrgId,
+        paymentStatus: 'completed',
+      },
+    },
+    { $unwind: '$items' },
+    {
+      $group: {
+        _id: '$items.productId',
+        unitsSold: { $sum: '$items.quantity' },
+        revenue: { $sum: '$items.totalPrice' },
+      },
+    },
+  ]);
+
+  return summary;
 };
