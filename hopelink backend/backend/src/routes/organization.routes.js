@@ -11,6 +11,7 @@ import {
   approveOrganization,
   rejectOrganization,
 } from '../controllers/organization.controller.js';
+import { getOrganizationFundStatus } from '../controllers/campaign.controller.js';
 import { handleFileUpload } from '../config/multer.config.js';
 
 const router = express.Router();
@@ -31,6 +32,8 @@ router.post(
 
 router.get('/', asyncHandler(getOrganizations));
 router.get('/:id', asyncHandler(getOrganization));
+// Organization fund tracking (public)
+router.get('/:id/fund-status', asyncHandler(getOrganizationFundStatus));
 
 // Protected routes (require authentication)
 router.use(authenticate);

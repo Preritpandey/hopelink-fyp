@@ -29,8 +29,26 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   @override
   void initState() {
     super.initState();
-    campaignId = Get.arguments as String;
-    _loadCampaignDetails();
+    final args = Get.arguments;
+    if (args is String) {
+      campaignId = args;
+      _loadCampaignDetails();
+    } else if (args is Campaign) {
+      campaign = args;
+      campaignId = campaign!.id;
+    } else if (args is Map<String, dynamic>) {
+      try {
+        campaign = Campaign.fromJson(args);
+        campaignId = campaign!.id;
+      } catch (e) {
+        // Fallback: try to extract id and load
+        campaignId = args['id']?.toString() ?? '';
+        if (campaignId.isNotEmpty) _loadCampaignDetails();
+      }
+    } else {
+      campaignId = '';
+      _loadCampaignDetails();
+    }
 
     _animationController = AnimationController(
       vsync: this,

@@ -9,6 +9,7 @@ import {
   updateDonationStatus,
   getOrgDonationSummary,
   getDonationsSummaryByOrg,
+  completeStripePayment,
 } from '../controllers/donation.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
@@ -21,6 +22,9 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get('/', asyncHandler(getDonations));
+
+// Complete Stripe payment - Called after Stripe payment succeeds
+router.post('/complete-payment', asyncHandler(completeStripePayment));
 
 // User routes
 router.post('/', asyncHandler(createDonation));

@@ -72,6 +72,22 @@ const organizationSchema = new mongoose.Schema(
       required: false
     },
     isVerified: { type: Boolean, default: false },
+    // Fund tracking
+    totalDonationsReceived: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalDonationCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    activeCampaigns: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

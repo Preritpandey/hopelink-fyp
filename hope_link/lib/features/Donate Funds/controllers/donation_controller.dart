@@ -7,6 +7,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hope_link/config/stripe_config.dart';
 
 import '../models/campaign_model.dart';
+import 'campaign_controller.dart';
 
 class DonationController extends GetxController {
   final TextEditingController amountController = TextEditingController();
@@ -161,86 +162,145 @@ class DonationController extends GetxController {
 
       // Show success dialog only if server confirms succeeded
       if (verified != null && (verified['status'] as String?) == 'succeeded') {
-        print('[Donation] Payment successful!');
+        print('[Donation] Payment successful! Creating donation record...');
 
-        Get.dialog(
-          Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.green,
-                      size: 64,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Thank You!',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Your donation of NPR ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} has been received.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'You will receive a confirmation email shortly.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back(); // Close dialog
-                        Get.back(); // Go back to campaign details
-                        Get.back(); // Go back to campaigns list
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6B4CE6),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+        // Create donation record and update campaign/organization
+        try {
+          final completeRes = await dio.post(
+            '/api/v1/donations/complete-payment',
+            data: {
+              'paymentIntentId': paymentIntentId,
+              'amount': amount,
+              'campaignId': campaign!.id,
+              'isAnonymous': isAnonymous.value,
+              'message': messageController.text,
+            },
+          );
+
+          print('[Donation] Complete payment response: ${completeRes.data}');
+
+          // Update local cache and in-memory campaign list if possible
+          try {
+            final campaignController = Get.isRegistered<CampaignController>()
+                ? Get.find<CampaignController>()
+                : null;
+
+            if (campaignController != null) {
+              // Fetch updated campaign from API/local and replace in controller lists
+              final updated = await campaignController.getCampaignById(
+                campaign!.id,
+              );
+              if (updated != null) {
+                final idx = campaignController.campaigns.indexWhere(
+                  (c) => c.id == updated.id,
+                );
+                if (idx >= 0) {
+                  campaignController.campaigns[idx] = updated;
+                } else {
+                  campaignController.campaigns.add(updated);
+                }
+                // Reapply filters so UI updates
+                campaignController.applyFilters();
+              }
+            }
+          } catch (e) {
+            print('[Donation] Error updating local campaign cache: $e');
+          }
+
+          Get.dialog(
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        shape: BoxShape.circle,
                       ),
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                      child: const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                        size: 64,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Thank You!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Your donation of NPR ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} has been received.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'You will receive a confirmation email shortly.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.back(); // Close dialog
+                          Get.back(); // Go back to campaign details
+                          Get.back(); // Go back to campaigns list
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6B4CE6),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Done',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          barrierDismissible: false,
-        );
+            barrierDismissible: false,
+          );
 
-        // Clear form
-        _clearForm();
+          // Clear form
+          _clearForm();
+        } catch (e) {
+          print('[Donation] Error creating donation record: $e');
+          Get.snackbar(
+            'Payment Received',
+            'Your payment was successful but we encountered an issue recording the donation. Our team will verify it shortly.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.withOpacity(0.9),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 12,
+            duration: const Duration(seconds: 5),
+          );
+        }
       } else {
         throw Exception(
           'Payment verification failed. Status: ${verified?['status'] ?? 'unknown'}',

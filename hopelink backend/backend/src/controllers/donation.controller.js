@@ -503,3 +503,144 @@ const sendDonationStatusUpdate = async ({
     html,
   });
 };
+// @desc    Complete a Stripe payment and create donation record
+// @route   POST /api/v1/donations/complete-payment
+// @access  Private
+// Called by Flutter app after Stripe payment succeeds
+export const completeStripePayment = async (req, res, next) => {
+  try {
+    // Debug logs to help trace incoming requests from the Flutter app
+    console.log('[Backend][completeStripePayment] headers:', req.headers);
+    console.log('[Backend][completeStripePayment] body:', req.body);
+
+    const {
+      paymentIntentId,
+      amount,
+      campaignId,
+      isAnonymous,
+      message,
+    } = req.body;
+
+    const userId = req.user._id || req.user.id;
+
+    // Validate required fields
+    if (!paymentIntentId || !amount || !campaignId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'paymentIntentId, amount, and campaignId are required',
+      });
+    }
+
+    // Check if campaign exists and is active
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: `No campaign with id ${campaignId}`,
+      });
+    }
+
+    if (campaign.status !== 'active') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Cannot donate to an inactive campaign',
+      });
+    }
+
+    // Check if campaign end date has passed
+    if (new Date(campaign.endDate) < new Date()) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'This campaign has ended',
+      });
+    }
+
+    // Create donation record with 'completed' status
+    const donation = await Donation.create({
+      donor: userId,
+      campaign: campaignId,
+      organization: campaign.organization,
+      amount,
+      paymentMethod: 'stripe',
+      paymentId: paymentIntentId,
+      isAnonymous: isAnonymous || false,
+      message: message || '',
+      status: 'completed', // Mark as completed immediately
+    });
+
+    // UPDATE CAMPAIGN FUNDS
+    campaign.currentAmount = (campaign.currentAmount || 0) + amount;
+    campaign.donationsCount = (campaign.donationsCount || 0) + 1;
+    await campaign.save();
+
+    // UPDATE ORGANIZATION FUNDS
+    // UPDATE ORGANIZATION FUNDS (guarded)
+    let organization = null;
+    try {
+      organization = await Organization.findByIdAndUpdate(
+        campaign.organization,
+        {
+          $inc: {
+            totalDonationsReceived: amount,
+            totalDonationCount: 1,
+          },
+        },
+        { new: true }
+      );
+    } catch (err) {
+      console.error('[Backend] Error updating organization funds:', err);
+    }
+
+    // Get user and organization details for email
+    let user = null;
+    try {
+      user = await User.findById(userId);
+    } catch (err) {
+      console.error('[Backend] Error fetching user for donation receipt:', err);
+    }
+
+    // Send receipt email (don't fail the response if email fails)
+    try {
+      await sendDonationReceipt({
+        to: user?.email || '',
+        userName: user?.name || 'Donor',
+        amount,
+        campaignTitle: campaign.title,
+        organizationName: organization
+          ? organization.organizationName
+          : 'Unknown Organization',
+        donationId: donation._id,
+        date: new Date(),
+        isAnonymous,
+      });
+    } catch (error) {
+      console.error('Error sending donation receipt:', error);
+    }
+
+    const organizationUpdated = organization
+      ? {
+          totalDonationsReceived: organization.totalDonationsReceived,
+          totalDonationCount: organization.totalDonationCount,
+        }
+      : {
+          totalDonationsReceived: null,
+          totalDonationCount: null,
+        };
+
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: 'Donation completed successfully',
+      data: {
+        donation: donation,
+        campaignUpdated: {
+          currentAmount: campaign.currentAmount,
+          donationsCount: campaign.donationsCount,
+          progress: (campaign.currentAmount / campaign.targetAmount) * 100,
+        },
+        organizationUpdated,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

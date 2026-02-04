@@ -617,3 +617,130 @@ export const addCampaignFaq = async (req, res) => {
     });
   }
 };
+// @desc    Get campaign fund tracking info (progress, donations count, etc)
+// @route   GET /api/v1/campaigns/:id/fund-status
+// @access  Public
+export const getCampaignFundStatus = async (req, res) => {
+  try {
+    const campaign = await Campaign.findById(req.params.id)
+      .populate('organization', 'organizationName totalDonationsReceived totalDonationCount');
+
+    if (!campaign) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: `No campaign with id ${req.params.id}`,
+      });
+    }
+
+    // Get donation count and total for this campaign
+    const donationStats = await Donation.aggregate([
+      {
+        $match: {
+          campaign: campaign._id,
+          status: 'completed',
+        },
+      },
+      {
+        $group: {
+          _id: '$campaign',
+          totalAmount: { $sum: '$amount' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const stats = donationStats[0] || { totalAmount: 0, count: 0 };
+
+    const progress = (campaign.currentAmount / campaign.targetAmount) * 100;
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        campaignId: campaign._id,
+        campaignTitle: campaign.title,
+        organization: {
+          id: campaign.organization._id,
+          name: campaign.organization.organizationName,
+          totalDonationsReceived: campaign.organization.totalDonationsReceived,
+          totalDonationCount: campaign.organization.totalDonationCount,
+        },
+        fundStatus: {
+          targetAmount: campaign.targetAmount,
+          currentAmount: campaign.currentAmount,
+          remainingAmount: campaign.targetAmount - campaign.currentAmount,
+          progress: Math.round(progress * 100) / 100, // 2 decimal places
+          progressPercentage: Math.min(progress, 100),
+          donationCount: campaign.donationsCount || stats.count,
+          isComplete: campaign.currentAmount >= campaign.targetAmount,
+        },
+        timeline: {
+          startDate: campaign.startDate,
+          endDate: campaign.endDate,
+          daysRemaining: Math.max(0, Math.ceil((new Date(campaign.endDate) - new Date()) / (1000 * 60 * 60 * 24))),
+          isActive: campaign.status === 'active' && new Date(campaign.endDate) > new Date(),
+        },
+      },
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get organization fund tracking info
+// @route   GET /api/v1/organizations/:id/fund-status
+// @access  Public
+export const getOrganizationFundStatus = async (req, res) => {
+  try {
+    const organization = await Organization.findById(req.params.id);
+
+    if (!organization) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: `No organization with id ${req.params.id}`,
+      });
+    }
+
+    // Get all campaigns for this organization
+    const campaigns = await Campaign.find({ organization: organization._id });
+
+    const totalTargetAmount = campaigns.reduce((sum, c) => sum + (c.targetAmount || 0), 0);
+    const totalCurrentAmount = campaigns.reduce((sum, c) => sum + (c.currentAmount || 0), 0);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        organizationId: organization._id,
+        organizationName: organization.organizationName,
+        fundStatus: {
+          totalDonationsReceived: organization.totalDonationsReceived || 0,
+          totalDonationCount: organization.totalDonationCount || 0,
+          totalCampaigns: campaigns.length,
+          activeCampaigns: campaigns.filter(c => c.status === 'active' && new Date(c.endDate) > new Date()).length,
+          completedCampaigns: campaigns.filter(c => c.currentAmount >= c.targetAmount).length,
+        },
+        campaignOverview: {
+          totalTargetAmount,
+          totalCurrentAmount,
+          remainingAmount: totalTargetAmount - totalCurrentAmount,
+          overallProgress: totalTargetAmount > 0 ? Math.round((totalCurrentAmount / totalTargetAmount) * 100) : 0,
+        },
+        recentDonations: await Donation.find({
+          organization: organization._id,
+          status: 'completed',
+        })
+          .sort('-createdAt')
+          .limit(5)
+          .select('amount donor campaignId createdAt')
+          .lean(),
+      },
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};

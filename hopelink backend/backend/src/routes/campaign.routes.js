@@ -11,6 +11,8 @@ import {
   getCampaignsWithDonationsAndEvents,
   addCampaignUpdate,
   addCampaignFaq,
+  getCampaignFundStatus,
+  getOrganizationFundStatus,
 } from '../controllers/campaign.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { handleFileUpload } from '../config/multer.config.js';
@@ -21,6 +23,8 @@ const router = express.Router();
 router.get('/', getCampaigns);
 router.get('/:id', getCampaign);
 router.get('/with-details/all', getCampaignsWithDonationsAndEvents);
+// Fund tracking routes (public)
+router.get('/:id/fund-status', getCampaignFundStatus);
 
 // Protected routes (require authentication)
 router.use(authenticate);
