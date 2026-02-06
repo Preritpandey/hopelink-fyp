@@ -8,6 +8,8 @@ import {
   enrollInEvent,
   withdrawEnrollment,
   getEventVolunteers,
+  getEventApprovedVolunteers,
+  getEventRejectedEnrollments,
   updateVolunteerStatus,
   getMyEnrollments,
 } from '../controllers/event.controller.js';
@@ -46,6 +48,18 @@ router.get(
   '/:id/volunteers',
   authorize('user', 'organization', 'admin'),
   getEventVolunteers
+);
+
+router.get(
+  '/:id/volunteers/approved',
+  authorize('user', 'organization', 'admin'),
+  getEventApprovedVolunteers
+);
+
+router.get(
+  '/:id/volunteers/rejected',
+  authorize('user', 'organization', 'admin'),
+  getEventRejectedEnrollments
 );
 
 router.put(

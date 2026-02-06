@@ -11,6 +11,7 @@ import {
 } from '../errors/index.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
+import { sendEmail } from '../services/email.service.js';
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -426,11 +427,6 @@ export const enrollInEvent = async (req, res, next) => {
 
     await enrollment.save();
 
-    // Add to event's volunteers array
-    await Event.findByIdAndUpdate(event._id, {
-      $addToSet: { volunteers: req.user._id },
-    });
-
     res.status(201).json({
       success: true,
       data: enrollment,
@@ -506,12 +502,8 @@ export const getEventVolunteers = async (req, res, next) => {
       );
     }
 
-    const { status, page = 1, limit = 20 } = req.query;
-    const query = { event: event._id };
-
-    if (status) {
-      query.status = status;
-    }
+    const { page = 1, limit = 20 } = req.query;
+    const query = { event: event._id, status: 'pending' };
 
     const enrollments = await VolunteerEnrollment.find(query)
       .populate({
@@ -581,6 +573,29 @@ export const updateVolunteerStatus = async (req, res, next) => {
         $addToSet: { volunteers: enrollment.user._id },
       });
     }
+    // If rejected, ensure user is removed from volunteers array
+    if (status === 'rejected') {
+      await Event.findByIdAndUpdate(event._id, {
+        $pull: { volunteers: enrollment.user._id },
+      });
+    }
+
+    // Send status update email (best-effort)
+    if (status === 'approved' || status === 'rejected') {
+      try {
+        await sendVolunteerStatusEmail({
+          to: enrollment.user?.email,
+          userName: enrollment.user?.name || 'Volunteer',
+          status,
+          eventTitle: event.title || 'Event',
+          startDate: event.startDate,
+          endDate: event.endDate,
+          location: event.location,
+        });
+      } catch (emailError) {
+        console.error('Error sending volunteer status email:', emailError);
+      }
+    }
 
     res.json({
       success: true,
@@ -632,6 +647,167 @@ export const getMyEnrollments = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * Get approved volunteers (for event organizers)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export const getEventApprovedVolunteers = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      throw new NotFoundError('Event not found');
+    }
+
+    // Check if user is the organizer or admin
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
+
+    if (!isOrganizer && req.user.role !== 'admin') {
+      throw new ForbiddenError(
+        'Not authorized to view volunteers for this event',
+      );
+    }
+
+    const { page = 1, limit = 20 } = req.query;
+    const query = { event: event._id, status: 'approved' };
+
+    const enrollments = await VolunteerEnrollment.find(query)
+      .populate({
+        path: 'user',
+        select: 'name email phone profileImage skills',
+      })
+      .sort({ enrollmentDate: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await VolunteerEnrollment.countDocuments(query);
+
+    res.json({
+      success: true,
+      count: enrollments.length,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      data: enrollments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get rejected enrollments (for event organizers)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export const getEventRejectedEnrollments = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      throw new NotFoundError('Event not found');
+    }
+
+    // Check if user is the organizer or admin
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
+
+    if (!isOrganizer && req.user.role !== 'admin') {
+      throw new ForbiddenError(
+        'Not authorized to view volunteers for this event',
+      );
+    }
+
+    const { page = 1, limit = 20 } = req.query;
+    const query = { event: event._id, status: 'rejected' };
+
+    const enrollments = await VolunteerEnrollment.find(query)
+      .populate({
+        path: 'user',
+        select: 'name email phone profileImage skills',
+      })
+      .sort({ enrollmentDate: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await VolunteerEnrollment.countDocuments(query);
+
+    res.json({
+      success: true,
+      count: enrollments.length,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      data: enrollments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const formatEventDateRange = (startDate, endDate) => {
+  if (!startDate) return 'To be announced';
+  const start = new Date(startDate).toLocaleDateString();
+  const end = endDate ? new Date(endDate).toLocaleDateString() : null;
+  return end && end !== start ? `${start} - ${end}` : start;
+};
+
+const formatEventLocation = (location) => {
+  if (!location) return 'To be announced';
+  const parts = [location.address, location.city, location.state].filter(Boolean);
+  return parts.length ? parts.join(', ') : 'To be announced';
+};
+
+const sendVolunteerStatusEmail = async ({
+  to,
+  userName,
+  status,
+  eventTitle,
+  startDate,
+  endDate,
+  location,
+}) => {
+  if (!to) return;
+
+  const statusLabel = status === 'approved' ? 'approved' : 'rejected';
+  const subject =
+    status === 'approved'
+      ? `Your volunteer request for "${eventTitle}" was approved`
+      : `Your volunteer request for "${eventTitle}" was rejected`;
+
+  const dateRange = formatEventDateRange(startDate, endDate);
+  const eventLocation = formatEventLocation(location);
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Volunteer Request Update</h2>
+      <p>Hi ${userName},</p>
+      <p>Your volunteer request for <strong>"${eventTitle}"</strong> has been <strong>${statusLabel}</strong>.</p>
+      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p><strong>Event details:</strong></p>
+        <p>Date: ${dateRange}</p>
+        <p>Location: ${eventLocation}</p>
+      </div>
+      <p>If you have any questions, please contact the event organizer.</p>
+      <p>Best regards,<br>HopeLink Team</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to,
+    subject,
+    html,
+  });
 };
 // Export all controller methods
 export default {
