@@ -9,6 +9,7 @@ import {
   updateDonationStatus,
   getOrgDonationSummary,
   getDonationsSummaryByOrg,
+  getOrgDonationSummaryById,
   completeStripePayment,
 } from '../controllers/donation.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
@@ -44,6 +45,11 @@ router.get(
   '/summary/all',
   authorize('admin'),
   asyncHandler(getDonationsSummaryByOrg),
+);
+router.get(
+  '/summary/org/:orgId',
+  authorize('admin'),
+  asyncHandler(getOrgDonationSummaryById),
 );
 
 // Admin routes

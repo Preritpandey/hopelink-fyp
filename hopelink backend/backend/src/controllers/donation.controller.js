@@ -10,6 +10,7 @@ import {
 } from '../errors/index.js';
 import { sendEmail } from '../services/email.service.js';
 import mongoose from 'mongoose';
+import path from 'path';
 
 // @desc    Create a new donation
 // @route   POST /api/v1/donations
@@ -155,6 +156,43 @@ export const getDonationsSummaryByOrg = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     data: summary,
+  });
+};
+
+// @desc    Get donation summary for a specific organization (admin)
+// @route   GET /api/v1/donations/summary/org/:orgId
+// @access  Private (Admin)
+export const getOrgDonationSummaryById = async (req, res) => {
+  const { orgId } = req.params;
+
+  if (!orgId) {
+    throw new BadRequestError('Organization id is required');
+  }
+
+  const [summary] = await Donation.aggregate([
+    {
+      $match: {
+        organization: new mongoose.Types.ObjectId(orgId),
+        status: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: '$organization',
+        totalAmount: { $sum: '$amount' },
+        donationCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data:
+      summary || {
+        _id: orgId,
+        totalAmount: 0,
+        donationCount: 0,
+      },
   });
 };
 

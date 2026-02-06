@@ -1,4 +1,6 @@
 import express from 'express';
+import asyncHandler from '../utils/asyncHandler.js';
+import { getDonationsForCampaign } from '../controllers/donation.controller.js';
 import {
   getCampaigns,
   getCampaign,
@@ -69,5 +71,12 @@ router.put(
 // Campaign updates and FAQs
 router.post('/:id/updates', authorize('organization'), addCampaignUpdate);
 router.post('/:id/faqs', authorize('organization'), addCampaignFaq);
+
+// Campaign donations (organization/admin)
+router.get(
+  '/:campaignId/donations',
+  authorize('organization', 'admin'),
+  asyncHandler(getDonationsForCampaign),
+);
 
 export default router;

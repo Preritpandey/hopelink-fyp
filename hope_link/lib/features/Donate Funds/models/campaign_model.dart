@@ -97,7 +97,17 @@ class Campaign extends HiveObject {
       status: json['status'] ?? '',
       isFeatured: json['isFeatured'] ?? false,
       tags: List<String>.from(json['tags'] ?? []),
-      images: List<String>.from(json['images'] ?? []),
+      images:
+          (json['images'] as List?)
+              ?.map((img) {
+                if (img is String) return img;
+                if (img is Map && img['url'] != null) {
+                  return img['url'].toString();
+                }
+                return img.toString();
+              })
+              .toList() ??
+          [],
       updates:
           (json['updates'] as List?)
               ?.map((u) => CampaignUpdate.fromJson(u))

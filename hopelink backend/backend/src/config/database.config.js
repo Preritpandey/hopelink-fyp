@@ -10,26 +10,8 @@ const mongoUri =  'mongodb://localhost:27017/charity_platform';
 // Log the MongoDB URI (for debugging, remove in production)
 console.log('Connecting to MongoDB with URI:', mongoUri);
 
-// Clear any existing models to prevent OverwriteModelError
-const clearModelCache = () => {
-  const modelNames = Object.keys(mongoose.connection.models);
-  modelNames.forEach(modelName => {
-    delete mongoose.connection.models[modelName];
-  });
-
-  if (mongoose.connection.base && mongoose.connection.base.modelSchemas) {
-    const schemaNames = Object.keys(mongoose.connection.base.modelSchemas);
-    schemaNames.forEach(schemaName => {
-      delete mongoose.connection.base.modelSchemas[schemaName];
-    });
-  }
-};
-
 const connectDB = async () => {
   try {
-    // Clear any existing models and schemas
-    clearModelCache();
-
     // Set mongoose options
     const options = {
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s

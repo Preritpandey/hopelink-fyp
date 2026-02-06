@@ -26,27 +26,52 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   late String campaignId;
   Campaign? campaign;
 
+  void _initFromArgs(dynamic args) {
+    // Accept String, Campaign, or Map payloads and normalize to id + campaign.
+    if (args is Campaign) {
+      campaign = args;
+      campaignId = args.id;
+      return;
+    }
+
+    if (args is String) {
+      campaignId = args;
+      return;
+    }
+
+    if (args is Map) {
+      final map = Map<String, dynamic>.from(args);
+
+      final embeddedCampaign = map['campaign'];
+      if (embeddedCampaign is Campaign) {
+        campaign = embeddedCampaign;
+        campaignId = embeddedCampaign.id;
+        return;
+      }
+
+      final idValue = map['id'] ?? map['campaignId'] ?? map['_id'];
+      if (idValue != null) {
+        campaignId = idValue.toString();
+        return;
+      }
+
+      try {
+        campaign = Campaign.fromJson(map);
+        campaignId = campaign!.id;
+        return;
+      } catch (_) {
+        // Fall through to empty id below.
+      }
+    }
+
+    campaignId = '';
+  }
+
   @override
   void initState() {
     super.initState();
-    final args = Get.arguments;
-    if (args is String) {
-      campaignId = args;
-      _loadCampaignDetails();
-    } else if (args is Campaign) {
-      campaign = args;
-      campaignId = campaign!.id;
-    } else if (args is Map<String, dynamic>) {
-      try {
-        campaign = Campaign.fromJson(args);
-        campaignId = campaign!.id;
-      } catch (e) {
-        // Fallback: try to extract id and load
-        campaignId = args['id']?.toString() ?? '';
-        if (campaignId.isNotEmpty) _loadCampaignDetails();
-      }
-    } else {
-      campaignId = '';
+    _initFromArgs(Get.arguments);
+    if (campaign == null && campaignId.isNotEmpty) {
       _loadCampaignDetails();
     }
 
