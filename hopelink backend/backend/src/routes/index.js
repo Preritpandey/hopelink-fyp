@@ -8,6 +8,10 @@ import campaignRoutes from './campaign.routes.js';
 import profileRoutes from './profile.routes.js';
 import eventRoutes from './event.routes.js';
 import paymentRoutes from './payment.routes.js';
+import volunteerJobRoutes from './volunteerJob.routes.js';
+import volunteerApplicationRoutes from './volunteerApplication.routes.js';
+import certificationRoutes from './certification.routes.js';
+import userRoutes from './users.routes.js';
 
 const router = express.Router();
 
@@ -39,6 +43,10 @@ router.use('/categories', categoryRoutes);
 router.use('/donations', donationRoutes);
 router.use('/campaigns', campaignRoutes);
 router.use('/events', eventRoutes);
+router.use('/volunteer-jobs', volunteerJobRoutes);
+router.use('/volunteer-applications', volunteerApplicationRoutes);
+router.use('/certifications', certificationRoutes);
+router.use('/users', userRoutes);
 router.use('/user/profile', profileRoutes);
 router.use('/payments', paymentRoutes);
 

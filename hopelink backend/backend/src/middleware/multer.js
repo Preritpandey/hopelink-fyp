@@ -1,8 +1,29 @@
 import multer from 'multer';
 import { BadRequestError } from '../errors/index.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 // Configure storage
 const storage = multer.memoryStorage();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const resumeUploadDir = join(__dirname, '..', '..', 'uploads', 'resumes');
+if (!existsSync(resumeUploadDir)) {
+  mkdirSync(resumeUploadDir, { recursive: true });
+}
+
+const resumeStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, resumeUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const userId = req.user?._id?.toString?.() || 'user';
+    const timestamp = Date.now();
+    cb(null, `${userId}_${timestamp}.pdf`);
+  },
+});
 
 // File filter function factory for multer
 const fileFilter = (fileType) => (req, file, cb) => {
@@ -35,6 +56,11 @@ const createUploader = ({ maxSizeMB, fileType }) =>
 // Preconfigured uploaders
 const uploadImage = createUploader({ maxSizeMB: 5, fileType: 'image' });
 const uploadPdf = createUploader({ maxSizeMB: 10, fileType: 'pdf' });
+const uploadResume = multer({
+  storage: resumeStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: fileFilter('pdf'),
+});
 
 // Backward-compatible generic upload (no type filter, 10MB)
 const upload = multer({
@@ -61,4 +87,4 @@ const fileSizeLimit = (mb) => (req, res, next) => {
   });
 };
 
-export { upload, uploadImage, uploadPdf, fileFilter, fileSizeLimit };
+export { upload, uploadImage, uploadPdf, uploadResume, fileFilter, fileSizeLimit };

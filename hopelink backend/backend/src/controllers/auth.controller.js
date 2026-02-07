@@ -473,7 +473,6 @@ export const resetPassword = async (req, res) => {
     console.error('Error sending password reset confirmation email:', error);
   }
 
-  // Create token
   const token = user.generateAuthToken();
 
   res.status(StatusCodes.OK).json({
@@ -481,41 +480,7 @@ export const resetPassword = async (req, res) => {
     token,
   });
 };
-
-
-//// resetpassword with new otp
 // @desc    Reset password with OTP
-// @route   POST /api/v1/auth/reset-password
-// @access  Public
-// export const resetPasswordWithOtp = async (req, res) => {
-//   const { email, otp, newPassword } = req.body;
-
-//   const user = await User.findOne({
-//     email,
-//     otp,
-//     otpExpire: { $gt: Date.now() }
-//   });
-
-//   if (!user) {
-//     throw new BadRequestError('Invalid or expired OTP');
-//   }
-
-//   // Set new password
-//   user.password = newPassword;
-//   user.otp = undefined;
-//   user.otpExpire = undefined;
-//   await user.save();
-
-//   res.status(StatusCodes.OK).json({
-//     success: true,
-//     message: 'Password reset successful'
-//   });
-// };
-// @desc    Reset password with OTP
-// @route   POST /api/v1/auth/reset-password
-// @access  Public
-// @desc    Reset password with OTP
-// @route   POST /api/v1/auth/reset-password
 // @access  Public
 export const resetPasswordWithOtp = async (req, res) => {
   try {
@@ -579,10 +544,8 @@ export const resetPasswordWithOtp = async (req, res) => {
 
 // @desc    Verify email
 // @route   GET /api/v1/auth/verify-email/:verificationToken
-// @access  Public
 // @desc    Resend verification email
 // @route   POST /api/v1/auth/resend-verification
-// @access  Public
 export const resendVerificationEmail = async (req, res) => {
   const { email } = req.body;
 
@@ -628,8 +591,6 @@ export const resendVerificationEmail = async (req, res) => {
 };
 
 // @desc    Verify email
-// @route   GET /api/v1/auth/verify-email/:verificationToken
-// @access  Public
 export const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
 
@@ -858,11 +819,8 @@ export const resendOtp = async (req, res) => {
 };
 
 // @desc    Logout user / clear cookie
-// @route   GET /api/v1/auth/logout
-// @access  Private
+
 export const logout = async (req, res) => {
-  // In a stateless JWT system, the client should remove the token
-  // This endpoint is just a placeholder for API consistency
   res.status(StatusCodes.OK).json({
     success: true,
     message: 'Logged out successfully',

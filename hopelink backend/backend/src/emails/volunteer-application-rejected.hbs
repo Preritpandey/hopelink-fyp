@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Volunteer Application Rejected</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      line-height: 1.6; 
+      color: #333; 
+      margin: 0;
+      padding: 0;
+    }
+    .container { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background-color: #f9f9f9;
+    }
+    .header { 
+      background-color: #4CAF50; 
+      padding: 20px; 
+      color: white; 
+      text-align: center; 
+      border-radius: 5px 5px 0 0;
+    }
+    .content { 
+      padding: 25px; 
+      background-color: #ffffff;
+      border-radius: 0 0 5px 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .footer {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      color: #777;
+      font-size: 14px;
+    }
+    .reason {
+      background: #f4f4f4;
+      padding: 12px 16px;
+      border-radius: 5px;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Application Update</h2>
+    </div>
+    
+    <div class="content">
+      <p>Hello {{name}},</p>
+      
+      <p>Thank you for applying to <strong>{{jobTitle}}</strong> at <strong>{{organizationName}}</strong>.</p>
+      
+      <p>After careful review, we will not be moving forward with your application at this time.</p>
+
+      {{#if reason}}
+      <div class="reason">
+        <strong>Reason:</strong> {{reason}}
+      </div>
+      {{/if}}
+      
+      <p>We appreciate your interest and encourage you to apply for other opportunities in the future.</p>
+      
+      <div class="footer">
+        <p>If you have any questions, please contact our support team at <a href="mailto:{{supportEmail}}" style="color: #4CAF50;">{{supportEmail}}</a>.</p>
+        <p>This is an automated message, please do not reply to this email.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

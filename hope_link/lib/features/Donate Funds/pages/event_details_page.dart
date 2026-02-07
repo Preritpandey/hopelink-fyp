@@ -1,5 +1,3 @@
-// lib/features/events/pages/event_details_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -19,9 +17,15 @@ class EventDetailsPage extends StatefulWidget {
 }
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
-  final EventController _controller = Get.find<EventController>();
+  final EventController _controller = Get.put(EventController());
   final PageController _pageController = PageController();
   final RxInt _currentImageIndex = 0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.fetchMyEnrollments();
+  }
 
   @override
   void dispose() {
@@ -703,12 +707,25 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         ],
       ),
       child: SafeArea(
-        child: Obx(
-          () => ElevatedButton(
-            onPressed:
-                widget.event.spotsLeft > 0 && !_controller.isEnrolling.value
-                ? () => _enrollInEvent()
-                : null,
+        child: Obx(() {
+          final status = _controller.enrollmentStatus(widget.event.id);
+          final alreadyEnrolled = _controller.isEnrolled(widget.event.id);
+          final isFull = widget.event.spotsLeft <= 0;
+          final isBusy = _controller.isEnrolling.value;
+
+          final canEnroll = !alreadyEnrolled && !isFull && !isBusy;
+
+          String buttonLabel = 'Enroll Now';
+          if (status == 'pending') {
+            buttonLabel = 'Pending';
+          } else if (status == 'approved') {
+            buttonLabel = 'Approved';
+          } else if (status == 'rejected') {
+            buttonLabel = 'Rejected';
+          }
+
+          return ElevatedButton(
+            onPressed: canEnroll ? () => _enrollInEvent() : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColorToken.primary.color,
               foregroundColor: Colors.white,
@@ -719,7 +736,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               elevation: 0,
               disabledBackgroundColor: Colors.grey[300],
             ),
-            child: _controller.isEnrolling.value
+            child: isBusy
                 ? const SizedBox(
                     height: 20,
                     width: 20,
@@ -734,9 +751,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       const Icon(Icons.how_to_reg_rounded),
                       12.horizontalSpace,
                       Text(
-                        widget.event.spotsLeft > 0
-                            ? 'Enroll Now'
-                            : 'Event Full',
+                        buttonLabel,
                         style: AppTextStyle.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -744,8 +759,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       ),
                     ],
                   ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }

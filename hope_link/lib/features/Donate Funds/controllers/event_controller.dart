@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../config/constants/api_endpoints.dart';
 import '../models/event_model.dart';
 
@@ -16,6 +17,8 @@ class EventController extends GetxController {
   var selectedFilter = 'all'.obs;
   var hasError = false.obs;
   var errorMessage = ''.obs;
+  var enrolledEventIds = <String>{}.obs;
+  var enrollmentStatusByEventId = <String, String>{}.obs;
 
   // Hive box
   late Box<Event> eventBox;
@@ -61,6 +64,7 @@ class EventController extends GetxController {
         await saveEventsToCache(eventResponse.data);
 
         applyFilters();
+        await fetchMyEnrollments();
       }
     } on DioException catch (e) {
       hasError.value = true;
@@ -78,6 +82,55 @@ class EventController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> fetchMyEnrollments() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
+      if (token.isEmpty) return;
+
+      final response = await _dio.get(
+        '${ApiEndpoints.events}/me/enrollments',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('My enrollments response: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final enrollments = (data['data'] as List?) ?? [];
+
+        final ids = <String>{};
+        final statusMap = <String, String>{};
+
+        for (final item in enrollments) {
+          if (item is Map) {
+            final event = item['event'];
+            final eventId = event is Map ? (event['_id'] ?? '') : '';
+            final status = item['status']?.toString().toLowerCase() ?? '';
+            if (eventId.isNotEmpty) {
+              ids.add(eventId);
+              if (status.isNotEmpty) {
+                statusMap[eventId] = status;
+              }
+            }
+          }
+        }
+
+        enrolledEventIds.value = ids;
+        enrollmentStatusByEventId.value = statusMap;
+      }
+    } catch (e) {
+      print('Error fetching my enrollments: $e');
+    }
+  }
+
+  bool isEnrolled(String eventId) {
+    return enrolledEventIds.contains(eventId);
+  }
+
+  String? enrollmentStatus(String eventId) {
+    return enrollmentStatusByEventId[eventId];
   }
 
   Future<void> saveEventsToCache(List<Event> eventsList) async {
@@ -141,16 +194,30 @@ class EventController extends GetxController {
     try {
       isEnrolling.value = true;
 
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
+      if (token.isEmpty) {
+        Get.snackbar(
+          'Login Required',
+          'Please log in to enroll in this event.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.error,
+          colorText: Get.theme.colorScheme.onError,
+        );
+        return false;
+      }
+
       final response = await _dio.post(
         '${ApiEndpoints.events}/$eventId/enroll',
-        // Add your auth token here if needed
-        // options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(
+          headers: {if (token.isNotEmpty) 'Authorization': 'Bearer $token'},
+        ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
           'Success',
-          'Successfully enrolled in the event!',
+          'Enrollment request sent successfully.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Get.theme.primaryColor,
           colorText: Get.theme.colorScheme.onPrimary,
@@ -158,6 +225,7 @@ class EventController extends GetxController {
 
         // Refresh events
         await fetchEvents();
+        await fetchMyEnrollments();
         return true;
       }
       return false;

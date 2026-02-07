@@ -68,6 +68,25 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [1000, 'Bio cannot be more than 1000 characters']
     },
+    skills: [{
+      type: String,
+      trim: true
+    }],
+    certifications: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'VolunteerCertification',
+    }],
+    totalVolunteerHours: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
     location: {
       country: {
         type: String,

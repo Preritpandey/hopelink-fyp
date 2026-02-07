@@ -8,6 +8,9 @@ import Category from './category.model.js';
 import Donation from './donation.model.js';
 import Event from './event.model.js';
 import VolunteerEnrollment from './volunteerEnrollment.model.js';
+import VolunteerJob from './volunteerJob.model.js';
+import VolunteerApplication from './volunteerApplication.model.js';
+import VolunteerCertification from './volunteerCertification.model.js';
 
 // E-commerce Models
 import Product from './ecommerce/product.model.js';
@@ -25,6 +28,11 @@ const models = {
   Donation: mongoose.models.Donation || Donation,
   Event: mongoose.models.Event || Event,
   VolunteerEnrollment: mongoose.models.VolunteerEnrollment || VolunteerEnrollment,
+  VolunteerJob: mongoose.models.VolunteerJob || VolunteerJob,
+  VolunteerApplication:
+    mongoose.models.VolunteerApplication || VolunteerApplication,
+  VolunteerCertification:
+    mongoose.models.VolunteerCertification || VolunteerCertification,
   Product: mongoose.models.Product || Product,
   ProductVariant: mongoose.models.ProductVariant || ProductVariant,
   Cart: mongoose.models.Cart || Cart,
@@ -41,6 +49,9 @@ export {
   Donation,
   Event,
   VolunteerEnrollment,
+  VolunteerJob,
+  VolunteerApplication,
+  VolunteerCertification,
   Product,
   ProductVariant,
   Cart,
