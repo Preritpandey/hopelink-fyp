@@ -20,4 +20,8 @@ class ApiEndpoints {
   static String get updateProfile => '$baseUrl/user/profile';
   static String get uploadProfilePhoto => '$baseUrl/user/profile/photo';
   static String get uploadCV => '$baseUrl/user/profile/cv';
+  
+  // Volunteer job endpoints
+  static String get volunteerJobs => '$baseUrl/volunteer-jobs';
+  
 }

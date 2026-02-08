@@ -12,6 +12,7 @@ import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'config/stripe_config.dart';
+import 'features/Donate Funds/pages/volunteer_job_details_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,11 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/splash', page: () => const SplashScreen()),
         GetPage(name: '/signup', page: () => const SignUpPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
+
+        GetPage(
+          name: '/volunteer-job-details',
+          page: () => const VolunteerJobDetailsPage(),
+        ),
 
         GetPage(
           name: '/campaigns',
