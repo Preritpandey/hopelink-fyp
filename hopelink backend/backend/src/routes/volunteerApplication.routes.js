@@ -2,6 +2,8 @@ import express from 'express';
 import {
   getMyVolunteerApplications,
   getApplicationsByJob,
+  getApprovedApplicationsByJob,
+  getRejectedApplicationsByJob,
   approveVolunteerApplication,
   rejectVolunteerApplication,
   downloadApplicationResume,
@@ -25,6 +27,18 @@ router.get(
   authenticate,
   authorize('organization'),
   getApplicationsByJob,
+);
+router.get(
+  '/job/:jobId/approved',
+  authenticate,
+  authorize('organization'),
+  getApprovedApplicationsByJob,
+);
+router.get(
+  '/job/:jobId/rejected',
+  authenticate,
+  authorize('organization'),
+  getRejectedApplicationsByJob,
 );
 router.get(
   '/:id/resume',

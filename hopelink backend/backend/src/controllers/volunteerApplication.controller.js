@@ -114,6 +114,18 @@ export const getMyVolunteerApplications = async (req, res) => {
 };
 
 export const getApplicationsByJob = async (req, res) => {
+  return getApplicationsByJobByStatus(req, res, 'pending');
+};
+
+export const getApprovedApplicationsByJob = async (req, res) => {
+  return getApplicationsByJobByStatus(req, res, 'approved');
+};
+
+export const getRejectedApplicationsByJob = async (req, res) => {
+  return getApplicationsByJobByStatus(req, res, 'rejected');
+};
+
+const getApplicationsByJobByStatus = async (req, res, status) => {
   const { jobId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(jobId)) {
     throw new BadRequestError('Invalid job id');
@@ -128,9 +140,10 @@ export const getApplicationsByJob = async (req, res) => {
     throw new ForbiddenError('Not authorized to view applications for this job');
   }
 
-  const applications = await VolunteerApplication.find({ job: jobId }).sort({
-    createdAt: -1,
-  });
+  const applications = await VolunteerApplication.find({
+    job: jobId,
+    status,
+  }).sort({ createdAt: -1 });
 
   return res.status(StatusCodes.OK).json({
     success: true,

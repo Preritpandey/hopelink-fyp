@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
+import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:hope_link/config/stripe_config.dart';
-
 import '../models/campaign_model.dart';
 import 'campaign_controller.dart';
 
@@ -74,7 +73,7 @@ class DonationController extends GetxController {
 
       final dio = Dio(
         BaseOptions(
-          baseUrl: StripeConfig.baseUrl,
+          baseUrl: ApiEndpoints.baseUrl,
           headers: {
             'Content-Type': 'application/json',
             if (token.isNotEmpty) 'Authorization': 'Bearer $token',
@@ -87,7 +86,7 @@ class DonationController extends GetxController {
       print('[Donation] Creating payment intent with amount: $amountInPaisa');
 
       final res = await dio.post(
-        '/api/v1/payments/stripe/init',
+        ApiEndpoints.createPaymentIntent,
         data: {
           'amount': amountInPaisa,
           'currency': 'npr',
@@ -152,7 +151,7 @@ class DonationController extends GetxController {
 
       // Verify on server
       final verifyRes = await dio.post(
-        '/api/v1/payments/stripe/verify',
+        ApiEndpoints.verrifyPayment,
         data: {'paymentIntentId': paymentIntentId},
       );
 
@@ -167,7 +166,7 @@ class DonationController extends GetxController {
         // Create donation record and update campaign/organization
         try {
           final completeRes = await dio.post(
-            '/api/v1/donations/complete-payment',
+            ApiEndpoints.completePayment,
             data: {
               'paymentIntentId': paymentIntentId,
               'amount': amount,

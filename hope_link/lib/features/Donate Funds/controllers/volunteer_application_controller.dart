@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VolunteerApplicationController extends GetxController {
@@ -71,14 +73,14 @@ class VolunteerApplicationController extends GetxController {
       request.fields['skills'] = skills;
       request.fields['experience'] = experience;
 
-      // Add file
-      var resumeStream = http.ByteStream(resumeFile.value!.openRead());
-      var resumeLength = await resumeFile.value!.length();
-      var multipartFile = http.MultipartFile(
+      // Add file with explicit content type and robust filename handling
+      final file = resumeFile.value!;
+      final filename = p.basename(file.path);
+      final multipartFile = await http.MultipartFile.fromPath(
         'resume',
-        resumeStream,
-        resumeLength,
-        filename: resumeFile.value!.path.split('/').last,
+        file.path,
+        contentType: MediaType('application', 'pdf'),
+        filename: filename,
       );
       request.files.add(multipartFile);
 

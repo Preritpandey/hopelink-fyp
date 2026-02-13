@@ -20,8 +20,9 @@ class _VolunteerJobApplicationPageState
     extends State<VolunteerJobApplicationPage>
     with SingleTickerProviderStateMixin {
   late VolunteerJob job;
-  final VolunteerApplicationController _controller =
-      Get.put(VolunteerApplicationController());
+  final VolunteerApplicationController _controller = Get.put(
+    VolunteerApplicationController(),
+  );
 
   final _formKey = GlobalKey<FormState>();
   final _whyHireController = TextEditingController();
@@ -42,10 +43,7 @@ class _VolunteerJobApplicationPageState
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
     _animationController.forward();
@@ -181,10 +179,7 @@ class _VolunteerJobApplicationPageState
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                color: Colors.grey[800],
-              ),
+              child: Icon(Icons.arrow_back_rounded, color: Colors.grey[800]),
             ),
           ),
           16.horizontalSpace,
@@ -213,9 +208,7 @@ class _VolunteerJobApplicationPageState
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColorToken.primary.color.withOpacity(0.2),
-        ),
+        border: Border.all(color: AppColorToken.primary.color.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -337,11 +330,7 @@ class _VolunteerJobApplicationPageState
       children: [
         Row(
           children: [
-            Icon(
-              Icons.star_rounded,
-              color: Colors.orange,
-              size: 20,
-            ),
+            Icon(Icons.star_rounded, color: Colors.orange, size: 20),
             8.horizontalSpace,
             Text(
               'Your Skills',
@@ -362,9 +351,7 @@ class _VolunteerJobApplicationPageState
         8.verticalSpace,
         Text(
           'Separate skills with commas',
-          style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
         ),
         12.verticalSpace,
         Container(
@@ -412,11 +399,7 @@ class _VolunteerJobApplicationPageState
       children: [
         Row(
           children: [
-            Icon(
-              Icons.work_history_rounded,
-              color: Colors.blue,
-              size: 20,
-            ),
+            Icon(Icons.work_history_rounded, color: Colors.blue, size: 20),
             8.horizontalSpace,
             Text(
               'Experience',
@@ -484,11 +467,7 @@ class _VolunteerJobApplicationPageState
         children: [
           Row(
             children: [
-              Icon(
-                Icons.description_rounded,
-                color: Colors.purple,
-                size: 20,
-              ),
+              Icon(Icons.description_rounded, color: Colors.purple, size: 20),
               8.horizontalSpace,
               Text(
                 'Resume',
@@ -509,9 +488,7 @@ class _VolunteerJobApplicationPageState
           8.verticalSpace,
           Text(
             'Upload your resume in PDF format',
-            style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
           ),
           12.verticalSpace,
           GestureDetector(
@@ -536,9 +513,7 @@ class _VolunteerJobApplicationPageState
                   ),
                 ],
               ),
-              child: hasResume
-                  ? _buildResumePreview()
-                  : _buildUploadPrompt(),
+              child: hasResume ? _buildResumePreview() : _buildUploadPrompt(),
             ),
           ),
         ],
@@ -572,9 +547,7 @@ class _VolunteerJobApplicationPageState
         4.verticalSpace,
         Text(
           'PDF format only',
-          style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
         ),
       ],
     );
