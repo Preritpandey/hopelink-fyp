@@ -17,6 +17,8 @@ class ApiEndpoints {
 
   // Campaign and events 
   static String get campaigns => '$baseUrl/campaigns';
+  static String get closedCampaigns => '$baseUrl/campaigns/closed';
+  static String get upcomingCampaigns => '$baseUrl/campaigns/upcoming';
   static String get events => '$baseUrl/events';
 
   // User profile 

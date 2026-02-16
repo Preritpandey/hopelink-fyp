@@ -31,7 +31,78 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from '../services/cloudinary.service.js';
-import { model } from 'mongoose';
+
+const buildCampaignMongoFilter = (queryParams = {}, baseFilter = {}) => {
+  const reqQuery = { ...queryParams };
+  const removeFields = ['select', 'sort', 'page', 'limit'];
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  let queryStr = JSON.stringify(reqQuery);
+  queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+  const parsedFilter = JSON.parse(queryStr);
+
+  if (Object.keys(baseFilter).length === 0) {
+    return parsedFilter;
+  }
+
+  if (Object.keys(parsedFilter).length === 0) {
+    return baseFilter;
+  }
+
+  return {
+    $and: [baseFilter, parsedFilter],
+  };
+};
+
+const getCampaignsByBaseFilter = async (req, res, baseFilter = {}) => {
+  const mongoFilter = buildCampaignMongoFilter(req.query, baseFilter);
+
+  let query = Campaign.find(mongoFilter).populate({
+    path: 'organization',
+    select: 'organizationName',
+    model: Organization,
+  });
+
+  if (req.query.select) {
+    const fields = req.query.select.split(',').join(' ');
+    query = query.select(fields);
+  }
+
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort('-createdAt');
+  }
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const total = await Campaign.countDocuments(mongoFilter);
+
+  query = query.skip(startIndex).limit(limit);
+  const campaigns = await query;
+
+  const pagination = {};
+  if (endIndex < total) {
+    pagination.next = { page: page + 1, limit };
+  }
+  if (startIndex > 0) {
+    pagination.prev = { page: page - 1, limit };
+  }
+
+  const transformedCampaigns = campaigns.map((campaign) =>
+    transformCampaign(campaign),
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: transformedCampaigns.length,
+    pagination,
+    data: transformedCampaigns,
+  });
+};
 
 // @desc    Create a new campaign
 // @route   POST /api/v1/campaigns
@@ -84,81 +155,35 @@ export const createCampaign = async (req, res) => {
 // @route   GET /api/v1/campaigns
 // @access  Public
 export const getCampaigns = async (req, res) => {
-  // Copy req.query
-  const reqQuery = { ...req.query };
+  const now = new Date();
+  const activeDonatableFilter = {
+    status: 'active',
+    startDate: { $lte: now },
+    endDate: { $gte: now },
+  };
+  await getCampaignsByBaseFilter(req, res, activeDonatableFilter);
+};
 
-  // Fields to exclude
-  const removeFields = ['select', 'sort', 'page', 'limit'];
+// @desc    Get closed campaigns (end date passed)
+// @route   GET /api/v1/campaigns/closed
+// @access  Public
+export const getClosedCampaigns = async (req, res) => {
+  const now = new Date();
+  const closedFilter = {
+    endDate: { $lt: now },
+  };
+  await getCampaignsByBaseFilter(req, res, closedFilter);
+};
 
-  // Loop over removeFields and delete them from reqQuery
-  removeFields.forEach((param) => delete reqQuery[param]);
-
-  // Create query string
-  let queryStr = JSON.stringify(reqQuery);
-
-  // Create operators ($gt, $gte, etc)
-  queryStr = queryStr.replace(/(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
-
-  // Finding resource
-  let query = Campaign.find(JSON.parse(queryStr)).populate({
-    path: 'organization',
-    select: 'organizationName',
-    model: Organization,
-  });
-
-  // Select Fields
-  if (req.query.select) {
-    const fields = req.query.select.split(',').join(' ');
-    query = query.select(fields);
-  }
-
-  // Sort
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(',').join(' ');
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort('-createdAt');
-  }
-
-  // Pagination
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Campaign.countDocuments(JSON.parse(queryStr));
-
-  query = query.skip(startIndex).limit(limit);
-
-  // Executing query
-  const campaigns = await query;
-
-  // Pagination result
-  const pagination = {};
-
-  if (endIndex < total) {
-    pagination.next = {
-      page: page + 1,
-      limit,
-    };
-  }
-
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit,
-    };
-  }
-
-  const transformedCampaigns = campaigns.map((campaign) =>
-    transformCampaign(campaign),
-  );
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    count: transformedCampaigns.length,
-    pagination,
-    data: transformedCampaigns,
-  });
+// @desc    Get upcoming campaigns (start date not reached yet)
+// @route   GET /api/v1/campaigns/upcoming
+// @access  Public
+export const getUpcomingCampaigns = async (req, res) => {
+  const now = new Date();
+  const upcomingFilter = {
+    startDate: { $gt: now },
+  };
+  await getCampaignsByBaseFilter(req, res, upcomingFilter);
 };
 
 // @desc    Get single campaign

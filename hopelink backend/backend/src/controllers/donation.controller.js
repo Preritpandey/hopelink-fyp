@@ -442,23 +442,90 @@ const sendDonationReceipt = async ({
   `;
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Thank you for your donation!</h2>
-      <p>Dear ${userName},</p>
-      <p>Thank you for your generous donation of <strong>$${amount.toFixed(2)}</strong> to "${campaignTitle}" by ${organizationName}.</p>
-      
-      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p><strong>Donation Details:</strong></p>
-        <p>Donation ID: ${donationId}</p>
-        <p>Date: ${date.toLocaleDateString()}</p>
-        <p>Amount: $${amount.toFixed(2)}</p>
-        ${isAnonymous ? '<p>This donation was made anonymously.</p>' : ''}
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Donation Receipt</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #333; 
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          padding: 20px; 
+          background-color: #f9f9f9;
+        }
+        .header { 
+          background-color: #4CAF50; 
+          padding: 20px; 
+          color: white; 
+          text-align: center; 
+          border-radius: 5px 5px 0 0;
+        }
+        .header h2 {
+          margin: 0;
+        }
+        .content { 
+          padding: 25px; 
+          background-color: #ffffff;
+          border-radius: 0 0 5px 5px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .details-box {
+          background-color: #f9f9f9;
+          padding: 15px;
+          border-radius: 5px;
+          margin: 20px 0;
+          border-left: 4px solid #4CAF50;
+        }
+        .footer {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+          color: #777;
+          font-size: 14px;
+        }
+        a {
+          color: #4CAF50;
+          text-decoration: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>Thank You for Your Donation!</h2>
+        </div>
+        
+        <div class="content">
+          <p>Dear ${userName},</p>
+          <p>Thank you for your generous donation of <strong>$${amount.toFixed(2)}</strong> to "<strong>${campaignTitle}</strong>" by <strong>${organizationName}</strong>.</p>
+          
+          <div class="details-box">
+            <p><strong>Donation Details:</strong></p>
+            <p>Donation ID: ${donationId}</p>
+            <p>Date: ${date.toLocaleDateString()}</p>
+            <p>Amount: $${amount.toFixed(2)}</p>
+            ${isAnonymous ? '<p>This donation was made anonymously.</p>' : ''}
+          </div>
+          
+          <p>Your support is greatly appreciated and will help us make a difference.</p>
+          
+          <div class="footer">
+            <p>Best regards,<br><strong>${organizationName} Team</strong></p>
+            <p>If you have any questions, please contact us at <a href="mailto:support@hopelink.org">support@hopelink.org</a>.</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
       </div>
-      
-      <p>Your support is greatly appreciated and will help us make a difference.</p>
-      
-      <p>Best regards,<br>${organizationName} Team</p>
-    </div>
+    </body>
+    </html>
   `;
 
   await sendEmail({
@@ -506,32 +573,97 @@ const sendDonationStatusUpdate = async ({
   `;
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Donation Update</h2>
-      <p>Dear ${userName},</p>
-      <p>We would like to inform you that your donation for <strong>"${campaignTitle}"</strong> ${statusMessage}.</p>
-      
-      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p><strong>Donation Details:</strong></p>
-        <p>Donation ID: ${donationId}</p>
-        <p>Amount: $${amount.toFixed(2)}</p>
-        <p>Status: <span style="color: ${
-          status === 'completed'
-            ? '#28a745'
-            : status === 'failed'
-              ? '#dc3545'
-              : status === 'refunded'
-                ? '#ffc107'
-                : status === 'cancelled'
-                  ? '#6c757d'
-                  : '#007bff'
-        };">${status.charAt(0).toUpperCase() + status.slice(1)}</span></p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Donation Update</title>
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #333; 
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          padding: 20px; 
+          background-color: #f9f9f9;
+        }
+        .header { 
+          background-color: #4CAF50; 
+          padding: 20px; 
+          color: white; 
+          text-align: center; 
+          border-radius: 5px 5px 0 0;
+        }
+        .header h2 {
+          margin: 0;
+        }
+        .content { 
+          padding: 25px; 
+          background-color: #ffffff;
+          border-radius: 0 0 5px 5px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .details-box {
+          background-color: #f9f9f9;
+          padding: 15px;
+          border-radius: 5px;
+          margin: 20px 0;
+          border-left: 4px solid #4CAF50;
+        }
+        .footer {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+          color: #777;
+          font-size: 14px;
+        }
+        a {
+          color: #4CAF50;
+          text-decoration: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>Donation Update</h2>
+        </div>
+        
+        <div class="content">
+          <p>Dear ${userName},</p>
+          <p>We would like to inform you that your donation for <strong>"${campaignTitle}"</strong> ${statusMessage}.</p>
+          
+          <div class="details-box">
+            <p><strong>Donation Details:</strong></p>
+            <p>Donation ID: ${donationId}</p>
+            <p>Amount: $${amount.toFixed(2)}</p>
+            <p>Status: <span style="color: ${
+              status === 'completed'
+                ? '#28a745'
+                : status === 'failed'
+                  ? '#dc3545'
+                  : status === 'refunded'
+                    ? '#ffc107'
+                    : status === 'cancelled'
+                      ? '#6c757d'
+                      : '#007bff'
+            };">${status.charAt(0).toUpperCase() + status.slice(1)}</span></p>
+          </div>
+          
+          <div class="footer">
+            <p>If you have any questions, please contact us at <a href="mailto:support@hopelink.org">support@hopelink.org</a>.</p>
+            <p>Best regards,<br><strong>The HopeLink Team</strong></p>
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
       </div>
-      
-      <p>If you have any questions, please don't hesitate to contact us.</p>
-      
-      <p>Best regards,<br>The Team</p>
-    </div>
+    </body>
+    </html>
   `;
 
   await sendEmail({

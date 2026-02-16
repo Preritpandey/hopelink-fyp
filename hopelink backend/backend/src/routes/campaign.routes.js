@@ -11,6 +11,8 @@ import {
   deleteCampaignImage,
   setPrimaryCampaignImage,
   getCampaignsWithDonationsAndEvents,
+  getClosedCampaigns,
+  getUpcomingCampaigns,
   addCampaignUpdate,
   addCampaignFaq,
   getCampaignFundStatus,
@@ -23,10 +25,12 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getCampaigns);
-router.get('/:id', getCampaign);
+router.get('/closed', getClosedCampaigns);
+router.get('/upcoming', getUpcomingCampaigns);
 router.get('/with-details/all', getCampaignsWithDonationsAndEvents);
 // Fund tracking routes (public)
 router.get('/:id/fund-status', getCampaignFundStatus);
+router.get('/:id', getCampaign);
 
 // Protected routes (require authentication)
 router.use(authenticate);
