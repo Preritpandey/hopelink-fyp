@@ -239,6 +239,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             ),
             16.verticalSpace,
             _buildHorizontalCampaignsSection(),
+
             24.verticalSpace,
             _buildHorizontalVolunteerJobsSection(),
             24.verticalSpace,
@@ -271,7 +272,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
       }
 
       return SizedBox(
-        height: 320,
+        height: 310,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),

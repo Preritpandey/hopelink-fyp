@@ -38,7 +38,7 @@ class HorizontalCampaignCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildImageSection(), _buildContentSection()],
+          children: [imageSection(), contentSection()],
         ),
       ),
     );
@@ -62,7 +62,7 @@ class HorizontalCampaignCard extends StatelessWidget {
     return card;
   }
 
-  Widget _buildImageSection() {
+  Widget imageSection() {
     final daysLeft = campaign.endDate.difference(DateTime.now()).inDays;
 
     return Stack(
@@ -148,7 +148,7 @@ class HorizontalCampaignCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContentSection() {
+  Widget contentSection() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

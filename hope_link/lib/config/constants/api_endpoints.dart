@@ -6,30 +6,30 @@ class ApiEndpoints {
   static const String baseUrl =
       'http://10.0.2.2:3008/api/v1'; // android emulator
 
-  // static const String baseUrl = 'http://192.168.1.94:3008/api/v1'; // cg2.4
+  // static const String baseUrl = 'http://10.21.1.205:3008/api/v1'; // cg2.4
 
-  // Auth 
+  // Auth
   static String get login => '$baseUrl/auth/login';
   static String get register => '$baseUrl/auth/register';
   static String get getProfile => '$baseUrl/auth/me';
   static String get verifyOtp => '$baseUrl/auth/verify-otp';
   static String get resendOtp => '$baseUrl/auth/resend-otp';
 
-  // Campaign and events 
+  // Campaign and events
   static String get campaigns => '$baseUrl/campaigns';
   static String get closedCampaigns => '$baseUrl/campaigns/closed';
   static String get upcomingCampaigns => '$baseUrl/campaigns/upcoming';
   static String get events => '$baseUrl/events';
 
-  // User profile 
+  // User profile
   static String get updateProfile => '$baseUrl/user/profile';
   static String get uploadProfilePhoto => '$baseUrl/user/profile/photo';
   static String get uploadCV => '$baseUrl/user/profile/cv';
 
-  // Volunteer job 
+  // Volunteer job
   static String get volunteerJobs => '$baseUrl/volunteer-jobs';
 
-  // Payment 
+  // Payment
   static String get createPaymentIntent => '$baseUrl/payments/stripe/init';
   static String get verrifyPayment => '$baseUrl/payments/stripe/verify';
   static String get completePayment => '$baseUrl/donations/complete-payment';

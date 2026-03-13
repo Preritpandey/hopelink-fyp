@@ -8,10 +8,7 @@ import '../pages/volunteer_job_application_page.dart';
 class VolunteerJobApplyButton extends StatelessWidget {
   final VolunteerJob job;
 
-  const VolunteerJobApplyButton({
-    Key? key,
-    required this.job,
-  }) : super(key: key);
+  const VolunteerJobApplyButton({super.key, required this.job});
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +24,13 @@ class VolunteerJobApplyButton extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        child: _buildButton(),
-      ),
+      child: SafeArea(child: _buildButton()),
     );
   }
 
   Widget _buildButton() {
-    final bool canApply = job.isOpen &&
-        job.hasPositionsAvailable &&
-        !job.isDeadlinePassed;
+    final bool canApply =
+        job.isOpen && job.hasPositionsAvailable && !job.isDeadlinePassed;
 
     return GestureDetector(
       onTap: canApply
@@ -61,12 +55,7 @@ class VolunteerJobApplyButton extends StatelessWidget {
                     AppColorToken.primary.color.withOpacity(0.8),
                   ],
                 )
-              : LinearGradient(
-                  colors: [
-                    Colors.grey[300]!,
-                    Colors.grey[300]!,
-                  ],
-                ),
+              : LinearGradient(colors: [Colors.grey[300]!, Colors.grey[300]!]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: canApply
               ? [
