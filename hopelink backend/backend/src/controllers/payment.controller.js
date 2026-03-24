@@ -3,6 +3,11 @@ import {
   createStripePaymentIntent,
   retrieveStripePaymentIntent,
   verifyKhaltiPayment,
+  normalizeKhaltiAmount,
+  isKhaltiPaymentSuccessful,
+  initiateKhaltiEpayment,
+  lookupKhaltiEpayment,
+  isKhaltiEpaymentCompleted,
 } from '../services/payment.service.js';
 
 /**
@@ -89,23 +94,125 @@ export const verifyStripePayment = async (req, res, next) => {
  */
 export const verifyKhalti = async (req, res, next) => {
   try {
-    const { token, amount } = req.body;
+    const { token, amount, amountInPaisa } = req.body;
 
-    if (!token || !amount) {
+    if (!token || (amount == null && amountInPaisa == null)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: 'token and amount are required',
+        message: 'token and amount (in paisa) are required',
       });
     }
 
-    const result = await verifyKhaltiPayment({ token, amount });
+    const { amountInPaisa: normalizedPaisa, amountInRupees } =
+      normalizeKhaltiAmount({ amount, amountInPaisa });
+
+    const result = await verifyKhaltiPayment({
+      token,
+      amount: normalizedPaisa,
+    });
+
+    if (!isKhaltiPaymentSuccessful(result)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Khalti payment is not completed',
+        data: result,
+      });
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: result,
+      meta: {
+        amountInPaisa: normalizedPaisa,
+        amountInRupees,
+      },
+    });
+  } catch (error) {
+    // Khalti returns 4xx with error details; surface a clean message
+    if (error.response?.data) {
+      return res.status(error.response.status || 400).json({
+        success: false,
+        error: error.response.data,
+      });
+    }
+    next(error);
+  }
+};
+
+/**
+ * Initialize Khalti ePayment (KPG) and return pidx for client checkout.
+ *
+ * @route POST /api/v1/payments/khalti/init
+ */
+export const initKhaltiPayment = async (req, res, next) => {
+  try {
+    const {
+      amount,
+      purchaseOrderId,
+      purchaseOrderName,
+      returnUrl,
+      websiteUrl,
+      customerInfo,
+    } = req.body;
+
+    if (!amount || !purchaseOrderId || !purchaseOrderName) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'amount, purchaseOrderId, and purchaseOrderName are required',
+      });
+    }
+
+    const result = await initiateKhaltiEpayment({
+      amount,
+      purchaseOrderId,
+      purchaseOrderName,
+      returnUrl,
+      websiteUrl,
+      customerInfo,
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: result,
     });
   } catch (error) {
-    // Khalti returns 4xx with error details; surface a clean message
+    if (error.response?.data) {
+      return res.status(error.response.status || 400).json({
+        success: false,
+        error: error.response.data,
+      });
+    }
+    next(error);
+  }
+};
+
+/**
+ * Lookup Khalti ePayment status by pidx.
+ *
+ * @route POST /api/v1/payments/khalti/lookup
+ */
+export const lookupKhaltiPayment = async (req, res, next) => {
+  try {
+    const { pidx } = req.body;
+
+    if (!pidx) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'pidx is required',
+      });
+    }
+
+    const result = await lookupKhaltiEpayment({ pidx });
+    const completed = isKhaltiEpaymentCompleted(result);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: result,
+      meta: {
+        completed,
+      },
+    });
+  } catch (error) {
     if (error.response?.data) {
       return res.status(error.response.status || 400).json({
         success: false,
@@ -120,5 +227,7 @@ export default {
   initStripePayment,
   verifyStripePayment,
   verifyKhalti,
+  initKhaltiPayment,
+  lookupKhaltiPayment,
 };
 

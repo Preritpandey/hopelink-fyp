@@ -6,16 +6,10 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 import '../controllers/campaign_controller.dart';
 
 class SearchFilterChip extends StatelessWidget {
-  // final CampaignController campaignController;
   final String label;
   final String value;
 
-  const SearchFilterChip({
-    super.key,
-    // required this.campaignController,
-    required this.label,
-    required this.value,
-  });
+  const SearchFilterChip({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

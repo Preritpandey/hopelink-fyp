@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
-  final String baseUrl = 'http://localhost:3008/api/v1';
-
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
@@ -43,6 +41,7 @@ class LoginController extends GetxController {
 
       isLoading.value = true;
       errorMessage.value = '';
+      print('Attempting login with email: $email');
 
       final response = await http
           .post(
@@ -55,6 +54,7 @@ class LoginController extends GetxController {
             onTimeout: () =>
                 throw TimeoutException('Request timed out after 30 seconds'),
           );
+      print('Login response status: ${response.statusCode}');
 
       // Handle different status codes
       if (response.statusCode == 200) {

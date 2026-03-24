@@ -11,6 +11,7 @@ import VolunteerEnrollment from './volunteerEnrollment.model.js';
 import VolunteerJob from './volunteerJob.model.js';
 import VolunteerApplication from './volunteerApplication.model.js';
 import VolunteerCertification from './volunteerCertification.model.js';
+import UserActivity from './userActivity.model.js';
 
 // E-commerce Models
 import Product from './ecommerce/product.model.js';
@@ -33,6 +34,7 @@ const models = {
     mongoose.models.VolunteerApplication || VolunteerApplication,
   VolunteerCertification:
     mongoose.models.VolunteerCertification || VolunteerCertification,
+  UserActivity: mongoose.models.UserActivity || UserActivity,
   Product: mongoose.models.Product || Product,
   ProductVariant: mongoose.models.ProductVariant || ProductVariant,
   Cart: mongoose.models.Cart || Cart,
@@ -52,6 +54,7 @@ export {
   VolunteerJob,
   VolunteerApplication,
   VolunteerCertification,
+  UserActivity,
   Product,
   ProductVariant,
   Cart,

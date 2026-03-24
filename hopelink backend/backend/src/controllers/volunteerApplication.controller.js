@@ -5,6 +5,7 @@ import VolunteerJob from '../models/volunteerJob.model.js';
 import VolunteerApplication from '../models/volunteerApplication.model.js';
 import User from '../models/user.model.js';
 import { sendEmail } from '../services/email.service.js';
+import { logUserActivity } from '../services/activity.service.js';
 import {
   BadRequestError,
   NotFoundError,
@@ -90,6 +91,19 @@ export const applyToVolunteerJob = async (req, res) => {
     skills: parsedSkills,
     experience: experience ? experience.toString().trim() : '',
     applicantSnapshot: snapshot,
+  });
+
+  await logUserActivity({
+    user: req.user._id,
+    activityType: 'volunteer_job_enrollment',
+    resourceType: 'VolunteerApplication',
+    resourceId: application._id,
+    metadata: {
+      jobId: job._id,
+      jobTitle: job.title,
+      organizationId: job.organization,
+      status: application.status,
+    },
   });
 
   return res.status(StatusCodes.CREATED).json({

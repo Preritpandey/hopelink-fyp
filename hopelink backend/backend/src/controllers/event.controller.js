@@ -12,6 +12,7 @@ import {
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
 import { sendEmail } from '../services/email.service.js';
+import { logUserActivity } from '../services/activity.service.js';
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -426,6 +427,18 @@ export const enrollInEvent = async (req, res, next) => {
     });
 
     await enrollment.save();
+
+    await logUserActivity({
+      user: req.user._id,
+      activityType: 'event_registration',
+      resourceType: 'VolunteerEnrollment',
+      resourceId: enrollment._id,
+      metadata: {
+        eventId: event._id,
+        eventTitle: event.title,
+        status: enrollment.status,
+      },
+    });
 
     res.status(201).json({
       success: true,

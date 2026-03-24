@@ -3,12 +3,19 @@ import Donation from '../models/donation.model.js';
 import Campaign from '../models/campaign.model.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
+import { logUserActivity } from '../services/activity.service.js';
 import {
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
 } from '../errors/index.js';
 import { sendEmail } from '../services/email.service.js';
+import {
+  normalizeKhaltiAmount,
+  getKhaltiPaymentId,
+  lookupKhaltiEpayment,
+  isKhaltiEpaymentCompleted,
+} from '../services/payment.service.js';
 import mongoose from 'mongoose';
 import path from 'path';
 
@@ -67,6 +74,21 @@ export const createDonation = async (req, res) => {
   campaign.currentAmount += amount;
   campaign.donationsCount += 1;
   await campaign.save();
+
+  await logUserActivity({
+    user: userId,
+    activityType: 'donation',
+    resourceType: 'Donation',
+    resourceId: donation._id,
+    metadata: {
+      amount,
+      campaignId: campaign._id,
+      campaignTitle: campaign.title,
+      organizationId: campaign.organization,
+      paymentMethod,
+      isAnonymous: isAnonymous || false,
+    },
+  });
 
   // Get organization details for receipt
   const organization = await Organization.findById(campaign.organization);
@@ -743,6 +765,21 @@ export const completeStripePayment = async (req, res, next) => {
     campaign.donationsCount = (campaign.donationsCount || 0) + 1;
     await campaign.save();
 
+    await logUserActivity({
+      user: userId,
+      activityType: 'donation',
+      resourceType: 'Donation',
+      resourceId: donation._id,
+      metadata: {
+        amount,
+        campaignId: campaign._id,
+        campaignTitle: campaign.title,
+        organizationId: campaign.organization,
+        paymentMethod: 'stripe',
+        isAnonymous: isAnonymous || false,
+      },
+    });
+
     // UPDATE ORGANIZATION FUNDS
     // UPDATE ORGANIZATION FUNDS (guarded)
     let organization = null;
@@ -808,6 +845,180 @@ export const completeStripePayment = async (req, res, next) => {
           progress: (campaign.currentAmount / campaign.targetAmount) * 100,
         },
         organizationUpdated,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Complete a Khalti payment and create donation record
+// @route   POST /api/v1/donations/complete-khalti-payment
+// @access  Private
+export const completeKhaltiPayment = async (req, res, next) => {
+  try {
+    const {
+      pidx,
+      amount,
+      amountInPaisa,
+      campaignId,
+      isAnonymous,
+      message,
+    } = req.body;
+
+    if (!pidx || !campaignId || (amount == null && amountInPaisa == null)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'pidx, amount (in paisa), and campaignId are required',
+      });
+    }
+
+    const { amountInPaisa: normalizedPaisa, amountInRupees } =
+      normalizeKhaltiAmount({ amount, amountInPaisa });
+
+    const result = await lookupKhaltiEpayment({ pidx });
+
+    if (!isKhaltiEpaymentCompleted(result)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Khalti payment is not completed',
+        data: result,
+      });
+    }
+
+    const paidAmount = result?.total_amount ?? result?.amount;
+    if (paidAmount != null && Number(paidAmount) !== Number(normalizedPaisa)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Khalti payment amount mismatch',
+        data: result,
+      });
+    }
+
+    // Check if campaign exists and is active
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: `No campaign with id ${campaignId}`,
+      });
+    }
+
+    if (campaign.status !== 'active') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Cannot donate to an inactive campaign',
+      });
+    }
+
+    // Check if campaign end date has passed
+    if (new Date(campaign.endDate) < new Date()) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'This campaign has ended',
+      });
+    }
+
+    const userId = req.user._id || req.user.id;
+    const paymentId = getKhaltiPaymentId(result, pidx);
+
+    const donation = await Donation.create({
+      donor: userId,
+      campaign: campaignId,
+      organization: campaign.organization,
+      amount: amountInRupees,
+      paymentMethod: 'khalti',
+      paymentId,
+      isAnonymous: isAnonymous || false,
+      message: message || '',
+      status: 'completed',
+    });
+
+    campaign.currentAmount =
+      (campaign.currentAmount || 0) + amountInRupees;
+    campaign.donationsCount = (campaign.donationsCount || 0) + 1;
+    await campaign.save();
+
+    await logUserActivity({
+      user: userId,
+      activityType: 'donation',
+      resourceType: 'Donation',
+      resourceId: donation._id,
+      metadata: {
+        amount: amountInRupees,
+        campaignId: campaign._id,
+        campaignTitle: campaign.title,
+        organizationId: campaign.organization,
+        paymentMethod: 'khalti',
+        isAnonymous: isAnonymous || false,
+      },
+    });
+
+    let organization = null;
+    try {
+      organization = await Organization.findByIdAndUpdate(
+        campaign.organization,
+        {
+          $inc: {
+            totalDonationsReceived: amountInRupees,
+            totalDonationCount: 1,
+          },
+        },
+        { new: true },
+      );
+    } catch (err) {
+      console.error('[Backend] Error updating organization funds:', err);
+    }
+
+    let user = null;
+    try {
+      user = await User.findById(userId);
+    } catch (err) {
+      console.error('[Backend] Error fetching user for donation receipt:', err);
+    }
+
+    try {
+      await sendDonationReceipt({
+        to: user?.email || '',
+        userName: user?.name || 'Donor',
+        amount: amountInRupees,
+        campaignTitle: campaign.title,
+        organizationName: organization
+          ? organization.organizationName
+          : 'Unknown Organization',
+        donationId: donation._id,
+        date: new Date(),
+        isAnonymous,
+      });
+    } catch (error) {
+      console.error('Error sending donation receipt:', error);
+    }
+
+    const organizationUpdated = organization
+      ? {
+          totalDonationsReceived: organization.totalDonationsReceived,
+          totalDonationCount: organization.totalDonationCount,
+        }
+      : {
+          totalDonationsReceived: null,
+          totalDonationCount: null,
+        };
+
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: 'Donation completed successfully',
+      data: {
+        donation,
+        campaignUpdated: {
+          currentAmount: campaign.currentAmount,
+          donationsCount: campaign.donationsCount,
+          progress: (campaign.currentAmount / campaign.targetAmount) * 100,
+        },
+        organizationUpdated,
+        khalti: {
+          paymentId,
+          amountInPaisa: normalizedPaisa,
+        },
       },
     });
   } catch (error) {

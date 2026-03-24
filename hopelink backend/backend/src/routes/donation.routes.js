@@ -11,6 +11,7 @@ import {
   getDonationsSummaryByOrg,
   getOrgDonationSummaryById,
   completeStripePayment,
+  completeKhaltiPayment,
 } from '../controllers/donation.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
@@ -26,6 +27,8 @@ router.get('/', asyncHandler(getDonations));
 
 // Complete Stripe payment - Called after Stripe payment succeeds
 router.post('/complete-payment', asyncHandler(completeStripePayment));
+// Complete Khalti payment - Called after Khalti payment succeeds
+router.post('/complete-khalti-payment', asyncHandler(completeKhaltiPayment));
 
 // User routes
 router.post('/', asyncHandler(createDonation));

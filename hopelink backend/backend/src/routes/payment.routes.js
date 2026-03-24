@@ -3,6 +3,8 @@ import {
   initStripePayment,
   verifyStripePayment,
   verifyKhalti,
+  initKhaltiPayment,
+  lookupKhaltiPayment,
 } from '../controllers/payment.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import PAYMENT_CONFIG from '../config/payment.config.js';
@@ -15,6 +17,7 @@ router.get('/config', (req, res) => {
     success: true,
     data: {
       publishableKey: PAYMENT_CONFIG.stripe.publishableKey || '',
+      khaltiPublicKey: PAYMENT_CONFIG.khalti.publicKey || '',
       currency: PAYMENT_CONFIG.stripe.currency || 'npr',
     },
   });
@@ -28,6 +31,8 @@ router.post('/stripe/init', initStripePayment);
 router.post('/stripe/verify', verifyStripePayment);
 
 // Khalti
+router.post('/khalti/init', initKhaltiPayment);
+router.post('/khalti/lookup', lookupKhaltiPayment);
 router.post('/khalti/verify', verifyKhalti);
 
 export default router;

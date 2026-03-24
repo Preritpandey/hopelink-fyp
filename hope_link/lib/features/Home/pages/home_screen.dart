@@ -7,6 +7,7 @@ import 'package:hope_link/features/Profile/pages/profile_view_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widgets/app_button.dart';
+import '../../Activity/pages/activities_page.dart';
 import '../../Auth/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -108,7 +109,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       case 1:
         return homePage();
       case 2:
-        return ForgotPasswordPage();
+        return ActivitiesPage();
       case 3:
         // return ProfilePage(token: widget.token);
         return ProfileViewPage(token: widget.token);

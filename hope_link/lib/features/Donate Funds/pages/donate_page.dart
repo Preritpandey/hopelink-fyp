@@ -332,42 +332,175 @@ class _DonatePageState extends State<DonatePage>
                     ),
                   ),
                 ),
+                24.verticalSpace,
+                Text(
+                  'Payment Method',
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                12.verticalSpace,
+                _buildPaymentMethodSelector(),
               ],
             ),
           ),
           24.verticalSpace,
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColorToken.primary.color.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColorToken.primary.color.withOpacity(0.2),
+          _buildPaymentInfoCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodSelector() {
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: _buildPaymentMethodCard(
+              title: 'Stripe',
+              subtitle: 'Card / Wallet',
+              icon: Icons.credit_card_rounded,
+              isSelected: _controller.paymentMethod.value ==
+                  DonationPaymentMethod.stripe,
+              onTap: () => _controller.setPaymentMethod(
+                DonationPaymentMethod.stripe,
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  color: AppColorToken.primary.color,
-                  size: 24,
-                ),
-                12.horizontalSpace,
-                Expanded(
-                  child: Text(
-                    'Card details will be collected on the next screen',
-                    style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.grey[700],
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
+          ),
+          12.horizontalSpace,
+          Expanded(
+            child: _buildPaymentMethodCard(
+              title: 'Khalti',
+              subtitle: 'Wallet',
+              icon: Icons.account_balance_wallet_rounded,
+              isSelected: _controller.paymentMethod.value ==
+                  DonationPaymentMethod.khalti,
+              onTap: () => _controller.setPaymentMethod(
+                DonationPaymentMethod.khalti,
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildPaymentMethodCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColorToken.primary.color.withOpacity(0.1)
+              : Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppColorToken.primary.color
+                : Colors.grey.withOpacity(0.2),
+            width: 1.5,
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: AppColorToken.primary.color.withOpacity(0.15),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColorToken.primary.color
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected ? Colors.white : AppColorToken.primary.color,
+              ),
+            ),
+            12.horizontalSpace,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color:
+                          isSelected ? Colors.grey[900] : Colors.grey[700],
+                    ),
+                  ),
+                  2.verticalSpace,
+                  Text(
+                    subtitle,
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentInfoCard() {
+    return Obx(() {
+      final isKhalti = _controller.paymentMethod.value ==
+          DonationPaymentMethod.khalti;
+      final message = isKhalti
+          ? 'You will be redirected to Khalti to complete your payment'
+          : 'Card details will be collected on the next screen';
+
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColorToken.primary.color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColorToken.primary.color.withOpacity(0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              color: AppColorToken.primary.color,
+              size: 24,
+            ),
+            12.horizontalSpace,
+            Expanded(
+              child: Text(
+                message,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildAmountChip(int amount) {
