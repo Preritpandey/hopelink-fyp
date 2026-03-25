@@ -139,19 +139,19 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             ),
           ),
           16.verticalSpace,
-          SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildFilterChip('All', 'all'),
-                8.horizontalSpace,
-                _buildFilterChip('Active', 'active'),
-                8.horizontalSpace,
-                _buildFilterChip('Featured', 'featured'),
-              ],
-            ),
-          ),
+          // SizedBox(
+          //   height: 40,
+          //   child: ListView(
+          //     scrollDirection: Axis.horizontal,
+          //     children: [
+          //       _buildFilterChip('All', 'all'),
+          //       8.horizontalSpace,
+          //       _buildFilterChip('Active', 'active'),
+          //       8.horizontalSpace,
+          //       _buildFilterChip('Featured', 'featured'),
+          //     ],
+          //   ),
+          // ),
           16.verticalSpace,
         ],
       ),
@@ -220,20 +220,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Trending',
-                    style: AppTextStyle.h3.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey[900],
-                    ),
-                  ),
-                  8.verticalSpace,
-                  Text(
-                    'Discover impactful campaigns, events, and opportunities',
-                    style: AppTextStyle.bodyMedium.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  // Text(
+                  //   'Discover impactful campaigns, events, and opportunities',
+                  //   style: AppTextStyle.bodyMedium.copyWith(
+                  //     color: Colors.grey[600],
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -271,21 +263,85 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         );
       }
 
-      return SizedBox(
-        height: 310,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          itemCount: _campaignController.filteredCampaigns.length,
-          itemBuilder: (context, index) {
-            final campaign = _campaignController.filteredCampaigns[index];
-            return HorizontalCampaignCard(
-              campaign: campaign,
-              index: index,
-              animationController: _animationController,
-            );
-          },
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Donation Campaigns',
+                      style: AppTextStyle.h4.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                    4.verticalSpace,
+                    Text(
+                      'Support causes that need you',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () => Get.toNamed('/campaigns-all'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColorToken.primary.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'See All',
+                          style: AppTextStyle.bodySmall.copyWith(
+                            color: AppColorToken.primary.color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        4.horizontalSpace,
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: AppColorToken.primary.color,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          12.verticalSpace,
+          SizedBox(
+            height: 310,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _campaignController.filteredCampaigns.length,
+              itemBuilder: (context, index) {
+                final campaign = _campaignController.filteredCampaigns[index];
+                return HorizontalCampaignCard(
+                  campaign: campaign,
+                  index: index,
+                  animationController: _animationController,
+                );
+              },
+            ),
+          ),
+        ],
       );
     });
   }
@@ -333,8 +389,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                 ),
                 GestureDetector(
                   onTap: () {
-                    // Navigate to all volunteer jobs page
-                    // Get.toNamed('/volunteer-jobs-all');
+                    Get.toNamed('/volunteer-jobs-all');
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

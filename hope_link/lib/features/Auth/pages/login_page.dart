@@ -86,9 +86,9 @@ class _LoginPageState extends State<LoginPage>
                       children: [
                         header(),
                         const SizedBox(height: 48),
-                        loginForm(),
-                        const SizedBox(height: 24),
                         signUpPrompt(),
+                        const SizedBox(height: 24),
+                        loginForm(),
                       ],
                     ),
                   ),

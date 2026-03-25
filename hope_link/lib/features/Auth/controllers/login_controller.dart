@@ -41,7 +41,6 @@ class LoginController extends GetxController {
 
       isLoading.value = true;
       errorMessage.value = '';
-      print('Attempting login with email: $email');
 
       final response = await http
           .post(
@@ -54,6 +53,8 @@ class LoginController extends GetxController {
             onTimeout: () =>
                 throw TimeoutException('Request timed out after 30 seconds'),
           );
+      print('Attempting login with email: $email');
+
       print('Login response status: ${response.statusCode}');
 
       // Handle different status codes

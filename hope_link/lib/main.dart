@@ -5,6 +5,8 @@ import 'package:hope_link/features/Auth/pages/otp_verification_page.dart';
 import 'package:hope_link/features/Auth/pages/user_registration_page.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaign_details_page.dart';
+import 'package:hope_link/features/Donate%20Funds/pages/all_campaigns_page.dart';
+import 'package:hope_link/features/Donate%20Funds/pages/all_volunteer_jobs_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
 import 'package:hope_link/features/Home/pages/home_screen.dart';
@@ -54,6 +56,8 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/splash', page: () => const SplashScreen()),
         GetPage(name: '/signup', page: () => const SignUpPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
+        GetPage(name: '/campaigns-all', page: () => const AllCampaignsPage()),
+        GetPage(name: '/volunteer-jobs-all', page:()=>  AllVolunteerJobsPage()),
 
         GetPage(
           name: '/volunteer-job-details',
@@ -64,6 +68,16 @@ class MyApp extends StatelessWidget {
           name: '/campaigns',
           page: () => const CampaignsListPage(),
           transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/campaigns-all',
+          page: () => const AllCampaignsPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/volunteer-jobs-all',
+          page: () => const AllVolunteerJobsPage(),
+          transition: Transition.rightToLeft,
         ),
         GetPage(
           name: '/campaign-details',

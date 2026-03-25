@@ -9,12 +9,16 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
   final VolunteerJob job;
   final int index;
   final AnimationController animationController;
+  final double? width;
+  final EdgeInsets? margin;
 
   const HorizontalVolunteerJobCard({
     super.key,
     required this.job,
     required this.index,
     required this.animationController,
+    this.width,
+    this.margin,
   });
 
   @override
@@ -33,18 +37,19 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
           offset: Offset(50 * (1 - animation.value), 0),
           child: Opacity(opacity: animation.value, child: child),
         );
-      },
-      child: GestureDetector(
-        onTap: () {
-          Get.toNamed('/volunteer-job-details', arguments: job);
-          // Get.to(() => VolunteerJobDetailsPage());
         },
-        child: Container(
-          width: 300,
-          margin: EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+        child: GestureDetector(
+          onTap: () {
+            Get.toNamed('/volunteer-job-details', arguments: job);
+            // Get.to(() => VolunteerJobDetailsPage());
+          },
+          child: Container(
+            width: width ?? 300,
+            margin:
+                margin ?? EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: AppColorToken.primary.color.withOpacity(0.08),

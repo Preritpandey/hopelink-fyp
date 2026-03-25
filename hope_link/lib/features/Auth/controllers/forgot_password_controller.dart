@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -7,7 +8,7 @@ class ForgotPasswordController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString userEmail = ''.obs;
 
-  static const String baseUrl = 'http://localhost:3008/api/v1/auth';
+  // static const String baseUrl = 'http://localhost:3008/api/v1/auth';
 
   Future<bool> sendOTP({required String email}) async {
     try {
@@ -15,7 +16,7 @@ class ForgotPasswordController extends GetxController {
       errorMessage.value = '';
 
       final response = await http.post(
-        Uri.parse('$baseUrl/forgot-password'),
+        Uri.parse(ApiEndpoints.forgotPassword),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email}),
       );
@@ -47,7 +48,7 @@ class ForgotPasswordController extends GetxController {
       errorMessage.value = '';
 
       final response = await http.post(
-        Uri.parse('$baseUrl/reset-password'),
+        Uri.parse(ApiEndpoints.resetPassword),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
