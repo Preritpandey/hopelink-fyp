@@ -2,9 +2,8 @@ class ApiEndpoints {
   // static const String baseUrl =
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
-  // static const String baseUrl = 'http://10.21.6.154:3008/api/v1';
-  static const String baseUrl =
-      'http://192.168.1.96:3008/api/v1'; // android emulator
+  // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
+  static const String baseUrl = 'http://10.24.9.186:3008/api/v1';
 
   // static const String baseUrl = 'http://10.24.1.217:3008/api/v1'; // college
   // static const String baseUrl = 'http://localhost:3008/api/v1'; // college
@@ -41,7 +40,6 @@ class ApiEndpoints {
   static String get khaltiCompletePayment =>
       '$baseUrl/donations/complete-khalti-payment';
 
-
-  // Products 
+  // Products
   static String get products => '$baseUrl/products';
 }

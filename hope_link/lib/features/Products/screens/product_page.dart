@@ -1,128 +1,270 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/core/extensions/num_extension.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/core/theme/app_text_styles.dart';
+
 import '../controllers/product_controller.dart';
-import '../widgets/app_colors.dart';
 import '../widgets/product_card.dart';
 
-class ProductsPage extends StatelessWidget {
+class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
 
   @override
+  State<ProductsPage> createState() => _ProductsPageState();
+}
+
+class _ProductsPageState extends State<ProductsPage>
+    with SingleTickerProviderStateMixin {
+  late final ProductController _controller = Get.put(ProductController());
+  final TextEditingController _searchController = TextEditingController();
+  final RxString _searchText = ''.obs;
+  Timer? _searchDebounce;
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _searchController.addListener(() {
+      _searchText.value = _searchController.text;
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      _controller.searchProducts(value);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProductController());
-
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          // ── App Bar ──────────────────────────────────────────────────────
-          _ProductsAppBar(controller: controller),
-
-          // ── Body ─────────────────────────────────────────────────────────
-          Obx(() {
-            if (controller.isLoading && !controller.hasProducts) {
-              return const SliverFillRemaining(child: _LoadingState());
-            }
-
-            if (controller.hasError && !controller.hasProducts) {
-              return SliverFillRemaining(
-                child: _ErrorState(
-                  message: controller.errorMessage,
-                  onRetry: controller.refreshProducts,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColorToken.primary.color.withOpacity(0.06),
+              Colors.white,
+              AppColorToken.primary.color.withOpacity(0.04),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _controller.refreshProducts,
+            color: AppColorToken.primary.color,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _HeaderSection(controller: _controller),
+                    ),
+                  ),
                 ),
-              );
-            }
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _SearchSection(
+                        controller: _searchController,
+                        searchText: _searchText,
+                        onChanged: _onSearchChanged,
+                        onClear: () {
+                          _searchController.clear();
+                          _controller.searchProducts('');
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                Obx(() {
+                  if (_controller.isLoading && !_controller.hasProducts) {
+                    return const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _LoadingState(),
+                    );
+                  }
 
-            if (!controller.hasProducts) {
-              return const SliverFillRemaining(child: _EmptyState());
-            }
+                  if (_controller.hasError && !_controller.hasProducts) {
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _ErrorState(
+                        message: _controller.errorMessage,
+                        onRetry: _controller.refreshProducts,
+                      ),
+                    );
+                  }
 
-            return _ProductsGrid(controller: controller);
-          }),
+                  if (!_controller.hasProducts) {
+                    return const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _EmptyState(),
+                    );
+                  }
+
+                  return _ProductsGrid(
+                    controller: _controller,
+                    animationController: _animationController,
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderSection extends StatelessWidget {
+  final ProductController controller;
+  const _HeaderSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child:
+                Text(
+                  'Marketplace',
+                  style: AppTextStyle.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColorToken.primary.color,
+                  ),
+                ),
+         
+          ),
+          12.horizontalSpace,
+          IconButton(
+            onPressed: controller.refreshProducts,
+            icon: const Icon(Icons.refresh_rounded),
+            color: AppColorToken.primary.color,
+            tooltip: 'Refresh',
+          ),
         ],
       ),
     );
   }
 }
 
-// ── App Bar ───────────────────────────────────────────────────────────────────
+class _SearchSection extends StatelessWidget {
+  final TextEditingController controller;
+  final RxString searchText;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
 
-class _ProductsAppBar extends StatelessWidget {
-  final ProductController controller;
-  const _ProductsAppBar({required this.controller});
+  const _SearchSection({
+    required this.controller,
+    required this.searchText,
+    required this.onChanged,
+    required this.onClear,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 160,
-      pinned: true,
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      scrolledUnderElevation: 1,
-      shadowColor: AppColors.shadow,
-      flexibleSpace: FlexibleSpaceBar(
-        collapseMode: CollapseMode.pin,
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFB85C38), Color(0xFF8C3D20)],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColorToken.primary.color.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
-          ),
-          padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                'Marketplace',
-                style: TextStyle(
-                  fontFamily: 'Fraunces',
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.1,
-                ),
+          ],
+        ),
+        child: Obx(
+          () => TextField(
+            controller: controller,
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: 'Search products, artisans, or causes...',
+              hintStyle: AppTextStyle.bodyMedium.copyWith(
+                color: Colors.grey[400],
               ),
-              const SizedBox(height: 4),
-              Obx(
-                () => Text(
-                  '${controller.total} handcrafted products',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
+              prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400]),
+              suffixIcon: searchText.value.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear_rounded, color: Colors.grey[400]),
+                      onPressed: onClear,
+                    )
+                  : const SizedBox.shrink(),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
               ),
-            ],
+            ),
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          onPressed: controller.refreshProducts,
-          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-        ),
-        const SizedBox(width: 4),
-      ],
     );
   }
 }
 
-// ── Products Grid ─────────────────────────────────────────────────────────────
-
 class _ProductsGrid extends StatelessWidget {
   final ProductController controller;
-  const _ProductsGrid({required this.controller});
+  final AnimationController animationController;
+
+  const _ProductsGrid({
+    required this.controller,
+    required this.animationController,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
       sliver: Obx(() {
         final products = controller.products;
+
         return SliverGrid(
           delegate: SliverChildBuilderDelegate((context, index) {
             // Load-more trigger
@@ -131,17 +273,37 @@ class _ProductsGrid extends StatelessWidget {
               controller.loadMoreProducts();
             }
 
-            return products[index] == products.last && controller.isLoading
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  )
-                : ProductCard(product: products[index]);
+            if (products[index] == products.last && controller.isLoading) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColorToken.primary.color,
+                  ),
+                ),
+              );
+            }
+
+            final animation = CurvedAnimation(
+              parent: animationController,
+              curve: Interval(
+                (index * 0.06).clamp(0.0, 1.0),
+                1.0,
+                curve: Curves.easeOutCubic,
+              ),
+            );
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.08),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: ProductCard(product: products[index]),
+              ),
+            );
           }, childCount: products.length),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -155,26 +317,23 @@ class _ProductsGrid extends StatelessWidget {
   }
 }
 
-// ── State Widgets ─────────────────────────────────────────────────────────────
-
 class _LoadingState extends StatelessWidget {
   const _LoadingState();
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-          SizedBox(height: 16),
+          CircularProgressIndicator(
+            color: AppColorToken.primary.color,
+            strokeWidth: 2,
+          ),
+          16.verticalSpace,
           Text(
-            'Loading products…',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 14,
-              color: AppColors.textMuted,
-            ),
+            'Loading products...',
+            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
           ),
         ],
       ),
@@ -199,31 +358,29 @@ class _ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.errorColor.withOpacity(0.1),
+                color: AppColorToken.error.color.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.wifi_off_rounded,
                 size: 40,
-                color: AppColors.errorColor,
+                color: AppColorToken.error.color,
               ),
             ),
-            const SizedBox(height: 20),
+            20.verticalSpace,
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 15,
-                color: AppColors.textSecondary,
+              style: AppTextStyle.bodyMedium.copyWith(
+                color: Colors.grey[700],
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 24),
+            24.verticalSpace,
             FilledButton.icon(
               onPressed: onRetry,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColorToken.primary.color,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -233,11 +390,11 @@ class _ErrorState extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(
+              label: Text(
                 'Try Again',
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
+                style: AppTextStyle.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -262,33 +419,29 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColorToken.primary.color.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.storefront_outlined,
-                size: 48,
-                color: AppColors.primary,
+                size: 46,
+                color: AppColorToken.primary.color,
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            20.verticalSpace,
+            Text(
               'No products yet',
-              style: TextStyle(
-                fontFamily: 'Fraunces',
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+              style: AppTextStyle.h4.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.grey[900],
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Check back soon — our artisans are crafting something special.',
+            8.verticalSpace,
+            Text(
+              'Check back soon ? our artisans are crafting something special.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 14,
-                color: AppColors.textMuted,
+              style: AppTextStyle.bodySmall.copyWith(
+                color: Colors.grey[600],
                 height: 1.5,
               ),
             ),

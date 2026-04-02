@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Warm humanitarian theme — earthy terracotta, sage green, warm cream.
 abstract final class AppColors {
   // ── Brand ──────────────────────────────────────────────────────────────
-  static const Color primary = Color(0xFFB85C38); // Terracotta
+  static const Color primary = Color(0XFF27AE60); // Terracotta
   static const Color primaryLight = Color(0xFFD4845C); // Light terracotta
   static const Color primaryDark = Color(0xFF8C3D20); // Deep terracotta
 

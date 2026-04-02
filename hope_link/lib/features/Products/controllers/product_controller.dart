@@ -33,6 +33,7 @@ class ProductController extends GetxController {
   bool get isLoading => _status.value == ProductStatus.loading;
   bool get hasError => _status.value == ProductStatus.error;
   bool get hasProducts => _products.isNotEmpty;
+  String get searchQuery => _searchQuery.value;
 
   // ── Config ────────────────────────────────────────────────────────────────
 
@@ -87,6 +88,11 @@ class ProductController extends GetxController {
   }
 
   Future<void> refreshProducts() => fetchProducts(page: 1);
+
+  Future<void> searchProducts(String query) {
+    _searchQuery.value = query;
+    return fetchProducts(page: 1, search: query);
+  }
 
   Future<void> loadMoreProducts() async {
     if (_currentPage.value < _totalPages.value && !isLoading) {

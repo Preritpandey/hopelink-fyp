@@ -186,6 +186,16 @@ export const getUpcomingCampaigns = async (req, res) => {
   await getCampaignsByBaseFilter(req, res, upcomingFilter);
 };
 
+// @desc    Get campaigns for logged-in organization
+// @route   GET /api/v1/campaigns/organization
+// @access  Private (Organization)
+export const getOrganizationCampaigns = async (req, res) => {
+  const orgFilter = {
+    organization: req.user.organization,
+  };
+  await getCampaignsByBaseFilter(req, res, orgFilter);
+};
+
 // @desc    Get single campaign
 // @route   GET /api/v1/campaigns/:id
 // @access  Public

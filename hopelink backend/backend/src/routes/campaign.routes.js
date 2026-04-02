@@ -13,6 +13,7 @@ import {
   getCampaignsWithDonationsAndEvents,
   getClosedCampaigns,
   getUpcomingCampaigns,
+  getOrganizationCampaigns,
   addCampaignUpdate,
   addCampaignFaq,
   getCampaignFundStatus,
@@ -28,6 +29,13 @@ router.get('/', getCampaigns);
 router.get('/closed', getClosedCampaigns);
 router.get('/upcoming', getUpcomingCampaigns);
 router.get('/with-details/all', getCampaignsWithDonationsAndEvents);
+// Organization campaigns (protected)
+router.get(
+  '/organization',
+  authenticate,
+  authorize('organization'),
+  getOrganizationCampaigns,
+);
 // Fund tracking routes (public)
 router.get('/:id/fund-status', getCampaignFundStatus);
 router.get('/:id', getCampaign);

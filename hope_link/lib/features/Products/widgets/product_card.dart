@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:hope_link/core/extensions/num_extension.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/core/theme/app_text_styles.dart';
+
 import '../models/product_model.dart';
 import '../screens/product_detail_page.dart';
-import 'app_colors.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -11,110 +14,99 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      elevation: 0,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailPage(product: product),
+          ),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Product Image ─────────────────────────────────────────────
-            _ProductCardImage(product: product),
-
-            // ── Product Info ──────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Org badge
-                  _OrgBadge(orgName: product.org.organizationName),
-                  const SizedBox(height: 6),
-
-                  // Product name
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Fraunces',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      height: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Price row
-                  Row(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: AppColorToken.primary.color.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 6, child: _ProductCardImage(product: product)),
+              Expanded(
+                flex: 5,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      _OrgBadge(orgName: product.org.organizationName),
                       Text(
-                        product.priceDisplay,
-                        style: const TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 14,
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: Colors.grey[900],
+                          height: 1.2,
                         ),
                       ),
-                      if (product.ratingAverage > 0)
-                        _RatingChip(rating: product.ratingAverage),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Beneficiary
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.volunteer_activism_rounded,
-                        size: 13,
-                        color: AppColors.accent,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          product.beneficiaryDescription,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                            fontStyle: FontStyle.italic,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            product.priceDisplay,
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColorToken.primary.color,
+                            ),
                           ),
-                        ),
+                          if (product.ratingAverage > 0)
+                            _RatingChip(rating: product.ratingAverage),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.volunteer_activism_rounded,
+                            size: 13,
+                            color: AppColorToken.primary.color.withOpacity(0.8),
+                          ),
+                          4.horizontalSpace,
+                          Expanded(
+                            child: Text(
+                              product.beneficiaryDescription,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyle.bodySmall.copyWith(
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-// ── Sub-widgets ───────────────────────────────────────────────────────────────
 
 class _ProductCardImage extends StatelessWidget {
   final ProductModel product;
@@ -122,44 +114,59 @@ class _ProductCardImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          product.coverImage != null
-              ? CachedNetworkImage(
-                  imageUrl: product.coverImage!,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(color: AppColors.shimmer),
-                  errorWidget: (_, __, ___) => _ImageFallback(product: product),
-                )
-              : _ImageFallback(product: product),
-
-          // Variant count badge
-          if (product.variants.length > 1)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.92),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${product.variants.length} options',
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        product.coverImage != null
+            ? CachedNetworkImage(
+                imageUrl: product.coverImage!,
+                fit: BoxFit.cover,
+                placeholder: (_, __) =>
+                    Container(color: AppColorToken.lightGrey.color),
+                errorWidget: (_, __, ___) => _ImageFallback(product: product),
+              )
+            : _ImageFallback(product: product),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.0),
+                  Colors.black.withOpacity(0.25),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (product.variants.length > 1)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
+                ],
+              ),
+              child: Text(
+                '${product.variants.length} options',
+                style: AppTextStyle.labelSmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColorToken.primary.color,
                 ),
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -171,14 +178,12 @@ class _ImageFallback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.shimmer,
+      color: AppColorToken.lightGrey.color,
       child: Center(
         child: Text(
           product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
-          style: TextStyle(
-            fontFamily: 'Fraunces',
-            fontSize: 36,
-            color: AppColors.primary.withOpacity(0.4),
+          style: AppTextStyle.h2.copyWith(
+            color: AppColorToken.primary.color.withOpacity(0.4),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -194,19 +199,17 @@ class _OrgBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
+        color: AppColorToken.primary.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         orgName,
-        style: const TextStyle(
-          fontFamily: 'DM Sans',
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-          letterSpacing: 0.3,
+        style: AppTextStyle.labelSmall.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColorToken.primary.color,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -221,15 +224,13 @@ class _RatingChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.star_rounded, size: 12, color: AppColors.starColor),
-        const SizedBox(width: 2),
+        Icon(Icons.star_rounded, size: 12, color: Colors.amber[600]),
+        2.horizontalSpace,
         Text(
           rating.toStringAsFixed(1),
-          style: const TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 11,
+          style: AppTextStyle.labelSmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: Colors.grey[700],
           ),
         ),
       ],
