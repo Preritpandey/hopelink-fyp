@@ -7,6 +7,7 @@ import Campaign from './campaign.model.js';
 import Category from './category.model.js';
 import Donation from './donation.model.js';
 import Event from './event.model.js';
+import CampaignReport from './campaignReport.model.js';
 import VolunteerEnrollment from './volunteerEnrollment.model.js';
 import VolunteerJob from './volunteerJob.model.js';
 import VolunteerApplication from './volunteerApplication.model.js';
@@ -28,6 +29,7 @@ const models = {
   Category: mongoose.models.Category || Category,
   Donation: mongoose.models.Donation || Donation,
   Event: mongoose.models.Event || Event,
+  CampaignReport: mongoose.models.CampaignReport || CampaignReport,
   VolunteerEnrollment: mongoose.models.VolunteerEnrollment || VolunteerEnrollment,
   VolunteerJob: mongoose.models.VolunteerJob || VolunteerJob,
   VolunteerApplication:
@@ -50,6 +52,7 @@ export {
   Category,
   Donation,
   Event,
+  CampaignReport,
   VolunteerEnrollment,
   VolunteerJob,
   VolunteerApplication,
