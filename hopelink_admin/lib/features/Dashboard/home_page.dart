@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hopelink_admin/features/Event/pages/event_page.dart';
 
 import 'controllers/campaign_controller.dart';
 import 'widgets/dashboard_widgets.dart';
@@ -26,6 +27,8 @@ class DashboardShell extends StatelessWidget {
                   return _CampaignsListPage(ctrl: ctrl);
                 case 2:
                   return _CreateCampaignPage(ctrl: ctrl);
+                case 3:
+                  return CreateEventPage(ctrl: ctrl);
                 default:
                   return _DashboardPage(ctrl: ctrl);
               }

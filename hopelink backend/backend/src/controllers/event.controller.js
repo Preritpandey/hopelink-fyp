@@ -223,6 +223,94 @@ export const getEvents = async (req, res, next) => {
 };
 
 /**
+ * Get events by organization ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export const getEventsByOrganization = async (req, res, next) => {
+  try {
+    const { organizationId } = req.params;
+    const {
+      category,
+      location,
+      startDate,
+      endDate,
+      status,
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    // Validate organization ID
+    if (!organizationId) {
+      throw new BadRequestError('Organization ID is required');
+    }
+
+    // Check if organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      throw new NotFoundError('Organization not found');
+    }
+
+    const query = {
+      organizer: organizationId,
+      organizerType: 'Organization',
+    };
+
+    if (category) query.category = category;
+    if (location) query['location.city'] = new RegExp(location, 'i');
+
+    // Handle date filtering (only when a status filter is provided)
+    if (status) {
+      const now = new Date();
+      if (status === 'upcoming') {
+        query.startDate = { $gte: now };
+      } else if (status === 'ongoing') {
+        query.startDate = { $lte: now };
+        query.endDate = { $gte: now };
+      } else if (status === 'past') {
+        query.endDate = { $lt: now };
+      }
+    }
+
+    if (startDate && endDate) {
+      query.startDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    let events = await Event.find(query)
+      .sort({ startDate: 1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Populate organizer information
+    for (let event of events) {
+      const organizer = await Organization.findById(event.organizer)
+        .select('organizationName officialEmail logo')
+        .lean();
+      event.organizer = organizer;
+    }
+
+    const total = await Event.countDocuments(query);
+
+    res.json({
+      success: true,
+      count: events.length,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      organizationId: organizationId.toString(),
+      data: events,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get event by ID
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object

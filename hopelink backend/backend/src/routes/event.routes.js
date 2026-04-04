@@ -12,6 +12,7 @@ import {
   getEventRejectedEnrollments,
   updateVolunteerStatus,
   getMyEnrollments,
+  getEventsByOrganization,
 } from '../controllers/event.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { upload } from '../middleware/multer.js';
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getEvents);
+router.get('/organization/:organizationId', getEventsByOrganization);
 router.get('/:id', getEventById);
 
 // Protected routes (require authentication)
