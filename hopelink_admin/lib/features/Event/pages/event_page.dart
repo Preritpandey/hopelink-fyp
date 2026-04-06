@@ -23,10 +23,14 @@ class _CreateEventPageState extends State<CreateEventPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
+  late final String _eventCtrlTag;
+  late final EventController _eventCtrl;
 
   @override
   void initState() {
     super.initState();
+    _eventCtrlTag = 'create_event_${UniqueKey()}';
+    _eventCtrl = Get.put(EventController(), tag: _eventCtrlTag);
     _fadeCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -38,12 +42,12 @@ class _CreateEventPageState extends State<CreateEventPage>
   @override
   void dispose() {
     _fadeCtrl.dispose();
+    Get.delete<EventController>(tag: _eventCtrlTag);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final eventCtrl = Get.put(EventController());
     return Scaffold(
       backgroundColor: kEvBg,
       body: FadeTransition(
@@ -57,7 +61,7 @@ class _CreateEventPageState extends State<CreateEventPage>
               flex: 3,
               child: Column(
                 children: [
-                  _TopBar(ctrl: eventCtrl),
+                  _TopBar(ctrl: _eventCtrl),
                   Expanded(
                     child: Obx(
                       () => AnimatedSwitcher(
@@ -79,8 +83,8 @@ class _CreateEventPageState extends State<CreateEventPage>
                           ),
                         ),
                         child: KeyedSubtree(
-                          key: ValueKey(eventCtrl.wizardStep.value),
-                          child: _buildStep(eventCtrl),
+                          key: ValueKey(_eventCtrl.wizardStep.value),
+                          child: _buildStep(_eventCtrl),
                         ),
                       ),
                     ),

@@ -64,13 +64,20 @@ class LoginController extends GetxController {
 
           if (data['success'] == true && data['token'] != null) {
             final token = data['token'] as String;
+            final user = data['user'] as Map<String, dynamic>;
+            final orgId = user['organization']?['_id'] as String?;
             final prefs = await SharedPreferences.getInstance();
+
+            // Save token and user info
             await prefs.setString('auth_token', token);
-            await prefs.setString(
-              'user_email',
-              data['user']?['email'] ?? email,
-            );
-            await prefs.setString('user_name', data['user']?['name'] ?? '');
+            await prefs.setString('user_email', user['email'] ?? email);
+            await prefs.setString('user_name', user['name'] ?? '');
+
+            // Save organization ID
+            if (orgId != null && orgId.isNotEmpty) {
+              await prefs.setString('org_id', orgId);
+            }
+
             await prefs.setBool('is_logged_in', true);
             return true;
           } else {
@@ -115,5 +122,11 @@ class LoginController extends GetxController {
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
+  }
+
+  // Get the stored organization ID
+  Future<String?> getOrgId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('org_id');
   }
 }

@@ -13,28 +13,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/login_model.dart';
 
-
 class LoginController extends GetxController {
   // ── Form ───────────────────────────────────────────────────
-  final formKey        = GlobalKey<FormState>();
-  final emailCtrl      = TextEditingController();
-  final passwordCtrl   = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
 
   // ── State ──────────────────────────────────────────────────
-  final isLoading      = false.obs;
+  final isLoading = false.obs;
   final obscurePassword = true.obs;
-  final rememberMe     = false.obs;
-  final errorMessage   = ''.obs;
-  final loginSuccess   = false.obs;
-  final currentUser    = Rxn<LoginUser>();
+  final rememberMe = false.obs;
+  final errorMessage = ''.obs;
+  final loginSuccess = false.obs;
+  final currentUser = Rxn<LoginUser>();
 
   // ── Focus nodes ────────────────────────────────────────────
-  final emailFocus    = FocusNode();
+  final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
 
   static const _baseUrl = 'http://localhost:3008/api/v1';
   static const _tokenKey = 'auth_token';
   static const _emailKey = 'saved_email';
+  static const _orgIdKey = 'org_id';
+  static const _orgNameKey = 'org_name';
 
   @override
   void onInit() {
@@ -71,7 +72,7 @@ class LoginController extends GetxController {
   Future<void> login() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
-    isLoading.value   = true;
+    isLoading.value = true;
     errorMessage.value = '';
 
     try {
@@ -80,10 +81,12 @@ class LoginController extends GetxController {
           .post(
             uri,
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(LoginRequest(
-              email: emailCtrl.text.trim(),
-              password: passwordCtrl.text,
-            ).toJson()),
+            body: jsonEncode(
+              LoginRequest(
+                email: emailCtrl.text.trim(),
+                password: passwordCtrl.text,
+              ).toJson(),
+            ),
           )
           .timeout(const Duration(seconds: 15));
 
@@ -95,6 +98,18 @@ class LoginController extends GetxController {
         // Persist token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, result.token);
+
+        // Save user data and organization info
+        final user = result.user;
+        final orgId = user.organization.id;
+        final orgName = user.organization.name;
+
+        if (orgId.isNotEmpty) {
+          await prefs.setString(_orgIdKey, orgId);
+        }
+        if (orgName.isNotEmpty) {
+          await prefs.setString(_orgNameKey, orgName);
+        }
 
         // Save email if remember me
         if (rememberMe.value) {
@@ -127,10 +142,24 @@ class LoginController extends GetxController {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
-    currentUser.value  = null;
+    await prefs.remove(_orgIdKey);
+    await prefs.remove(_orgNameKey);
+    currentUser.value = null;
     loginSuccess.value = false;
     passwordCtrl.clear();
     errorMessage.value = '';
+  }
+
+  // Get the stored authentication token
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_tokenKey);
+  }
+
+  // Get the stored organization ID
+  Future<String?> getOrgId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_orgIdKey);
   }
 
   @override
