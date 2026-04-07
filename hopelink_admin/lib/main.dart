@@ -7,11 +7,11 @@ import 'features/Auth/pages/login_page.dart';
 import 'features/Dashboard/home_page.dart';
 
 void main() {
-  runApp(const _App());
+  runApp(const MyApp());
 }
- 
-class _App extends StatelessWidget {
-  const _App();
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -41,9 +41,7 @@ class _AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
         return snapshot.data == true
@@ -53,7 +51,7 @@ class _AuthGate extends StatelessWidget {
     );
   }
 }
- 
+
 ThemeData _buildTheme() {
   return ThemeData(
     brightness: Brightness.dark,

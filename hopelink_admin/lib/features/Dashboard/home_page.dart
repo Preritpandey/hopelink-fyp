@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../Auth/controller/login_controller.dart';
 import '../Event/pages/org_events_page.dart';
 import 'controllers/campaign_controller.dart';
+import 'pages/campaign_list_page.dart';
 import 'widgets/dashboard_sidebar.dart';
 import 'widgets/dashboard_top_bar.dart';
 import 'widgets/dashboard_widgets.dart';
@@ -28,7 +29,7 @@ class DashboardShell extends StatelessWidget {
                 case 0:
                   return _DashboardPage(ctrl: ctrl);
                 case 1:
-                  return _CampaignsListPage(ctrl: ctrl);
+                  return CampaignListPage();
                 case 2:
                   return _CreateCampaignPage(ctrl: ctrl);
                 case 3:
@@ -166,80 +167,6 @@ class _DashboardPage extends StatelessWidget {
                           .toList(),
                     ),
                 ],
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-//  CAMPAIGNS LIST PAGE
-// ─────────────────────────────────────────────────────────────
-class _CampaignsListPage extends StatelessWidget {
-  final CampaignController ctrl;
-  const _CampaignsListPage({required this.ctrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        DashboardTopBar(
-          title: 'All Campaigns',
-          sub: 'Manage your fundraising campaigns',
-          actions: [
-            GhostBtn(
-              label: 'Refresh',
-              icon: Icons.refresh_rounded,
-              onTap: ctrl.fetchCampaigns,
-            ),
-            const SizedBox(width: 10),
-            PrimaryBtn(
-              label: 'New Campaign',
-              icon: Icons.add_rounded,
-              onTap: () => ctrl.navigateTo(2),
-            ),
-          ],
-        ),
-        Expanded(
-          child: Obx(() {
-            if (ctrl.isLoadingList.value) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: kAccent,
-                  strokeWidth: 2,
-                ),
-              );
-            }
-            if (ctrl.campaigns.isEmpty) {
-              return Center(
-                child: _EmptyState(
-                  icon: Icons.campaign_outlined,
-                  title: 'No campaigns yet',
-                  sub: 'Start your first campaign and make an impact.',
-                  action: PrimaryBtn(
-                    label: 'Create Campaign',
-                    icon: Icons.add_rounded,
-                    onTap: () => ctrl.navigateTo(2),
-                  ),
-                ),
-              );
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.all(28),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.65,
-              ),
-              itemCount: ctrl.campaigns.length,
-              itemBuilder: (_, i) => CampaignCard(
-                campaign: ctrl.campaigns[i],
-                ctrl: ctrl,
-                onTap: () => ctrl.selectedCampaign.value = ctrl.campaigns[i],
               ),
             );
           }),
