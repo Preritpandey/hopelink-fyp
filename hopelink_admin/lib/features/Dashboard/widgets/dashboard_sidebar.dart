@@ -195,6 +195,13 @@ class DashboardSidebar extends StatelessWidget {
                   active: ctrl.currentNavIndex.value == 3,
                   onTap: () => ctrl.navigateTo(3),
                 ),
+
+                NavItem(
+                  icon: Icons.work_outline_rounded,
+                  label: 'Jobs',
+                  active: ctrl.currentNavIndex.value == 4,
+                  onTap: () => ctrl.navigateTo(4),
+                ),
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hopelink_admin/features/Jobs/pages/jobs_page.dart';
 
 import '../Auth/controller/login_controller.dart';
 import '../Event/pages/org_events_page.dart';
@@ -35,6 +36,8 @@ class DashboardShell extends StatelessWidget {
                 case 3:
                   // return CreateEventPage(ctrl: ctrl);
                   return OrgEventsPage();
+                case 4:
+                  return JobsPage();
                 default:
                   return _DashboardPage(ctrl: ctrl);
               }
@@ -198,8 +201,9 @@ class _CreateCampaignPage extends StatelessWidget {
             children: [
               Expanded(
                 child: Obx(() {
-                  if (ctrl.wizardStep.value >= 4)
+                  if (ctrl.wizardStep.value >= 4) {
                     return _WizardDone(ctrl: ctrl);
+                  }
                   return Column(
                     children: [
                       Padding(
