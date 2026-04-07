@@ -371,6 +371,74 @@ class _ActionButtons extends StatelessWidget {
     required this.ctrl,
   });
 
+  Future<String?> _askRejectionReason(BuildContext context) async {
+    final textCtrl = TextEditingController();
+    String? reason;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          final canSubmit = textCtrl.text.trim().isNotEmpty;
+          return AlertDialog(
+            backgroundColor: jSurf,
+            title: Text('Rejection Reason', style: jH3()),
+            content: SizedBox(
+              width: 420,
+              child: TextField(
+                controller: textCtrl,
+                maxLines: 4,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  hintText: 'Write a short reason for rejection',
+                  hintStyle: jMonoSm().copyWith(color: jMuted),
+                  filled: true,
+                  fillColor: jSurf2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: jBorder2),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: jBorder2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: jGreen.withOpacity(0.6)),
+                  ),
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Cancel', style: jMonoSm().copyWith(color: jSub)),
+              ),
+              TextButton(
+                onPressed: canSubmit
+                    ? () {
+                        reason = textCtrl.text.trim();
+                        Navigator.of(ctx).pop();
+                      }
+                    : null,
+                child: Text(
+                  'Reject',
+                  style: jMonoSm().copyWith(
+                    color: canSubmit ? jRose : jMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    textCtrl.dispose();
+    return reason;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -396,7 +464,11 @@ class _ActionButtons extends StatelessWidget {
             loading: loading,
             onTap: loading
                 ? null
-                : () => ctrl.rejectApplication(application.id),
+                : () async {
+                    final reason = await _askRejectionReason(context);
+                    if (reason == null) return;
+                    await ctrl.rejectApplication(application.id, reason);
+                  },
           ),
         ),
       ]);

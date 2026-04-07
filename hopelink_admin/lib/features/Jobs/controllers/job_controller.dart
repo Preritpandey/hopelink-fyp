@@ -273,14 +273,23 @@ class JobController extends GetxController {
   }
 
   // ── Reject ────────────────────────────────────────────────────
-  Future<void> rejectApplication(String applicationId) async {
+  Future<void> rejectApplication(String applicationId, String reason) async {
     appActionLoading.value = applicationId;
     try {
+      final trimmed = reason.trim();
+      if (trimmed.isEmpty) {
+        _showSnack('Please provide a rejection reason.');
+        appActionLoading.value = '';
+        return;
+      }
       final res = await http
           .patch(
               Uri.parse(
                   '$_base/volunteer-applications/$applicationId/reject'),
-              headers: _authHeaders)
+              headers: _authHeaders,
+              body: jsonEncode({
+                'reason': trimmed,
+              }))
           .timeout(const Duration(seconds: 15));
       if (res.statusCode == 200) {
         _updateApplicationStatus(applicationId, ApplicationStatus.rejected);
