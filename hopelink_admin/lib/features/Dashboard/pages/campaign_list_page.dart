@@ -148,6 +148,18 @@ class _TopBar extends StatelessWidget {
             tooltip: 'Refresh',
             onTap: ctrl.refresh,
           ),
+          const SizedBox(width: 10),
+          Obx(() {
+            final selected = ctrl.selectedCampaign.value;
+            return GradBtn(
+              label: 'Manage Selected',
+              icon: Icons.edit_rounded,
+              ghost: true,
+              onTap: selected == null
+                  ? null
+                  : () => ctrl.openDetail(selected),
+            );
+          }),
         ],
       ),
     );
