@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hopelink_admin/features/Event/models/event_volunteer_model.dart';
 import 'package:hopelink_admin/features/Event/models/org_event_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -26,6 +27,15 @@ class OrgEventsController extends GetxController {
   final viewMode = EventViewMode.grid.obs;
   final searchQuery = ''.obs;
   final selectedEvent = Rxn<OrgEvent>();
+
+  // ── Volunteer Management State ────────────────────────────────
+  final eventVolunteers = <EventVolunteer>[].obs;
+  final isLoadingVolunteers = false.obs;
+  final volunteersError = ''.obs;
+  final volunteerActionLoading = <String>[].obs; // IDs of volunteers loading
+  final isUpdatingEvent = false.obs;
+  final updateEventError = ''.obs;
+  final isDeletingEvent = false.obs;
 
   // ── Meta ─────────────────────────────────────────────────────
   final total = 0.obs;
@@ -166,6 +176,190 @@ class OrgEventsController extends GetxController {
     final diff = e.endDate.difference(e.startDate).inDays;
     if (diff == 0) return '1 Day';
     return '$diff Days';
+  }
+
+  // ── Volunteer Management ──────────────────────────────────────
+  Future<void> fetchEventVolunteers(String eventId) async {
+    isLoadingVolunteers.value = true;
+    volunteersError.value = '';
+
+    try {
+      final uri = Uri.parse(
+        '$_base/events/$eventId/volunteers?page=1&limit=50',
+      );
+
+      final res = await http
+          .get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $_token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (res.statusCode == 200 && json['success'] == true) {
+        final resp = EventVolunteersResponse.fromJson(json);
+        eventVolunteers.assignAll(resp.enrollments);
+      } else {
+        volunteersError.value =
+            json['message'] as String? ?? 'Failed to load volunteers.';
+      }
+    } on SocketException {
+      volunteersError.value = 'No internet connection.';
+    } on TimeoutException {
+      volunteersError.value = 'Request timed out. Please try again.';
+    } catch (e) {
+      volunteersError.value = 'Unexpected error: $e';
+    }
+
+    isLoadingVolunteers.value = false;
+  }
+
+  Future<void> updateVolunteerStatus(
+    String eventId,
+    String enrollmentId,
+    String newStatus, {
+    String? notes,
+  }) async {
+    volunteerActionLoading.add(enrollmentId);
+
+    try {
+      final body = UpdateVolunteerStatusRequest(
+        status: newStatus,
+        approverNotes: notes,
+      );
+
+      final uri = Uri.parse('$_base/events/volunteers/$enrollmentId');
+
+      final res = await http
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $_token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body.toJson()),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (res.statusCode == 200 && json['success'] == true) {
+        // Find and update the volunteer in the list
+        final idx = eventVolunteers.indexWhere((v) => v.id == enrollmentId);
+        if (idx != -1) {
+          final updated = EventVolunteer.fromJson(json['data']);
+          eventVolunteers[idx] = updated;
+        }
+        // Also refresh the event to update volunteer count
+        await fetchEvents();
+      } else {
+        volunteersError.value =
+            json['message'] as String? ?? 'Failed to update volunteer status.';
+      }
+    } on SocketException {
+      volunteersError.value = 'No internet connection.';
+    } on TimeoutException {
+      volunteersError.value = 'Request timed out. Please try again.';
+    } catch (e) {
+      volunteersError.value = 'Unexpected error: $e';
+    }
+
+    volunteerActionLoading.remove(enrollmentId);
+  }
+
+  // ── Event Management ──────────────────────────────────────────
+  Future<void> updateEvent(
+    String eventId,
+    UpdateEventRequest updateData,
+  ) async {
+    isUpdatingEvent.value = true;
+    updateEventError.value = '';
+
+    try {
+      final uri = Uri.parse('$_base/events/$eventId');
+
+      final res = await http
+          .put(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $_token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(updateData.toJson()),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (res.statusCode == 200 && json['success'] == true) {
+        // Refresh the events list to show updates
+        await fetchEvents();
+        closeDetail();
+        Get.snackbar(
+          'Success',
+          'Event updated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        updateEventError.value =
+            json['message'] as String? ?? 'Failed to update event.';
+      }
+    } on SocketException {
+      updateEventError.value = 'No internet connection.';
+    } on TimeoutException {
+      updateEventError.value = 'Request timed out. Please try again.';
+    } catch (e) {
+      updateEventError.value = 'Unexpected error: $e';
+    }
+
+    isUpdatingEvent.value = false;
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    isDeletingEvent.value = true;
+    updateEventError.value = '';
+
+    try {
+      final uri = Uri.parse('$_base/events/$eventId');
+
+      final res = await http
+          .delete(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $_token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (res.statusCode == 200 && json['success'] == true) {
+        // Remove from list
+        allEvents.removeWhere((e) => e.id == eventId);
+        closeDetail();
+        Get.snackbar(
+          'Success',
+          'Event deleted successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        updateEventError.value =
+            json['message'] as String? ?? 'Failed to delete event.';
+      }
+    } on SocketException {
+      updateEventError.value = 'No internet connection.';
+    } on TimeoutException {
+      updateEventError.value = 'Request timed out. Please try again.';
+    } catch (e) {
+      updateEventError.value = 'Unexpected error: $e';
+    }
+
+    isDeletingEvent.value = false;
   }
 
   @override

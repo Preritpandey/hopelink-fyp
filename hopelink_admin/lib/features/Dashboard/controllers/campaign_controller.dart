@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/campaign_model.dart';
+import 'campaign_list_controller.dart';
 
 class CampaignController extends GetxController {
   static const _base = 'http://localhost:3008/api/v1';
@@ -349,6 +350,8 @@ class CampaignController extends GetxController {
     fetchCampaigns();
     resetCreateForm();
     currentNavIndex.value = 1; // go to campaigns list
+    _showSnack('Campaign posted successfully.', isError: false);
+    _refreshCampaignListSoon();
   }
 
   // ─── Reset ────────────────────────────────────────────────────
@@ -370,6 +373,32 @@ class CampaignController extends GetxController {
     successMsg.value = '';
     _startDate = null;
     _endDate = null;
+  }
+
+  void _refreshCampaignListSoon() {
+    Future.delayed(const Duration(milliseconds: 120), () {
+      if (Get.isRegistered<CampaignListController>()) {
+        Get.find<CampaignListController>().refresh();
+      }
+    });
+  }
+
+  void _showSnack(String msg, {bool isError = true}) {
+    if (Get.context == null) return;
+    ScaffoldMessenger.of(Get.context!).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError
+            ? const Color(0xFFEF4444)
+            : const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   void navigateTo(int index) {

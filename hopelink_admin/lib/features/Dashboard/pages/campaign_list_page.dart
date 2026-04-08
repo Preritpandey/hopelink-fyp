@@ -24,10 +24,13 @@ class _CampaignListPageState extends State<CampaignListPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
   late final Animation<double>   _fade;
+  late final CampaignListController _ctrl;
 
   @override
   void initState() {
     super.initState();
+    _ctrl = Get.put(CampaignListController());
+    _ctrl.refresh();
     _entry = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
     _fade  = CurvedAnimation(parent: _entry, curve: Curves.easeOut);
@@ -39,8 +42,6 @@ class _CampaignListPageState extends State<CampaignListPage>
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.put(CampaignListController());
-
     return Scaffold(
       backgroundColor: cBg,
       body: FadeTransition(
@@ -51,19 +52,19 @@ class _CampaignListPageState extends State<CampaignListPage>
             Expanded(
               child: Column(
                 children: [
-                  _TopBar(ctrl: ctrl),
-                  _StatsBar(ctrl: ctrl),
-                  _FilterSortBar(ctrl: ctrl),
-                  Expanded(child: _Body(ctrl: ctrl)),
+                  _TopBar(ctrl: _ctrl),
+                  _StatsBar(ctrl: _ctrl),
+                  _FilterSortBar(ctrl: _ctrl),
+                  Expanded(child: _Body(ctrl: _ctrl)),
                 ],
               ),
             ),
 
             // ── Detail panel ───────────────────────────────
-            if (ctrl.selectedCampaign.value != null)
+            if (_ctrl.selectedCampaign.value != null)
               CampaignDetailPanel(
-                campaign: ctrl.selectedCampaign.value!,
-                ctrl: ctrl,
+                campaign: _ctrl.selectedCampaign.value!,
+                ctrl: _ctrl,
               ),
           ],
         )),

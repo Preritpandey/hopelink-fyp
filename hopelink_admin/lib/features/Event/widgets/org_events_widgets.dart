@@ -3,29 +3,31 @@
 // ─────────────────────────────────────────────────────────────
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../controllers/org_events_controller.dart';
 import '../models/org_event_model.dart';
-
+import '../pages/edit_event_page.dart';
+import 'volunteer_management_widgets.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────
-const kOeBg      = Color(0xFF06080F);
-const kOeSurf    = Color(0xFF0B1120);
-const kOeSurf2   = Color(0xFF0F172A);
-const kOeSurf3   = Color(0xFF152035);
-const kOeBorder  = Color(0xFF1C2E4A);
+const kOeBg = Color(0xFF06080F);
+const kOeSurf = Color(0xFF0B1120);
+const kOeSurf2 = Color(0xFF0F172A);
+const kOeSurf3 = Color(0xFF152035);
+const kOeBorder = Color(0xFF1C2E4A);
 const kOeBorder2 = Color(0xFF243655);
-const kOeGreen   = Color(0xFF10D078);
-const kOeBlue    = Color(0xFF3B82F6);
-const kOeAmber   = Color(0xFFF59E0B);
-const kOeRed     = Color(0xFFEF4444);
-const kOeIndigo  = Color(0xFF6366F1);
-const kOeText    = Colors.white;
-const kOeSub     = Color(0xFF7C93B8);
-const kOeMuted   = Color(0xFF3B506E);
+const kOeGreen = Color(0xFF10D078);
+const kOeBlue = Color(0xFF3B82F6);
+const kOeAmber = Color(0xFFF59E0B);
+const kOeRed = Color(0xFFEF4444);
+const kOeIndigo = Color(0xFF6366F1);
+const kOeText = Colors.white;
+const kOeSub = Color(0xFF7C93B8);
+const kOeMuted = Color(0xFF3B506E);
 
 // ─────────────────────────────────────────────────────────────
 //  STATUS CONFIG
@@ -38,11 +40,16 @@ class _StatusCfg {
 
 _StatusCfg statusConfig(String status) {
   switch (status.toLowerCase()) {
-    case 'published': return const _StatusCfg(kOeBlue,   Icons.public_rounded);
-    case 'ongoing':   return const _StatusCfg(kOeGreen,  Icons.play_circle_rounded);
-    case 'completed': return const _StatusCfg(kOeAmber,  Icons.check_circle_rounded);
-    case 'cancelled': return const _StatusCfg(kOeRed,    Icons.cancel_rounded);
-    default:          return const _StatusCfg(kOeMuted,  Icons.drafts_rounded);
+    case 'published':
+      return const _StatusCfg(kOeBlue, Icons.public_rounded);
+    case 'ongoing':
+      return const _StatusCfg(kOeGreen, Icons.play_circle_rounded);
+    case 'completed':
+      return const _StatusCfg(kOeAmber, Icons.check_circle_rounded);
+    case 'cancelled':
+      return const _StatusCfg(kOeRed, Icons.cancel_rounded);
+    default:
+      return const _StatusCfg(kOeMuted, Icons.drafts_rounded);
   }
 }
 
@@ -63,22 +70,31 @@ class StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: cfg.color.withOpacity(0.3)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          width: 5, height: 5,
-          decoration: BoxDecoration(
-            color: cfg.color,
-            shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: cfg.color.withOpacity(0.7), blurRadius: 4)],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              color: cfg.color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: cfg.color.withOpacity(0.7), blurRadius: 4),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          status.statusLabel,
-          style: GoogleFonts.ibmPlexMono(
-              fontSize: 10, color: cfg.color, fontWeight: FontWeight.w600),
-        ),
-      ]),
+          const SizedBox(width: 5),
+          Text(
+            status.statusLabel,
+            style: GoogleFonts.ibmPlexMono(
+              fontSize: 10,
+              color: cfg.color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -111,7 +127,7 @@ class _OeStatCardState extends State<OeStatCard> {
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
-      onExit:  (_) => setState(() => _hovered = false),
+      onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.all(18),
@@ -122,32 +138,47 @@ class _OeStatCardState extends State<OeStatCard> {
             color: _hovered ? widget.accent.withOpacity(0.3) : kOeBorder,
           ),
           boxShadow: _hovered
-              ? [BoxShadow(color: widget.accent.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 6))]
+              ? [
+                  BoxShadow(
+                    color: widget.accent.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
               : [],
         ),
-        child: Row(children: [
-          Container(
-            width: 42, height: 42,
-            decoration: BoxDecoration(
-              color: widget.accent.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: widget.accent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(widget.icon, color: widget.accent, size: 20),
             ),
-            child: Icon(widget.icon, color: widget.accent, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(widget.value,
-                style: GoogleFonts.ibmPlexMono(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: kOeText,
-                  letterSpacing: -0.5,
-                )),
-            Text(widget.label,
-                style: GoogleFonts.ibmPlexSans(
-                    fontSize: 11, color: kOeSub)),
-          ]),
-        ]),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.value,
+                  style: GoogleFonts.ibmPlexMono(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: kOeText,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Text(
+                  widget.label,
+                  style: GoogleFonts.ibmPlexSans(fontSize: 11, color: kOeSub),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -177,12 +208,12 @@ class _EventGridCardState extends State<EventGridCard> {
 
   @override
   Widget build(BuildContext context) {
-    final e   = widget.event;
+    final e = widget.event;
     final cfg = statusConfig(e.status);
 
     return MouseRegion(
-      onEnter:  (_) => setState(() => _hovered = true),
-      onExit:   (_) => setState(() => _hovered = false),
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
@@ -195,7 +226,13 @@ class _EventGridCardState extends State<EventGridCard> {
               color: _hovered ? cfg.color.withOpacity(0.35) : kOeBorder,
             ),
             boxShadow: _hovered
-                ? [BoxShadow(color: cfg.color.withOpacity(0.07), blurRadius: 24, offset: const Offset(0, 8))]
+                ? [
+                    BoxShadow(
+                      color: cfg.color.withOpacity(0.07),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
                 : [],
           ),
           child: Column(
@@ -204,7 +241,7 @@ class _EventGridCardState extends State<EventGridCard> {
               // ── Image / Placeholder ───────────────────────
               ClipRRect(
                 borderRadius: const BorderRadius.only(
-                  topLeft:  Radius.circular(16),
+                  topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
                 ),
                 child: _EventImageBanner(event: e, height: 130),
@@ -218,105 +255,140 @@ class _EventGridCardState extends State<EventGridCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Title + Status
-                      Row(children: [
-                        Expanded(
-                          child: Text(
-                            e.title,
-                            style: GoogleFonts.ibmPlexSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: kOeText,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              e.title,
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: kOeText,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        StatusBadge(status: e.status),
-                      ]),
+                          const SizedBox(width: 8),
+                          StatusBadge(status: e.status),
+                        ],
+                      ),
                       const SizedBox(height: 8),
 
                       // Meta chips row
-                      Wrap(spacing: 6, runSpacing: 4, children: [
-                        _MiniChip(
-                          icon: Icons.folder_outlined,
-                          label: e.category,
-                          color: kOeIndigo,
-                        ),
-                        _MiniChip(
-                          icon: Icons.schedule_rounded,
-                          label: e.eventType.replaceAll('-', ' '),
-                          color: kOeBlue,
-                        ),
-                      ]),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          _MiniChip(
+                            icon: Icons.folder_outlined,
+                            label: e.category,
+                            color: kOeIndigo,
+                          ),
+                          _MiniChip(
+                            icon: Icons.schedule_rounded,
+                            label: e.eventType.replaceAll('-', ' '),
+                            color: kOeBlue,
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 10),
 
                       // Location
-                      Row(children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 12, color: kOeMuted),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            e.location.displayCity,
-                            style: GoogleFonts.ibmPlexSans(
-                                fontSize: 11, color: kOeSub),
-                            overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
+                            color: kOeMuted,
                           ),
-                        ),
-                      ]),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              e.location.displayCity,
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 11,
+                                color: kOeSub,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 6),
 
                       // Date range
-                      Row(children: [
-                        const Icon(Icons.calendar_today_rounded,
-                            size: 11, color: kOeMuted),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${widget.ctrl.formatShortDate(e.startDate)} → ${widget.ctrl.formatDate(e.endDate)}',
-                          style: GoogleFonts.ibmPlexMono(
-                              fontSize: 10, color: kOeSub),
-                        ),
-                      ]),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 11,
+                            color: kOeMuted,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${widget.ctrl.formatShortDate(e.startDate)} → ${widget.ctrl.formatDate(e.endDate)}',
+                            style: GoogleFonts.ibmPlexMono(
+                              fontSize: 10,
+                              color: kOeSub,
+                            ),
+                          ),
+                        ],
+                      ),
 
                       const Spacer(),
 
                       // Footer
-                      Row(children: [
-                        _FooterStat(
-                          icon: Icons.group_rounded,
-                          value: '${e.volunteerCount}',
-                          label: 'Volunteers',
-                          color: kOeGreen,
-                        ),
-                        const SizedBox(width: 10),
-                        _FooterStat(
-                          icon: Icons.image_rounded,
-                          value: '${e.images.length}',
-                          label: 'Photos',
-                          color: kOeIndigo,
-                        ),
-                        const Spacer(),
-                        if (e.isFeatured)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: kOeAmber.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                  color: kOeAmber.withOpacity(0.3)),
-                            ),
-                            child: Row(mainAxisSize: MainAxisSize.min, children: [
-                              const Icon(Icons.star_rounded,
-                                  size: 9, color: kOeAmber),
-                              const SizedBox(width: 3),
-                              Text('Featured',
-                                  style: GoogleFonts.ibmPlexMono(
-                                      fontSize: 9, color: kOeAmber)),
-                            ]),
+                      Row(
+                        children: [
+                          _FooterStat(
+                            icon: Icons.group_rounded,
+                            value: '${e.volunteerCount}',
+                            label: 'Volunteers',
+                            color: kOeGreen,
                           ),
-                      ]),
+                          const SizedBox(width: 10),
+                          _FooterStat(
+                            icon: Icons.image_rounded,
+                            value: '${e.images.length}',
+                            label: 'Photos',
+                            color: kOeIndigo,
+                          ),
+                          const Spacer(),
+                          if (e.isFeatured)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: kOeAmber.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: kOeAmber.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    size: 9,
+                                    color: kOeAmber,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'Featured',
+                                    style: GoogleFonts.ibmPlexMono(
+                                      fontSize: 9,
+                                      color: kOeAmber,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -353,12 +425,12 @@ class _EventListRowState extends State<EventListRow> {
 
   @override
   Widget build(BuildContext context) {
-    final e   = widget.event;
+    final e = widget.event;
     final cfg = statusConfig(e.status);
 
     return MouseRegion(
-      onEnter:  (_) => setState(() => _hovered = true),
-      onExit:   (_) => setState(() => _hovered = false),
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
@@ -373,73 +445,97 @@ class _EventListRowState extends State<EventListRow> {
               color: _hovered ? cfg.color.withOpacity(0.3) : kOeBorder,
             ),
           ),
-          child: Row(children: [
-            // Thumbnail
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 64, height: 64,
-                child: _EventImageBanner(event: e, height: 64),
+          child: Row(
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: _EventImageBanner(event: e, height: 64),
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
+              const SizedBox(width: 14),
 
-            // Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Expanded(
-                      child: Text(e.title,
-                          style: GoogleFonts.ibmPlexSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: kOeText,
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            e.title,
+                            style: GoogleFonts.ibmPlexSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: kOeText,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                        ),
+                        StatusBadge(status: e.status),
+                      ],
                     ),
-                    StatusBadge(status: e.status),
-                  ]),
-                  const SizedBox(height: 5),
-                  Row(children: [
-                    _MiniChip(icon: Icons.folder_outlined, label: e.category, color: kOeIndigo),
-                    const SizedBox(width: 6),
-                    _MiniChip(icon: Icons.schedule_rounded, label: e.eventType.replaceAll('-', ' '), color: kOeBlue),
-                  ]),
-                  const SizedBox(height: 5),
-                  Text(
-                    '${e.location.displayCity}  ·  ${widget.ctrl.formatDate(e.startDate)} → ${widget.ctrl.formatDate(e.endDate)}',
-                    style: GoogleFonts.ibmPlexMono(
-                        fontSize: 10, color: kOeSub),
-                  ),
-                ],
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        _MiniChip(
+                          icon: Icons.folder_outlined,
+                          label: e.category,
+                          color: kOeIndigo,
+                        ),
+                        const SizedBox(width: 6),
+                        _MiniChip(
+                          icon: Icons.schedule_rounded,
+                          label: e.eventType.replaceAll('-', ' '),
+                          color: kOeBlue,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '${e.location.displayCity}  ·  ${widget.ctrl.formatDate(e.startDate)} → ${widget.ctrl.formatDate(e.endDate)}',
+                      style: GoogleFonts.ibmPlexMono(
+                        fontSize: 10,
+                        color: kOeSub,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
+              const SizedBox(width: 16),
 
-            // Right stats
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _FooterStat(
+              // Right stats
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _FooterStat(
                     icon: Icons.group_rounded,
                     value: '${e.volunteerCount}',
                     label: 'volunteers',
-                    color: kOeGreen),
-                const SizedBox(height: 4),
-                _FooterStat(
+                    color: kOeGreen,
+                  ),
+                  const SizedBox(height: 4),
+                  _FooterStat(
                     icon: Icons.image_rounded,
                     value: '${e.images.length}',
                     label: 'images',
-                    color: kOeIndigo),
-              ],
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded,
-                color: kOeMuted, size: 18),
-          ]),
+                    color: kOeIndigo,
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: kOeMuted,
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -465,7 +561,8 @@ class _EventImageBanner extends StatelessWidget {
         width: double.infinity,
         height: height,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _Placeholder(event: event, height: height, cfg: cfg),
+        errorBuilder: (_, __, ___) =>
+            _Placeholder(event: event, height: height, cfg: cfg),
         loadingBuilder: (ctx, child, progress) {
           if (progress == null) return child;
           return _Placeholder(event: event, height: height, cfg: cfg);
@@ -480,14 +577,18 @@ class _Placeholder extends StatelessWidget {
   final OrgEvent event;
   final double height;
   final _StatusCfg cfg;
-  const _Placeholder({required this.event, required this.height, required this.cfg});
+  const _Placeholder({
+    required this.event,
+    required this.height,
+    required this.cfg,
+  });
 
   static const _categoryIcons = <String, IconData>{
-    'education':    Icons.school_rounded,
-    'health':       Icons.health_and_safety_rounded,
-    'environment':  Icons.eco_rounded,
+    'education': Icons.school_rounded,
+    'health': Icons.health_and_safety_rounded,
+    'environment': Icons.eco_rounded,
     'human-rights': Icons.gavel_rounded,
-    'community':    Icons.people_rounded,
+    'community': Icons.people_rounded,
   };
 
   @override
@@ -498,38 +599,49 @@ class _Placeholder extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            cfg.color.withOpacity(0.12),
-            kOeSurf3,
-          ],
+          colors: [cfg.color.withOpacity(0.12), kOeSurf3],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: Stack(children: [
-        // Background pattern dots
-        Positioned(
-          right: 12, bottom: 8,
-          child: Icon(icon, size: height * 0.45,
-              color: cfg.color.withOpacity(0.08)),
-        ),
-        Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(
-                color: cfg.color.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 18, color: cfg.color),
+      child: Stack(
+        children: [
+          // Background pattern dots
+          Positioned(
+            right: 12,
+            bottom: 8,
+            child: Icon(
+              icon,
+              size: height * 0.45,
+              color: cfg.color.withOpacity(0.08),
             ),
-            const SizedBox(height: 6),
-            Text('No Images',
-                style: GoogleFonts.ibmPlexMono(
-                    fontSize: 9, color: cfg.color.withOpacity(0.6))),
-          ]),
-        ),
-      ]),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: cfg.color.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 18, color: cfg.color),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'No Images',
+                  style: GoogleFonts.ibmPlexMono(
+                    fontSize: 9,
+                    color: cfg.color.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -541,11 +653,7 @@ class EventDetailPanel extends StatefulWidget {
   final OrgEvent event;
   final OrgEventsController ctrl;
 
-  const EventDetailPanel({
-    super.key,
-    required this.event,
-    required this.ctrl,
-  });
+  const EventDetailPanel({super.key, required this.event, required this.ctrl});
 
   @override
   State<EventDetailPanel> createState() => _EventDetailPanelState();
@@ -560,18 +668,26 @@ class _EventDetailPanelState extends State<EventDetailPanel>
   @override
   void initState() {
     super.initState();
-    _anim  = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _slide = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
     _anim.forward();
   }
 
   @override
-  void dispose() { _anim.dispose(); super.dispose(); }
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final e   = widget.event;
+    final e = widget.event;
     final cfg = statusConfig(e.status);
 
     return SlideTransition(
@@ -588,27 +704,36 @@ class _EventDetailPanelState extends State<EventDetailPanel>
             Container(
               padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
               decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: kOeBorder))),
-              child: Row(children: [
-                Expanded(
-                  child: Text('Event Details',
+                border: Border(bottom: BorderSide(color: kOeBorder)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Event Details',
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: kOeText,
-                      )),
-                ),
-                IconButton(
-                  onPressed: widget.ctrl.closeDetail,
-                  icon: const Icon(Icons.close_rounded,
-                      color: kOeSub, size: 18),
-                  style: IconButton.styleFrom(
-                    backgroundColor: kOeSurf3,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                  IconButton(
+                    onPressed: widget.ctrl.closeDetail,
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: kOeSub,
+                      size: 18,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: kOeSurf3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // ── Scrollable body ────────────────────────────
@@ -624,57 +749,76 @@ class _EventDetailPanelState extends State<EventDetailPanel>
                         borderRadius: BorderRadius.circular(12),
                         child: SizedBox(
                           height: 180,
-                          child: Stack(children: [
-                            Image.network(
-                              e.images[_imageIndex].url,
-                              width: double.infinity,
-                              height: 180,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _Placeholder(event: e, height: 180, cfg: cfg),
-                            ),
-                            if (e.images.length > 1) ...[
-                              Positioned(
-                                bottom: 8, right: 8,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: List.generate(e.images.length, (i) =>
-                                    GestureDetector(
-                                      onTap: () => setState(() => _imageIndex = i),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 150),
-                                        width: _imageIndex == i ? 16 : 6,
-                                        height: 6,
-                                        margin: const EdgeInsets.only(left: 3),
-                                        decoration: BoxDecoration(
-                                          color: _imageIndex == i
-                                              ? Colors.white
-                                              : Colors.white.withOpacity(0.4),
-                                          borderRadius: BorderRadius.circular(3),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                e.images[_imageIndex].url,
+                                width: double.infinity,
+                                height: 180,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _Placeholder(
+                                  event: e,
+                                  height: 180,
+                                  cfg: cfg,
+                                ),
+                              ),
+                              if (e.images.length > 1) ...[
+                                Positioned(
+                                  bottom: 8,
+                                  right: 8,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List.generate(
+                                      e.images.length,
+                                      (i) => GestureDetector(
+                                        onTap: () =>
+                                            setState(() => _imageIndex = i),
+                                        child: AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 150,
+                                          ),
+                                          width: _imageIndex == i ? 16 : 6,
+                                          height: 6,
+                                          margin: const EdgeInsets.only(
+                                            left: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _imageIndex == i
+                                                ? Colors.white
+                                                : Colors.white.withOpacity(0.4),
+                                            borderRadius: BorderRadius.circular(
+                                              3,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                bottom: 8, left: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    '${_imageIndex + 1}/${e.images.length}',
-                                    style: GoogleFonts.ibmPlexMono(
-                                        fontSize: 10, color: Colors.white),
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${_imageIndex + 1}/${e.images.length}',
+                                      style: GoogleFonts.ibmPlexMono(
+                                        fontSize: 10,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
-                          ]),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -687,67 +831,122 @@ class _EventDetailPanelState extends State<EventDetailPanel>
                     ],
 
                     // Title + status
-                    Row(children: [
-                      Expanded(
-                        child: Text(e.title,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            e.title,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: kOeText,
-                            )),
-                      ),
-                    ]),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     StatusBadge(status: e.status),
                     const SizedBox(height: 14),
 
                     // Description
-                    Text(e.description,
-                        style: GoogleFonts.ibmPlexSans(
-                            fontSize: 12, color: kOeSub, height: 1.6)),
+                    Text(
+                      e.description,
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 12,
+                        color: kOeSub,
+                        height: 1.6,
+                      ),
+                    ),
                     const SizedBox(height: 18),
 
                     _Divider(),
 
                     // Detail rows
-                    _DetailRow(icon: Icons.category_rounded,        label: 'Category',     value: e.category),
-                    _DetailRow(icon: Icons.event_repeat_rounded,    label: 'Event Type',   value: e.eventType.replaceAll('-', ' ')),
-                    _DetailRow(icon: Icons.location_on_rounded,     label: 'Location',     value: '${e.location.address}, ${e.location.displayCity}'),
-                    _DetailRow(icon: Icons.play_circle_outline,     label: 'Starts',       value: widget.ctrl.formatDate(e.startDate)),
-                    _DetailRow(icon: Icons.stop_circle_outlined,    label: 'Ends',         value: widget.ctrl.formatDate(e.endDate)),
-                    _DetailRow(icon: Icons.group_rounded,           label: 'Max Volunteers', value: '${e.maxVolunteers}'),
-                    _DetailRow(icon: Icons.how_to_reg_rounded,      label: 'Eligibility',  value: e.eligibility),
-                    _DetailRow(icon: Icons.people_alt_rounded,      label: 'Enrolled',     value: '${e.volunteerCount} volunteer${e.volunteerCount != 1 ? 's' : ''}', valueColor: kOeGreen),
+                    _DetailRow(
+                      icon: Icons.category_rounded,
+                      label: 'Category',
+                      value: e.category,
+                    ),
+                    _DetailRow(
+                      icon: Icons.event_repeat_rounded,
+                      label: 'Event Type',
+                      value: e.eventType.replaceAll('-', ' '),
+                    ),
+                    _DetailRow(
+                      icon: Icons.location_on_rounded,
+                      label: 'Location',
+                      value: '${e.location.address}, ${e.location.displayCity}',
+                    ),
+                    _DetailRow(
+                      icon: Icons.play_circle_outline,
+                      label: 'Starts',
+                      value: widget.ctrl.formatDate(e.startDate),
+                    ),
+                    _DetailRow(
+                      icon: Icons.stop_circle_outlined,
+                      label: 'Ends',
+                      value: widget.ctrl.formatDate(e.endDate),
+                    ),
+                    _DetailRow(
+                      icon: Icons.group_rounded,
+                      label: 'Max Volunteers',
+                      value: '${e.maxVolunteers}',
+                    ),
+                    _DetailRow(
+                      icon: Icons.how_to_reg_rounded,
+                      label: 'Eligibility',
+                      value: e.eligibility,
+                    ),
+                    _DetailRow(
+                      icon: Icons.people_alt_rounded,
+                      label: 'Enrolled',
+                      value:
+                          '${e.volunteerCount} volunteer${e.volunteerCount != 1 ? 's' : ''}',
+                      valueColor: kOeGreen,
+                    ),
 
                     if (e.parsedSkills.isNotEmpty) ...[
                       const SizedBox(height: 14),
                       _Divider(),
                       const SizedBox(height: 14),
-                      Text('Required Skills',
-                          style: GoogleFonts.ibmPlexSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: kOeSub,
-                            letterSpacing: 0.5,
-                          )),
+                      Text(
+                        'Required Skills',
+                        style: GoogleFonts.ibmPlexSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: kOeSub,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 6, runSpacing: 6,
-                        children: e.parsedSkills.map((s) =>
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 9, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: kOeIndigo.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: kOeIndigo.withOpacity(0.25)),
-                            ),
-                            child: Text(s,
-                                style: GoogleFonts.ibmPlexMono(
-                                    fontSize: 10, color: kOeIndigo)),
-                          ),
-                        ).toList(),
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: e.parsedSkills
+                            .map(
+                              (s) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: kOeIndigo.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: kOeIndigo.withOpacity(0.25),
+                                  ),
+                                ),
+                                child: Text(
+                                  s,
+                                  style: GoogleFonts.ibmPlexMono(
+                                    fontSize: 10,
+                                    color: kOeIndigo,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
                     ],
 
@@ -759,10 +958,91 @@ class _EventDetailPanelState extends State<EventDetailPanel>
                     Text(
                       'Created ${widget.ctrl.formatDate(e.createdAt)}  ·  Updated ${widget.ctrl.formatDate(e.updatedAt)}',
                       style: GoogleFonts.ibmPlexMono(
-                          fontSize: 9, color: kOeMuted),
+                        fontSize: 9,
+                        color: kOeMuted,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     _IdChip(id: e.id),
+                    const SizedBox(height: 20),
+
+                    // Action buttons
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Get.to(
+                                () =>
+                                    EditEventPage(event: e, ctrl: widget.ctrl),
+                                transition: Transition.rightToLeft,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: kOeBlue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(Icons.edit_rounded, size: 16),
+                            label: Text(
+                              'Edit Event',
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              widget.ctrl.closeDetail();
+                              Get.dialog(
+                                Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: VolunteerManagementPanel(
+                                      event: e,
+                                      ctrl: widget.ctrl,
+                                    ),
+                                  ),
+                                ),
+                                barrierDismissible: true,
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: kOeBlue),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Groups2Rounded,
+                              size: 16,
+                              color: kOeBlue,
+                            ),
+                            label: Text(
+                              'Manage Volunteers',
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: kOeBlue,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -773,6 +1053,9 @@ class _EventDetailPanelState extends State<EventDetailPanel>
     );
   }
 }
+
+// Fix for IconData reference
+const Groups2Rounded = IconData(0xe1d0, fontFamily: 'MaterialIcons');
 
 class _Divider extends StatelessWidget {
   @override
@@ -803,29 +1086,42 @@ class _DetailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(children: [
-        Container(
-          width: 28, height: 28,
-          decoration: BoxDecoration(
-            color: kOeSurf3,
-            borderRadius: BorderRadius.circular(7),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: kOeSurf3,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Icon(icon, size: 13, color: kOeSub),
           ),
-          child: Icon(icon, size: 13, color: kOeSub),
-        ),
-        const SizedBox(width: 10),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label.toUpperCase(),
-              style: GoogleFonts.ibmPlexMono(
-                  fontSize: 9, color: kOeMuted, letterSpacing: 0.5)),
-          const SizedBox(height: 1),
-          Text(value,
-              style: GoogleFonts.ibmPlexSans(
-                fontSize: 12,
-                color: valueColor ?? kOeText,
-                fontWeight: FontWeight.w500,
-              )),
-        ]),
-      ]),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.ibmPlexMono(
+                  fontSize: 9,
+                  color: kOeMuted,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                value,
+                style: GoogleFonts.ibmPlexSans(
+                  fontSize: 12,
+                  color: valueColor ?? kOeText,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -843,15 +1139,14 @@ class _IdChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: kOeBorder2),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.tag_rounded, size: 11, color: kOeMuted),
-        const SizedBox(width: 5),
-        Text(id,
-            style: GoogleFonts.ibmPlexMono(
-              fontSize: 9,
-              color: kOeSub,
-            )),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.tag_rounded, size: 11, color: kOeMuted),
+          const SizedBox(width: 5),
+          Text(id, style: GoogleFonts.ibmPlexMono(fontSize: 9, color: kOeSub)),
+        ],
+      ),
     );
   }
 }
@@ -863,7 +1158,11 @@ class _MiniChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  const _MiniChip({required this.icon, required this.label, required this.color});
+  const _MiniChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -873,12 +1172,17 @@ class _MiniChip extends StatelessWidget {
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 10, color: color),
-        const SizedBox(width: 3),
-        Text(label,
-            style: GoogleFonts.ibmPlexMono(fontSize: 9, color: color)),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: GoogleFonts.ibmPlexMono(fontSize: 9, color: color),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -888,22 +1192,35 @@ class _FooterStat extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
-  const _FooterStat({required this.icon, required this.value,
-      required this.label, required this.color});
+  const _FooterStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: 12, color: color),
-      const SizedBox(width: 3),
-      Text(value,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: color),
+        const SizedBox(width: 3),
+        Text(
+          value,
           style: GoogleFonts.ibmPlexMono(
-            fontSize: 11, color: color, fontWeight: FontWeight.w600,
-          )),
-      const SizedBox(width: 2),
-      Text(label,
-          style: GoogleFonts.ibmPlexSans(fontSize: 10, color: kOeMuted)),
-    ]);
+            fontSize: 11,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 2),
+        Text(
+          label,
+          style: GoogleFonts.ibmPlexSans(fontSize: 10, color: kOeMuted),
+        ),
+      ],
+    );
   }
 }
 
@@ -936,7 +1253,7 @@ class _FilterTabState extends State<FilterTab> {
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => _h = true),
-      onExit:  (_) => setState(() => _h = false),
+      onExit: (_) => setState(() => _h = false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -946,8 +1263,8 @@ class _FilterTabState extends State<FilterTab> {
             color: widget.active
                 ? widget.accent.withOpacity(0.12)
                 : _h
-                    ? kOeSurf3
-                    : Colors.transparent,
+                ? kOeSurf3
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: widget.active
@@ -955,32 +1272,46 @@ class _FilterTabState extends State<FilterTab> {
                   : Colors.transparent,
             ),
           ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Text(widget.label,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.label,
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 12,
-                  color: widget.active ? kOeText : _h ? kOeText : kOeSub,
-                  fontWeight: widget.active ? FontWeight.w600 : FontWeight.w400,
-                )),
-            if (widget.count > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
                   color: widget.active
-                      ? widget.accent.withOpacity(0.2)
-                      : kOeSurf3,
-                  borderRadius: BorderRadius.circular(10),
+                      ? kOeText
+                      : _h
+                      ? kOeText
+                      : kOeSub,
+                  fontWeight: widget.active ? FontWeight.w600 : FontWeight.w400,
                 ),
-                child: Text('${widget.count}',
+              ),
+              if (widget.count > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.active
+                        ? widget.accent.withOpacity(0.2)
+                        : kOeSurf3,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${widget.count}',
                     style: GoogleFonts.ibmPlexMono(
                       fontSize: 9,
                       color: widget.active ? widget.accent : kOeMuted,
                       fontWeight: FontWeight.w700,
-                    )),
-              ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ]),
+          ),
         ),
       ),
     );
@@ -1007,30 +1338,37 @@ class OeEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(
-          width: 72, height: 72,
-          decoration: BoxDecoration(
-            color: kOeSurf3,
-            shape: BoxShape.circle,
-            border: Border.all(color: kOeBorder2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: kOeSurf3,
+              shape: BoxShape.circle,
+              border: Border.all(color: kOeBorder2),
+            ),
+            child: Icon(icon, color: kOeMuted, size: 30),
           ),
-          child: Icon(icon, color: kOeMuted, size: 30),
-        ),
-        const SizedBox(height: 18),
-        Text(title,
+          const SizedBox(height: 18),
+          Text(
+            title,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: kOeText,
-            )),
-        const SizedBox(height: 6),
-        Text(subtitle,
-            style: GoogleFonts.ibmPlexSans(
-                fontSize: 12, color: kOeSub),
-            textAlign: TextAlign.center),
-        if (action != null) ...[const SizedBox(height: 20), action!],
-      ]),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: GoogleFonts.ibmPlexSans(fontSize: 12, color: kOeSub),
+            textAlign: TextAlign.center,
+          ),
+          if (action != null) ...[const SizedBox(height: 20), action!],
+        ],
+      ),
     );
   }
 }
@@ -1040,7 +1378,8 @@ class OeEmptyState extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 class SkeletonCard extends StatefulWidget {
   const SkeletonCard({super.key});
-  @override State<SkeletonCard> createState() => _SkeletonCardState();
+  @override
+  State<SkeletonCard> createState() => _SkeletonCardState();
 }
 
 class _SkeletonCardState extends State<SkeletonCard>
@@ -1051,12 +1390,18 @@ class _SkeletonCardState extends State<SkeletonCard>
   @override
   void initState() {
     super.initState();
-    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
     _shimmer = CurvedAnimation(parent: _anim, curve: Curves.easeInOut);
   }
 
   @override
-  void dispose() { _anim.dispose(); super.dispose(); }
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1070,28 +1415,37 @@ class _SkeletonCardState extends State<SkeletonCard>
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: kOeBorder),
           ),
-          child: Column(children: [
-            Container(
-              height: 130,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(opacity),
-                borderRadius: const BorderRadius.only(
-                  topLeft:  Radius.circular(16),
-                  topRight: Radius.circular(16),
+          child: Column(
+            children: [
+              Container(
+                height: 130,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(opacity),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _SkeletonLine(width: double.infinity, height: 14, opacity: opacity),
-                const SizedBox(height: 8),
-                _SkeletonLine(width: 120, height: 10, opacity: opacity),
-                const SizedBox(height: 8),
-                _SkeletonLine(width: 80, height: 10, opacity: opacity),
-              ]),
-            ),
-          ]),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SkeletonLine(
+                      width: double.infinity,
+                      height: 14,
+                      opacity: opacity,
+                    ),
+                    const SizedBox(height: 8),
+                    _SkeletonLine(width: 120, height: 10, opacity: opacity),
+                    const SizedBox(height: 8),
+                    _SkeletonLine(width: 80, height: 10, opacity: opacity),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -1102,7 +1456,11 @@ class _SkeletonLine extends StatelessWidget {
   final double width;
   final double height;
   final double opacity;
-  const _SkeletonLine({required this.width, required this.height, required this.opacity});
+  const _SkeletonLine({
+    required this.width,
+    required this.height,
+    required this.opacity,
+  });
   @override
   Widget build(BuildContext context) {
     return Container(
