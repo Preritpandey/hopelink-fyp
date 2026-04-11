@@ -3,13 +3,14 @@ import {
   uploadCampaignReport,
   getApprovedCampaignReport,
   downloadApprovedCampaignReport,
+  downloadReportById,
   getOrganizationReports,
   getPendingReports,
   approveReport,
   rejectReport,
 } from '../controllers/campaignReport.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
-import { handleFileUpload } from '../config/multer.config.js';
+import { uploadPdf } from '../middleware/multer.js';
 
 const router = express.Router();
 
@@ -24,13 +25,14 @@ router.use(authenticate);
 router.post(
   '/:campaignId',
   authorize('organization'),
-  handleFileUpload([{ name: 'report', maxCount: 1 }]),
+  uploadPdf.single('report'),
   uploadCampaignReport
 );
 router.get('/organization', authorize('organization'), getOrganizationReports);
 
 // Admin routes
 router.get('/pending', authorize('admin'), getPendingReports);
+router.get('/:reportId/download', authorize('admin'), downloadReportById);
 router.put('/:reportId/approve', authorize('admin'), approveReport);
 router.put('/:reportId/reject', authorize('admin'), rejectReport);
 

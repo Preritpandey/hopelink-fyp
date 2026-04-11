@@ -48,6 +48,7 @@ class LoginUser {
   });
 
   factory LoginUser.fromJson(Map<String, dynamic> json) {
+    final organizationJson = json['organization'] as Map<String, dynamic>?;
     return LoginUser(
       id: json['_id'] as String,
       name: json['name'] as String,
@@ -55,9 +56,7 @@ class LoginUser {
       role: json['role'] as String,
       isVerified: json['isVerified'] as bool,
       isActive: json['isActive'] as bool,
-      organization: LoginOrganization.fromJson(
-        json['organization'] as Map<String, dynamic>,
-      ),
+      organization: LoginOrganization.fromJson(organizationJson),
     );
   }
 }
@@ -75,12 +74,12 @@ class LoginOrganization {
     required this.status,
   });
 
-  factory LoginOrganization.fromJson(Map<String, dynamic> json) {
+  factory LoginOrganization.fromJson(Map<String, dynamic>? json) {
     return LoginOrganization(
-      id: json['_id'] as String,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      status: json['status'] as String,
+      id: json?['_id'] as String? ?? '',
+      name: json?['name'] as String? ?? '',
+      type: json?['type'] as String? ?? '',
+      status: json?['status'] as String? ?? '',
     );
   }
 }

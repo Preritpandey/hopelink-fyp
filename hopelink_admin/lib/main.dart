@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/Auth/pages/login_page.dart';
+import 'features/Admin/Home/pages/admin_home_page.dart';
 import 'features/Dashboard/home_page.dart';
 
 void main() {
@@ -27,26 +28,35 @@ class _AuthGate extends StatelessWidget {
   const _AuthGate();
 
   static const _tokenKey = 'auth_token';
+  static const _roleKey = 'user_role';
 
-  Future<bool> _hasToken() async {
+  Future<String?> _getStoredRole() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
-    return token != null && token.isNotEmpty;
+    if (token == null || token.isEmpty) {
+      return null;
+    }
+    return prefs.getString(_roleKey);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _hasToken(),
+    return FutureBuilder<String?>(
+      future: _getStoredRole(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        return snapshot.data == true
-            ? const DashboardShell()
-            : const LoginPage();
+        final role = snapshot.data?.toLowerCase();
+        if (role == 'admin') {
+          return const AdminHomePage();
+        }
+        if (role == 'organization') {
+          return const DashboardShell();
+        }
+        return const LoginPage();
       },
     );
   }

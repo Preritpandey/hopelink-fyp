@@ -576,7 +576,8 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isApproved = status.toLowerCase() == 'approved';
+    final safeStatus = status.trim();
+    final isApproved = safeStatus.toLowerCase() == 'approved';
     final color = isApproved
         ? const Color(0xFF00D4AA)
         : const Color(0xFFFFB84C);
@@ -603,7 +604,9 @@ class _StatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            status[0].toUpperCase() + status.substring(1),
+            safeStatus.isEmpty
+                ? 'Unknown'
+                : safeStatus[0].toUpperCase() + safeStatus.substring(1),
             style: GoogleFonts.dmMono(fontSize: 11, color: color),
           ),
         ],

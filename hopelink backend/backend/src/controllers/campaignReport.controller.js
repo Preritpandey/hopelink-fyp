@@ -8,6 +8,7 @@ import {
   UnauthorizedError,
 } from '../errors/index.js';
 import fs from 'fs';
+import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
 
 const ensurePdfFile = (file) => {
   if (!file) {
@@ -35,6 +36,8 @@ const buildReportResponse = (report) => ({
         mimeType: report.reportFile.mimeType,
         size: report.reportFile.size,
         uploadedAt: report.reportFile.uploadedAt,
+        url: report.reportFile.url,
+        publicId: report.reportFile.publicId,
       }
     : null,
 });
@@ -43,7 +46,7 @@ const buildReportResponse = (report) => ({
 // @route   POST /api/v1/campaign-reports/:campaignId
 // @access  Private (Organization)
 export const uploadCampaignReport = async (req, res) => {
-  const file = req.files?.report?.[0];
+  const file = req.file;
   ensurePdfFile(file);
 
   const campaign = await Campaign.findById(req.params.campaignId);
@@ -60,18 +63,33 @@ export const uploadCampaignReport = async (req, res) => {
     throw new BadRequestError('No organization found for this user');
   }
 
+  // Upload to Cloudinary
+  const cloudResult = await uploadToCloudinary(file, 'campaign-reports');
+
   const reportFile = {
-    localPath: file.path,
+    localPath: file.path || null,
     originalName: file.originalname,
     mimeType: file.mimetype,
     size: file.size,
     uploadedAt: new Date(),
+    url: cloudResult?.url || null,
+    publicId: cloudResult?.public_id || null,
   };
 
   const existingReport = await CampaignReport.findOne({ campaign: campaign._id });
 
   let report;
   if (existingReport) {
+    // Delete previous cloudinary file if exists
+    if (existingReport.reportFile?.publicId) {
+      try {
+        await deleteFromCloudinary(existingReport.reportFile.publicId);
+      } catch (err) {
+        console.warn('Failed to delete previous Cloudinary file:', err.message);
+      }
+    }
+
+    // Delete previous local file if exists
     if (existingReport.reportFile?.localPath && fs.existsSync(existingReport.reportFile.localPath)) {
       try {
         fs.unlinkSync(existingReport.reportFile.localPath);
@@ -127,7 +145,7 @@ export const getApprovedCampaignReport = async (req, res) => {
         size: report.reportFile.size,
         uploadedAt: report.reportFile.uploadedAt,
       },
-      downloadEndpoint: `/api/v1/campaign-reports/campaign/${report.campaign}/download`,
+      downloadEndpoint: report.reportFile?.url || `/api/v1/campaign-reports/campaign/${report.campaign}/download`,
       approvedAt: report.reviewedAt,
     },
   });
@@ -144,6 +162,33 @@ export const downloadApprovedCampaignReport = async (req, res) => {
 
   if (!report) {
     throw new NotFoundError('No approved report found for this campaign');
+  }
+
+  // If Cloudinary URL exists, redirect to it
+  if (report.reportFile?.url) {
+    return res.redirect(report.reportFile.url);
+  }
+
+  const filePath = report.reportFile?.localPath;
+  if (!filePath || !fs.existsSync(filePath)) {
+    throw new NotFoundError('Report file not found');
+  }
+
+  return res.download(filePath, report.reportFile.originalName || 'campaign-report.pdf');
+};
+
+// New: admin download by reportId (admin-only)
+// @desc    Download campaign report by report id (admin)
+// @route   GET /api/v1/campaign-reports/:reportId/download
+// @access  Private (Admin)
+export const downloadReportById = async (req, res) => {
+  const report = await CampaignReport.findById(req.params.reportId);
+  if (!report) {
+    throw new NotFoundError('Report not found');
+  }
+
+  if (report.reportFile?.url) {
+    return res.redirect(report.reportFile.url);
   }
 
   const filePath = report.reportFile?.localPath;
@@ -181,7 +226,13 @@ export const getPendingReports = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     count: reports.length,
-    data: reports.map(buildReportResponse),
+    data: reports.map((report) => {
+      const base = '';
+      return {
+        ...buildReportResponse(report),
+        downloadEndpoint: report.reportFile?.url || `${base}/api/v1/campaign-reports/${report._id}/download`,
+      };
+    }),
   });
 };
 
@@ -193,6 +244,11 @@ export const approveReport = async (req, res) => {
 
   if (!report) {
     throw new NotFoundError('Report not found');
+  }
+
+  // Ensure a file path or cloud URL exists before approving
+  if (!report.reportFile || (!report.reportFile.localPath && !report.reportFile.url)) {
+    throw new BadRequestError('Report file is missing or invalid. Cannot approve.');
   }
 
   report.status = 'approved';

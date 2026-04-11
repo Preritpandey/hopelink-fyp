@@ -223,7 +223,10 @@ class _RightPanel extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Obx(() {
               // ── Show welcome card after login ───────────────
-              if (ctrl.loginSuccess.value && ctrl.currentUser.value != null) {
+              if (ctrl.loginSuccess.value &&
+                  ctrl.currentUser.value != null &&
+                  ctrl.currentUser.value!.role.toLowerCase() ==
+                      'organization') {
                 return _buildSuccessView(ctrl);
               }
               // ── Login form ──────────────────────────────────

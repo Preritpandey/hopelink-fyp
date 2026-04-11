@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-//  CONTROLLER  —  login_controller.dart
-// ─────────────────────────────────────────────────────────────
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -12,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/login_model.dart';
+import '../../Admin/Home/pages/admin_home_page.dart';
+import '../../Dashboard/home_page.dart';
 
 class LoginController extends GetxController {
   // ── Form ───────────────────────────────────────────────────
@@ -33,6 +31,7 @@ class LoginController extends GetxController {
 
   static const _baseUrl = 'http://localhost:3008/api/v1';
   static const _tokenKey = 'auth_token';
+  static const _roleKey = 'user_role';
   static const _emailKey = 'saved_email';
   static const _orgIdKey = 'org_id';
   static const _orgNameKey = 'org_name';
@@ -98,6 +97,7 @@ class LoginController extends GetxController {
         // Persist token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, result.token);
+        await prefs.setString(_roleKey, result.user.role);
 
         // Save user data and organization info
         final user = result.user;
@@ -120,6 +120,11 @@ class LoginController extends GetxController {
 
         currentUser.value = result.user;
         loginSuccess.value = true;
+        if (user.role.toLowerCase() == 'admin') {
+          Get.offAll(() => const AdminHomePage());
+        } else {
+          Get.offAll(() => const DashboardShell());
+        }
 
         // Navigate to dashboard — adjust route as needed
         // Get.offAllNamed('/dashboard');
@@ -142,6 +147,7 @@ class LoginController extends GetxController {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
+    await prefs.remove(_roleKey);
     await prefs.remove(_orgIdKey);
     await prefs.remove(_orgNameKey);
     currentUser.value = null;

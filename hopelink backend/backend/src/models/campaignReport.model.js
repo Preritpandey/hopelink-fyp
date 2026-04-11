@@ -4,7 +4,7 @@ const reportFileSchema = new mongoose.Schema(
   {
     localPath: {
       type: String,
-      required: [true, 'Report file path is required'],
+      default: null,
     },
     originalName: {
       type: String,
@@ -19,6 +19,14 @@ const reportFileSchema = new mongoose.Schema(
     uploadedAt: {
       type: Date,
       default: Date.now,
+    },
+    url: {
+      type: String,
+      default: null,
+    },
+    publicId: {
+      type: String,
+      default: null,
     },
   },
   { _id: false }
