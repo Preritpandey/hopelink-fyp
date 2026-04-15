@@ -3,6 +3,7 @@ import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 import '../models/campaign_model.dart';
+import '../models/campaign_report_model.dart';
 
 class CampaignService {
   static const String campaignsBox = 'campaigns_box';
@@ -106,6 +107,29 @@ class CampaignService {
       print('Error getting campaign from local: $e');
       return null;
     }
+  }
+
+  /// Fetch approved campaign report if available
+  Future<CampaignReport?> getCampaignReport(String campaignId) async {
+    final response = await http
+        .get(
+          Uri.parse(ApiEndpoints.campaignReportById(campaignId)),
+          headers: {'Content-Type': 'application/json'},
+        )
+        .timeout(const Duration(seconds: 10));
+
+    final jsonData = json.decode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200 && jsonData['success'] == true) {
+      return CampaignReport.fromJson(
+        Map<String, dynamic>.from(jsonData['data'] ?? {}),
+      );
+    }
+
+    final message =
+        jsonData['message']?.toString() ??
+        'Failed to load campaign report: ${response.statusCode}';
+    throw Exception(message);
   }
 
   /// Get last sync time

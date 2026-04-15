@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../models/campaign_model.dart';
+import '../models/campaign_report_model.dart';
 import '../services/campaign_service.dart';
 
 class CampaignController extends GetxController {
@@ -160,6 +161,15 @@ class CampaignController extends GetxController {
         borderRadius: 12,
       );
       return null;
+    }
+  }
+
+  Future<CampaignReport?> getCampaignReport(String campaignId) async {
+    try {
+      return await _service.getCampaignReport(campaignId);
+    } catch (e) {
+      print('Error getting campaign report: $e');
+      rethrow;
     }
   }
 

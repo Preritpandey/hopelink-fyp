@@ -29,6 +29,7 @@ dependencies:
   mime: ^1.0.4
   fluttertoast: ^8.2.2
   open_filex: 
+  url_launcher: ^6.3.2
   shimmer:
   hive: ^2.2.3
   hive_flutter: ^1.1.0

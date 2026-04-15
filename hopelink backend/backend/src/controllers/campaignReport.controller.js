@@ -132,7 +132,10 @@ export const getApprovedCampaignReport = async (req, res) => {
   });
 
   if (!report) {
-    throw new NotFoundError('No approved report found for this campaign');
+    return res.status(StatusCodes.OK).json({
+      success: false,
+      message: 'Campaign report has not been uploaded or approved yet',
+    });
   }
 
   res.status(StatusCodes.OK).json({

@@ -5,9 +5,11 @@ import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../models/campaign_model.dart';
+import '../models/campaign_report_model.dart';
 
 class CampaignDetailsPage extends StatefulWidget {
   const CampaignDetailsPage({super.key});
@@ -25,6 +27,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   late AnimationController _animationController;
   late String campaignId;
   Campaign? campaign;
+  CampaignReport? _campaignReport;
+  bool _isReportLoading = false;
+  String? _reportMessage;
 
   void _initFromArgs(dynamic args) {
     // Accept String, Campaign, or Map payloads and normalize to id + campaign.
@@ -74,6 +79,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     if (campaign == null && campaignId.isNotEmpty) {
       _loadCampaignDetails();
     }
+    if (campaignId.isNotEmpty) {
+      _loadCampaignReport();
+    }
 
     _animationController = AnimationController(
       vsync: this,
@@ -89,6 +97,35 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     });
   }
 
+  Future<void> _loadCampaignReport() async {
+    setState(() {
+      _isReportLoading = true;
+      _reportMessage = null;
+    });
+
+    try {
+      final report = await _controller.getCampaignReport(campaignId);
+      if (!mounted) return;
+
+      setState(() {
+        _campaignReport = report;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _campaignReport = null;
+        _reportMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        _isReportLoading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -102,6 +139,72 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
 
   String _formatDate(DateTime date) {
     return DateFormat('MMM dd, yyyy').format(date);
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes <= 0) return '0 B';
+
+    const units = ['B', 'KB', 'MB', 'GB'];
+    double size = bytes.toDouble();
+    int unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+
+    final formatted = unitIndex == 0
+        ? size.toStringAsFixed(0)
+        : size.toStringAsFixed(1);
+
+    return '$formatted ${units[unitIndex]}';
+  }
+
+  Future<void> _openCampaignReport() async {
+    final reportUrl = _campaignReport?.downloadEndpoint;
+    if (reportUrl == null || reportUrl.isEmpty) {
+      Get.snackbar(
+        'Report unavailable',
+        'No report file is available for this campaign yet.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+      return;
+    }
+
+    final uri = Uri.tryParse(reportUrl);
+    if (uri == null) {
+      Get.snackbar(
+        'Invalid report link',
+        'The report link could not be opened.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+      return;
+    }
+
+    final didLaunch = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (!didLaunch && mounted) {
+      Get.snackbar(
+        'Open failed',
+        'Could not open the campaign report.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    }
   }
 
   @override
@@ -645,6 +748,179 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               }).toList(),
             ),
           ],
+          24.verticalSpace,
+          _buildCampaignReportSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCampaignReportSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColorToken.primary.color.withOpacity(0.12),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColorToken.primary.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.receipt_long_rounded,
+                  color: AppColorToken.primary.color,
+                ),
+              ),
+              12.horizontalSpace,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Donation report',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                    4.verticalSpace,
+                    Text(
+                      'See the approved report file for this campaign.',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          16.verticalSpace,
+          if (_isReportLoading)
+            Row(
+              children: [
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColorToken.primary.color,
+                    ),
+                  ),
+                ),
+                12.horizontalSpace,
+                Expanded(
+                  child: Text(
+                    'Loading campaign report...',
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else if (_campaignReport != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _campaignReport!.reportFile.originalName,
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                12.verticalSpace,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildReportMetaChip(
+                      Icons.picture_as_pdf_rounded,
+                      _campaignReport!.reportFile.mimeType.toUpperCase(),
+                    ),
+                    _buildReportMetaChip(
+                      Icons.sd_storage_rounded,
+                      _formatFileSize(_campaignReport!.reportFile.size),
+                    ),
+                    _buildReportMetaChip(
+                      Icons.upload_file_rounded,
+                      'Uploaded ${_formatDate(_campaignReport!.reportFile.uploadedAt)}',
+                    ),
+                    if (_campaignReport!.approvedAt != null)
+                      _buildReportMetaChip(
+                        Icons.verified_rounded,
+                        'Approved ${_formatDate(_campaignReport!.approvedAt!)}',
+                      ),
+                  ],
+                ),
+                16.verticalSpace,
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    title: 'View Report',
+                    backgroundColor: AppColorToken.primary.color,
+                    onPressed: _openCampaignReport,
+                    radius: 14,
+                  ),
+                ),
+              ],
+            )
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Text(
+                _reportMessage ??
+                    'Campaign report has not been uploaded or approved yet.',
+                style: AppTextStyle.bodyMedium.copyWith(
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportMetaChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColorToken.primary.color),
+          6.horizontalSpace,
+          Text(
+            label,
+            style: AppTextStyle.bodySmall.copyWith(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
