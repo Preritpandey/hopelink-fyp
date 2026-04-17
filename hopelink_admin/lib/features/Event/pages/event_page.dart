@@ -832,6 +832,31 @@ class _Step2Details extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
+                      Expanded(
+                        child: EvField(
+                          controller: ctrl.creditHoursCtrl,
+                          label: 'Credit Hours',
+                          hint: '3',
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          prefix: const Padding(
+                            padding: EdgeInsets.only(left: 12, right: 8),
+                            child: Icon(
+                              Icons.schedule_rounded,
+                              size: 17,
+                              color: kEvMuted,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    children: [
                       Expanded(child: _EligibilityDropdown(ctrl: ctrl)),
                     ],
                   ),

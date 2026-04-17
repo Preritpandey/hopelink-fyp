@@ -50,6 +50,7 @@ class CreateEventRequest {
   final String startDate;
   final String endDate;
   final int maxVolunteers;
+  final int creditHours;
   final String eligibility;
   final String requiredSkills; // comma-separated
 
@@ -65,6 +66,7 @@ class CreateEventRequest {
     required this.startDate,
     required this.endDate,
     required this.maxVolunteers,
+    required this.creditHours,
     required this.eligibility,
     required this.requiredSkills,
   });
@@ -81,6 +83,7 @@ class CreateEventRequest {
     'startDate': startDate,
     'endDate': endDate,
     'maxVolunteers': maxVolunteers.toString(),
+    'creditHours': creditHours.toString(),
     'eligibility': eligibility,
     'requiredSkills': requiredSkills,
   };

@@ -29,7 +29,8 @@ class VolunteerUserInfo {
       id: json['_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      profilePicture: json['profileImage'] as String? ?? json['profilePicture'] as String?,
+      profilePicture:
+          json['profileImage'] as String? ?? json['profilePicture'] as String?,
       phone: json['phone'] as String?,
       bio: json['bio'] as String?,
       skills: (json['skills'] as List? ?? []).map((e) => e.toString()).toList(),
@@ -85,11 +86,15 @@ class EventVolunteer {
       id: json['_id'] as String? ?? '',
       eventId: json['event'] as String? ?? json['eventId'] as String? ?? '',
       userId: VolunteerUserInfo.fromJson(
-        json['user'] as Map<String, dynamic>? ?? json['userId'] as Map<String, dynamic>? ?? {},
+        json['user'] as Map<String, dynamic>? ??
+            json['userId'] as Map<String, dynamic>? ??
+            {},
       ),
       status: json['status'] as String? ?? 'pending',
       appliedAt: _parse(
-        json['enrollmentDate'] as String? ?? json['createdAt'] as String? ?? json['CreatedAt'] as String?,
+        json['enrollmentDate'] as String? ??
+            json['createdAt'] as String? ??
+            json['CreatedAt'] as String?,
       ),
       approvedAt: _parse(json['approvedAt'] as String?),
       approverNotes: json['approverNotes'] as String?,
@@ -198,6 +203,7 @@ class UpdateEventRequest {
   final DateTime? startDate;
   final DateTime? endDate;
   final int? maxVolunteers;
+  final int? creditHours;
   final List<String>? requiredSkills;
   final String? eligibility;
   final Map<String, dynamic>? location;
@@ -211,6 +217,7 @@ class UpdateEventRequest {
     this.startDate,
     this.endDate,
     this.maxVolunteers,
+    this.creditHours,
     this.requiredSkills,
     this.eligibility,
     this.location,
@@ -226,6 +233,7 @@ class UpdateEventRequest {
     if (startDate != null) map['startDate'] = startDate!.toIso8601String();
     if (endDate != null) map['endDate'] = endDate!.toIso8601String();
     if (maxVolunteers != null) map['maxVolunteers'] = maxVolunteers;
+    if (creditHours != null) map['creditHours'] = creditHours;
     if (requiredSkills != null) map['requiredSkills'] = requiredSkills;
     if (eligibility != null) map['eligibility'] = eligibility;
     if (location != null) map['location'] = location;

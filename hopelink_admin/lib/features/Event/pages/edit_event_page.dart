@@ -30,6 +30,7 @@ class _EditEventPageState extends State<EditEventPage>
   late TextEditingController cityCtrl;
   late TextEditingController stateCtrl;
   late TextEditingController maxVolunteersCtrl;
+  late TextEditingController creditHoursCtrl;
   late TextEditingController skillsInputCtrl;
 
   late Rx<String> selectedCategory;
@@ -64,6 +65,9 @@ class _EditEventPageState extends State<EditEventPage>
     maxVolunteersCtrl = TextEditingController(
       text: widget.event.maxVolunteers.toString(),
     );
+    creditHoursCtrl = TextEditingController(
+      text: widget.event.creditHours.toString(),
+    );
     skillsInputCtrl = TextEditingController();
 
     selectedCategory = widget.event.category.obs;
@@ -87,6 +91,7 @@ class _EditEventPageState extends State<EditEventPage>
     cityCtrl.dispose();
     stateCtrl.dispose();
     maxVolunteersCtrl.dispose();
+    creditHoursCtrl.dispose();
     skillsInputCtrl.dispose();
     super.dispose();
   }
@@ -129,6 +134,7 @@ class _EditEventPageState extends State<EditEventPage>
       startDate: startDateTime,
       endDate: endDateTime,
       maxVolunteers: int.tryParse(maxVolunteersCtrl.text) ?? 0,
+      creditHours: int.tryParse(creditHoursCtrl.text) ?? 0,
       requiredSkills: selectedSkills.toList(),
       eligibility: selectedEligibility.value,
       location: {
@@ -330,6 +336,18 @@ class _EditEventPageState extends State<EditEventPage>
                       ),
                     ),
                     const SizedBox(width: 16),
+                    Expanded(
+                      child: EventFormField(
+                        label: 'Credit Hours',
+                        controller: creditHoursCtrl,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
                     Expanded(
                       child: _buildDropdown(
                         label: 'Eligibility',

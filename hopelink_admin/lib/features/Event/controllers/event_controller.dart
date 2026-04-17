@@ -48,6 +48,7 @@ class EventController extends GetxController {
   final startDateCtrl = TextEditingController();
   final endDateCtrl = TextEditingController();
   final maxVolunteersCtrl = TextEditingController();
+  final creditHoursCtrl = TextEditingController();
   final eligibilityCtrl = TextEditingController(text: 'Anyone');
   final skillInputCtrl = TextEditingController();
   final selectedSkills = <String>[].obs;
@@ -201,6 +202,7 @@ class EventController extends GetxController {
         startDate: '${startDateCtrl.text}T09:00:00.000Z',
         endDate: '${endDateCtrl.text}T17:00:00.000Z',
         maxVolunteers: int.tryParse(maxVolunteersCtrl.text) ?? 0,
+        creditHours: int.tryParse(creditHoursCtrl.text) ?? 0,
         eligibility: eligibilityCtrl.text.trim(),
         requiredSkills: skillsValue,
       ).toFormFields();

@@ -31,6 +31,7 @@ export const createEvent = async (req, res, next) => {
       maxVolunteers,
       requiredSkills = [],
       eligibility = 'Anyone',
+      creditHours = 0,
     } = req.body;
 
     // Validate required fields
@@ -85,7 +86,9 @@ export const createEvent = async (req, res, next) => {
       requiredSkills: Array.isArray(requiredSkills)
         ? requiredSkills
         : [requiredSkills].filter(Boolean),
+      creditHours: Number(creditHours) || 0,
       eligibility,
+      creditHours: Number(creditHours) || 0,
       organizerType,
       organizer: organizerId,
       images,
@@ -404,6 +407,7 @@ export const updateEvent = async (req, res, next) => {
       'eligibility',
       'status',
       'images',
+      'creditHours',
     ];
 
     updates.forEach((update) => {

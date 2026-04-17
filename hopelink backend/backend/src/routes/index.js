@@ -13,6 +13,7 @@ import volunteerJobRoutes from './volunteerJob.routes.js';
 import volunteerApplicationRoutes from './volunteerApplication.routes.js';
 import certificationRoutes from './certification.routes.js';
 import userRoutes from './users.routes.js';
+import volunteerCreditsRoutes from './volunteerCredits.routes.js';
 
 const router = express.Router();
 
@@ -47,6 +48,7 @@ router.use('/campaign-reports', campaignReportRoutes);
 router.use('/events', eventRoutes);
 router.use('/volunteer-jobs', volunteerJobRoutes);
 router.use('/volunteer-applications', volunteerApplicationRoutes);
+router.use('/volunteer-credits', volunteerCreditsRoutes);
 router.use('/certifications', certificationRoutes);
 router.use('/users', userRoutes);
 router.use('/user/profile', profileRoutes);
