@@ -10,12 +10,20 @@ class ProductsResponse {
   });
 
   factory ProductsResponse.fromJson(Map<String, dynamic> json) {
+    final rawProducts =
+        json['products'] ??
+        json['data'] ??
+        json['items'] ??
+        const <dynamic>[];
+    final products = (rawProducts as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .map(ProductModel.fromJson)
+        .toList();
+
     return ProductsResponse(
-      products: (json['products'] as List<dynamic>)
-          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      total: json['total'] as int,
-      totalPages: json['totalPages'] as int,
+      products: products,
+      total: _asInt(json['total']) ?? products.length,
+      totalPages: _asInt(json['totalPages']) ?? _asInt(json['pages']) ?? 1,
     );
   }
 }
@@ -53,37 +61,41 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['_id'] as String? ?? json['id'] as String? ?? '',
-      org: OrgModel.fromJson(json['orgId'] as Map<String, dynamic>),
+      id: _idFromDynamic(json['_id']) ?? _idFromDynamic(json['id']) ?? '',
+      org: OrgModel.fromJson(json['orgId'] ?? json['organization'] ?? json['org']),
       name: json['name'] as String? ?? '',
       description: json['description'] as String? ?? '',
       beneficiaryDescription: json['beneficiaryDescription'] as String? ?? '',
-      category: json['category'] as String? ?? '',
+      category: _categoryLabel(json['category']),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => e as String)
+              ?.map(_imageUrlFromJson)
+              .whereType<String>()
               .toList() ??
           [],
       isActive: json['isActive'] as bool? ?? true,
       isDeleted: json['isDeleted'] as bool? ?? false,
       ratingAverage: (json['ratingAverage'] as num?)?.toDouble() ?? 0.0,
-      ratingCount: json['ratingCount'] as int? ?? 0,
+      ratingCount: _asInt(json['ratingCount']) ?? 0,
       slug: json['slug'] as String? ?? '',
       variants: (json['variants'] as List<dynamic>?)
-              ?.map((e) => ProductVariant.fromJson(e as Map<String, dynamic>))
+              ?.whereType<Map<String, dynamic>>()
+              .map(ProductVariant.fromJson)
               .toList() ??
           [],
     );
   }
 
-  double get minPrice =>
-      variants.isEmpty ? 0 : variants.map((v) => v.price).reduce((a, b) => a < b ? a : b);
+  double get minPrice => variants.isEmpty
+      ? 0
+      : variants.map((v) => v.price).reduce((a, b) => a < b ? a : b);
 
-  double get maxPrice =>
-      variants.isEmpty ? 0 : variants.map((v) => v.price).reduce((a, b) => a > b ? a : b);
+  double get maxPrice => variants.isEmpty
+      ? 0
+      : variants.map((v) => v.price).reduce((a, b) => a > b ? a : b);
 
   String get priceDisplay => minPrice == maxPrice
       ? 'NPR ${minPrice.toStringAsFixed(0)}'
-      : 'NPR ${minPrice.toStringAsFixed(0)} – ${maxPrice.toStringAsFixed(0)}';
+      : 'NPR ${minPrice.toStringAsFixed(0)} - ${maxPrice.toStringAsFixed(0)}';
 
   String? get coverImage => images.isNotEmpty ? images.first : null;
 }
@@ -94,11 +106,22 @@ class OrgModel {
 
   OrgModel({required this.id, required this.organizationName});
 
-  factory OrgModel.fromJson(Map<String, dynamic> json) {
-    return OrgModel(
-      id: json['_id'] as String? ?? '',
-      organizationName: json['organizationName'] as String? ?? '',
-    );
+  factory OrgModel.fromJson(dynamic json) {
+    if (json is Map<String, dynamic>) {
+      return OrgModel(
+        id: _idFromDynamic(json['_id']) ?? _idFromDynamic(json['id']) ?? '',
+        organizationName:
+            json['organizationName'] as String? ??
+            json['name'] as String? ??
+            '',
+      );
+    }
+
+    if (json is String) {
+      return OrgModel(id: json, organizationName: '');
+    }
+
+    return OrgModel(id: '', organizationName: '');
   }
 }
 
@@ -125,13 +148,14 @@ class ProductVariant {
 
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
     return ProductVariant(
-      id: json['_id'] as String? ?? '',
-      productId: json['productId'] as String? ?? '',
+      id: _idFromDynamic(json['_id']) ?? '',
+      productId: _idFromDynamic(json['productId']) ?? '',
       attributes: VariantAttributes.fromJson(
-          json['attributes'] as Map<String, dynamic>? ?? {}),
+        json['attributes'] as Map<String, dynamic>? ?? const {},
+      ),
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       sku: json['sku'] as String? ?? '',
-      stock: json['stock'] as int? ?? 0,
+      stock: _asInt(json['stock']) ?? 0,
       isActive: json['isActive'] as bool? ?? true,
       isDeleted: json['isDeleted'] as bool? ?? false,
     );
@@ -159,6 +183,41 @@ class VariantAttributes {
     final parts = <String>[];
     if (color != null && color!.isNotEmpty) parts.add(color!);
     if (size != null && size!.isNotEmpty) parts.add(size!);
-    return parts.join(' · ');
+    return parts.join(' - ');
   }
+}
+
+int? _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
+String? _idFromDynamic(dynamic value) {
+  if (value is String) return value;
+  if (value is Map<String, dynamic>) {
+    return value['_id'] as String? ?? value['id'] as String?;
+  }
+  return null;
+}
+
+String _categoryLabel(dynamic value) {
+  if (value is String) return value;
+  if (value is Map<String, dynamic>) {
+    return value['name'] as String? ??
+        value['title'] as String? ??
+        value['slug'] as String? ??
+        (_idFromDynamic(value) ?? '');
+  }
+  return '';
+}
+
+String? _imageUrlFromJson(dynamic image) {
+  if (image is String && image.isNotEmpty) return image;
+  if (image is Map<String, dynamic>) {
+    final url = image['url'] as String? ?? image['secure_url'] as String?;
+    if (url != null && url.isNotEmpty) return url;
+  }
+  return null;
 }

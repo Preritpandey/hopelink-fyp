@@ -13,6 +13,8 @@ import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
 import { sendEmail } from '../services/email.service.js';
 import { logUserActivity } from '../services/activity.service.js';
+import mongoose from 'mongoose';
+import { StatusCodes } from 'http-status-codes';
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -910,6 +912,77 @@ const sendVolunteerStatusEmail = async ({
     html,
   });
 };
+
+/**
+ * Grant credit hours to event attendee
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export const grantEventCreditHours = async (req, res, next) => {
+  try {
+    const { enrollmentId } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(enrollmentId)) {
+      throw new BadRequestError('Invalid enrollment id');
+    }
+
+    const enrollment = await VolunteerEnrollment.findById(enrollmentId).populate('event').populate('user');
+    if (!enrollment) {
+      throw new NotFoundError('Enrollment not found');
+    }
+
+    const event = enrollment.event;
+    
+    // Check if user is the event organizer or admin
+    const isOrganizer =
+      event.organizerType === 'User'
+        ? event.organizer.toString() === req.user._id.toString()
+        : event.organizer.toString() === req.user.organization?.toString();
+
+    if (!isOrganizer && req.user.role !== 'admin') {
+      throw new ForbiddenError('Not authorized to grant credit hours');
+    }
+
+    // Check if volunteer is approved
+    if (enrollment.status !== 'approved' && enrollment.status !== 'attended') {
+      throw new BadRequestError('Only approved or attended volunteers can receive credit hours');
+    }
+
+    // Check if event has credit hours defined
+    if (!event.creditHours || event.creditHours <= 0) {
+      throw new BadRequestError('Event does not have credit hours defined');
+    }
+
+    // Check if credit hours already granted
+    if (enrollment.creditHoursGranted && enrollment.creditHoursGranted > 0) {
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Credit hours already granted',
+        data: enrollment,
+      });
+    }
+
+    enrollment.creditHoursGranted = event.creditHours;
+    enrollment.creditGrantedAt = new Date();
+    await enrollment.save();
+
+    // Update user's total volunteer hours
+    await User.findByIdAndUpdate(
+      enrollment.user._id,
+      { $inc: { totalVolunteerHours: event.creditHours } },
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Credit hours granted successfully',
+      data: enrollment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Export all controller methods
 export default {
   createEvent,

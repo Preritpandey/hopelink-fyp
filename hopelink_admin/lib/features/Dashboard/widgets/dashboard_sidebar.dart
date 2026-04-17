@@ -202,6 +202,12 @@ class DashboardSidebar extends StatelessWidget {
                   active: ctrl.currentNavIndex.value == 4,
                   onTap: () => ctrl.navigateTo(4),
                 ),
+                NavItem(
+                  icon: Icons.workspace_premium_outlined,
+                  label: 'Volunteer Credits',
+                  active: ctrl.currentNavIndex.value == 5,
+                  onTap: () => ctrl.navigateTo(5),
+                ),
               ],
             ),
           ),

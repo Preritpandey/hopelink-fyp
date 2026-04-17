@@ -168,15 +168,13 @@ class _HeaderSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child:
-                Text(
-                  'Marketplace',
-                  style: AppTextStyle.h3.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColorToken.primary.color,
-                  ),
-                ),
-         
+            child: Text(
+              'Marketplace',
+              style: AppTextStyle.h3.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColorToken.primary.color,
+              ),
+            ),
           ),
           12.horizontalSpace,
           IconButton(

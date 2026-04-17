@@ -37,6 +37,11 @@ const volunteerEnrollmentSchema = new mongoose.Schema({
     comment: String,
     submittedAt: Date,
   },
+  creditHoursGranted: {
+    type: Number,
+    default: 0,
+  },
+  creditGrantedAt: Date,
 }, {
   timestamps: true,
 });

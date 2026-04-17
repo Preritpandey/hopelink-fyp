@@ -184,10 +184,8 @@ class OrgEventsController extends GetxController {
     volunteersError.value = '';
 
     try {
-      final uri = Uri.parse(
-        '$_base/events/$eventId/volunteers?page=1&limit=50',
-      );
-
+      final uri = Uri.parse('$_base/events/$eventId/volunteers');
+      print('Fetching volunteers from: $uri'); // Debug log")
       final res = await http
           .get(
             uri,
@@ -197,6 +195,9 @@ class OrgEventsController extends GetxController {
             },
           )
           .timeout(const Duration(seconds: 15));
+      print(
+        'Volunteer fetch response: ${res.statusCode} - ${res.body}',
+      ); // Debug log
 
       final json = jsonDecode(res.body) as Map<String, dynamic>;
 

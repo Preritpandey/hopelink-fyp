@@ -29,7 +29,7 @@ class VolunteerUserInfo {
       id: json['_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      profilePicture: json['profilePicture'] as String?,
+      profilePicture: json['profileImage'] as String? ?? json['profilePicture'] as String?,
       phone: json['phone'] as String?,
       bio: json['bio'] as String?,
       skills: (json['skills'] as List? ?? []).map((e) => e.toString()).toList(),
@@ -56,6 +56,10 @@ class EventVolunteer {
   final DateTime appliedAt;
   final DateTime? approvedAt;
   final String? approverNotes;
+  final bool attendance;
+  final int creditHoursGranted;
+  final DateTime? enrollmentDate;
+  final DateTime? creditGrantedAt;
 
   const EventVolunteer({
     required this.id,
@@ -65,6 +69,10 @@ class EventVolunteer {
     required this.appliedAt,
     this.approvedAt,
     this.approverNotes,
+    this.attendance = false,
+    this.creditHoursGranted = 0,
+    this.enrollmentDate,
+    this.creditGrantedAt,
   });
 
   factory EventVolunteer.fromJson(Map<String, dynamic> json) {
@@ -75,27 +83,34 @@ class EventVolunteer {
 
     return EventVolunteer(
       id: json['_id'] as String? ?? '',
-      eventId: json['eventId'] as String? ?? '',
+      eventId: json['event'] as String? ?? json['eventId'] as String? ?? '',
       userId: VolunteerUserInfo.fromJson(
-        json['userId'] as Map<String, dynamic>? ?? {},
+        json['user'] as Map<String, dynamic>? ?? json['userId'] as Map<String, dynamic>? ?? {},
       ),
       status: json['status'] as String? ?? 'pending',
       appliedAt: _parse(
-        json['CreatedAt'] as String? ?? json['createdAt'] as String?,
+        json['enrollmentDate'] as String? ?? json['createdAt'] as String? ?? json['CreatedAt'] as String?,
       ),
       approvedAt: _parse(json['approvedAt'] as String?),
       approverNotes: json['approverNotes'] as String?,
+      attendance: json['attendance'] as bool? ?? false,
+      creditHoursGranted: (json['creditHoursGranted'] as num?)?.toInt() ?? 0,
+      enrollmentDate: _parse(json['enrollmentDate'] as String?),
+      creditGrantedAt: _parse(json['creditGrantedAt'] as String?),
     );
   }
 
   Map<String, dynamic> toJson() => {
     '_id': id,
-    'eventId': eventId,
-    'userId': userId.toJson(),
+    'event': eventId,
+    'user': userId.toJson(),
     'status': status,
-    'CreatedAt': appliedAt.toIso8601String(),
+    'enrollmentDate': appliedAt.toIso8601String(),
     'approvedAt': approvedAt?.toIso8601String(),
     'approverNotes': approverNotes,
+    'attendance': attendance,
+    'creditHoursGranted': creditHoursGranted,
+    'creditGrantedAt': creditGrantedAt?.toIso8601String(),
   };
 
   bool get isPending => status == 'pending';
@@ -150,7 +165,7 @@ class EventVolunteersResponse {
     return EventVolunteersResponse(
       success: json['success'] as bool? ?? false,
       count: (json['count'] as num?)?.toInt() ?? 0,
-      enrollments: (json['enrollments'] as List? ?? [])
+      enrollments: (json['data'] as List? ?? json['enrollments'] as List? ?? [])
           .map((e) => EventVolunteer.fromJson(e as Map<String, dynamic>))
           .toList(),
     );

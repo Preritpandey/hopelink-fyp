@@ -121,6 +121,11 @@ const eventSchema = new mongoose.Schema(
       default: false,
     },
     tags: [String],
+    creditHours: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

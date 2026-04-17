@@ -18,10 +18,10 @@ class OrgEventImage {
 
   factory OrgEventImage.fromJson(Map<String, dynamic> json) {
     return OrgEventImage(
-      url:       json['url']       as String? ?? '',
-      publicId:  json['publicId']  as String? ?? '',
-      isPrimary: json['isPrimary'] as bool?   ?? false,
-      id:        json['_id']       as String? ?? '',
+      url: json['url'] as String? ?? '',
+      publicId: json['publicId'] as String? ?? '',
+      isPrimary: json['isPrimary'] as bool? ?? false,
+      id: json['_id'] as String? ?? '',
     );
   }
 }
@@ -42,10 +42,10 @@ class OrgEventOrganizer {
 
   factory OrgEventOrganizer.fromJson(Map<String, dynamic> json) {
     return OrgEventOrganizer(
-      id:               json['_id']              as String? ?? '',
+      id: json['_id'] as String? ?? '',
       organizationName: json['organizationName'] as String? ?? '',
-      officialEmail:    json['officialEmail']    as String? ?? '',
-      logo:             json['logo']             as String?,
+      officialEmail: json['officialEmail'] as String? ?? '',
+      logo: json['logo'] as String?,
     );
   }
 }
@@ -67,14 +67,13 @@ class OrgEventLocation {
   });
 
   factory OrgEventLocation.fromJson(Map<String, dynamic> json) {
-    final coords =
-        (json['coordinates']?['coordinates'] as List?) ?? [0.0, 0.0];
+    final coords = (json['coordinates']?['coordinates'] as List?) ?? [0.0, 0.0];
     return OrgEventLocation(
       address: json['address'] as String? ?? '',
-      city:    json['city']    as String? ?? '',
-      state:   json['state']   as String? ?? '',
-      lng:     (coords[0] as num).toDouble(),
-      lat:     (coords[1] as num).toDouble(),
+      city: json['city'] as String? ?? '',
+      state: json['state'] as String? ?? '',
+      lng: (coords[0] as num).toDouble(),
+      lat: (coords[1] as num).toDouble(),
     );
   }
 
@@ -101,6 +100,7 @@ class OrgEvent {
   final List<String> volunteers;
   final bool isFeatured;
   final List<String> tags;
+  final int creditHours;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -123,6 +123,7 @@ class OrgEvent {
     required this.volunteers,
     required this.isFeatured,
     required this.tags,
+    required this.creditHours,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -134,32 +135,35 @@ class OrgEvent {
     }
 
     return OrgEvent(
-      id:          json['_id']          as String? ?? '',
-      title:       json['title']        as String? ?? '',
-      description: json['description']  as String? ?? '',
-      category:    json['category']     as String? ?? '',
-      eventType:   json['eventType']    as String? ?? '',
-      location:    OrgEventLocation.fromJson(
-          json['location'] as Map<String, dynamic>? ?? {}),
-      startDate:   _parse(json['startDate'] as String?),
-      endDate:     _parse(json['endDate']   as String?),
+      id: json['_id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      category: json['category'] as String? ?? '',
+      eventType: json['eventType'] as String? ?? '',
+      location: OrgEventLocation.fromJson(
+        json['location'] as Map<String, dynamic>? ?? {},
+      ),
+      startDate: _parse(json['startDate'] as String?),
+      endDate: _parse(json['endDate'] as String?),
       images: (json['images'] as List? ?? [])
           .map((e) => OrgEventImage.fromJson(e as Map<String, dynamic>))
           .toList(),
-      status:        json['status']        as String? ?? 'published',
+      status: json['status'] as String? ?? 'published',
       maxVolunteers: (json['maxVolunteers'] as num?)?.toInt() ?? 0,
       requiredSkills: (json['requiredSkills'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
-      eligibility:  json['eligibility']  as String? ?? '',
+      eligibility: json['eligibility'] as String? ?? '',
       organizerType: json['organizerType'] as String? ?? 'Organization',
       organizer: OrgEventOrganizer.fromJson(
-          json['organizer'] as Map<String, dynamic>? ?? {}),
+        json['organizer'] as Map<String, dynamic>? ?? {},
+      ),
       volunteers: (json['volunteers'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
       isFeatured: json['isFeatured'] as bool? ?? false,
       tags: (json['tags'] as List? ?? []).map((e) => e.toString()).toList(),
+      creditHours: (json['creditHours'] as num?)?.toInt() ?? 0,
       createdAt: _parse(json['createdAt'] as String?),
       updatedAt: _parse(json['updatedAt'] as String?),
     );
@@ -180,7 +184,7 @@ class OrgEvent {
   }
 
   bool get isUpcoming => DateTime.now().isBefore(startDate);
-  bool get isPast     => DateTime.now().isAfter(endDate);
+  bool get isPast => DateTime.now().isAfter(endDate);
 
   List<String> get parsedSkills {
     final all = <String>[];
@@ -213,11 +217,11 @@ class OrgEventsResponse {
 
   factory OrgEventsResponse.fromJson(Map<String, dynamic> json) {
     return OrgEventsResponse(
-      success:        json['success']        as bool?   ?? false,
-      count:          (json['count']          as num?)?.toInt() ?? 0,
-      total:          (json['total']          as num?)?.toInt() ?? 0,
-      page:           (json['page']           as num?)?.toInt() ?? 1,
-      pages:          (json['pages']          as num?)?.toInt() ?? 1,
+      success: json['success'] as bool? ?? false,
+      count: (json['count'] as num?)?.toInt() ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pages: (json['pages'] as num?)?.toInt() ?? 1,
       organizationId: json['organizationId'] as String? ?? '',
       data: (json['data'] as List? ?? [])
           .map((e) => OrgEvent.fromJson(e as Map<String, dynamic>))
@@ -230,12 +234,18 @@ class OrgEventsResponse {
 extension OrgEventStatusX on String {
   String get statusLabel {
     switch (toLowerCase()) {
-      case 'published': return 'Published';
-      case 'ongoing':   return 'Ongoing';
-      case 'completed': return 'Completed';
-      case 'cancelled': return 'Cancelled';
-      case 'draft':     return 'Draft';
-      default:          return this;
+      case 'published':
+        return 'Published';
+      case 'ongoing':
+        return 'Ongoing';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      case 'draft':
+        return 'Draft';
+      default:
+        return this;
     }
   }
 }
@@ -246,11 +256,16 @@ enum OrgEventFilter { all, published, ongoing, completed, cancelled }
 extension OrgEventFilterX on OrgEventFilter {
   String get label {
     switch (this) {
-      case OrgEventFilter.all:       return 'All';
-      case OrgEventFilter.published: return 'Published';
-      case OrgEventFilter.ongoing:   return 'Ongoing';
-      case OrgEventFilter.completed: return 'Completed';
-      case OrgEventFilter.cancelled: return 'Cancelled';
+      case OrgEventFilter.all:
+        return 'All';
+      case OrgEventFilter.published:
+        return 'Published';
+      case OrgEventFilter.ongoing:
+        return 'Ongoing';
+      case OrgEventFilter.completed:
+        return 'Completed';
+      case OrgEventFilter.cancelled:
+        return 'Cancelled';
     }
   }
 

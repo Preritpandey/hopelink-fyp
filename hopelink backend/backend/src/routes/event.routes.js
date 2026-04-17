@@ -13,6 +13,7 @@ import {
   updateVolunteerStatus,
   getMyEnrollments,
   getEventsByOrganization,
+  grantEventCreditHours,
 } from '../controllers/event.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { upload } from '../middleware/multer.js';
@@ -68,6 +69,12 @@ router.put(
   '/volunteers/:enrollmentId',
   authorize('user', 'organization', 'admin'),
   updateVolunteerStatus
+);
+
+router.patch(
+  '/enrollments/:enrollmentId/credit-hours',
+  authorize('user', 'organization', 'admin'),
+  grantEventCreditHours
 );
 
 export default router;
