@@ -17,6 +17,11 @@ import { logUserActivity } from '../services/activity.service.js';
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
 import { updateUserPoints } from './volunteerCredits.controller.js';
+import {
+  attachInteractionsToDoc,
+  buildInteractionMap,
+  deleteInteractionsForPost,
+} from '../services/postInteraction.service.js';
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -215,14 +220,22 @@ export const getEvents = async (req, res, next) => {
     // });
 
     const total = await Event.countDocuments(query);
+    const interactionMap = await buildInteractionMap({
+      postType: 'Event',
+      postIds: events.map((event) => event._id),
+      currentUserId: req.user?._id,
+    });
+    const eventsWithInteractions = events.map((event) =>
+      attachInteractionsToDoc(event, interactionMap),
+    );
 
     res.json({
       success: true,
-      count: events.length,
+      count: eventsWithInteractions.length,
       total,
       page: parseInt(page),
       pages: Math.ceil(total / limit),
-      data: events,
+      data: eventsWithInteractions,
     });
   } catch (error) {
     next(error);
@@ -302,15 +315,23 @@ export const getEventsByOrganization = async (req, res, next) => {
     }
 
     const total = await Event.countDocuments(query);
+    const interactionMap = await buildInteractionMap({
+      postType: 'Event',
+      postIds: events.map((event) => event._id),
+      currentUserId: req.user?._id,
+    });
+    const eventsWithInteractions = events.map((event) =>
+      attachInteractionsToDoc(event, interactionMap),
+    );
 
     res.json({
       success: true,
-      count: events.length,
+      count: eventsWithInteractions.length,
       total,
       page: parseInt(page),
       pages: Math.ceil(total / limit),
       organizationId: organizationId.toString(),
-      data: events,
+      data: eventsWithInteractions,
     });
   } catch (error) {
     next(error);
@@ -359,10 +380,16 @@ export const getEventById = async (req, res, next) => {
       });
     }
 
+    const interactionMap = await buildInteractionMap({
+      postType: 'Event',
+      postIds: [event._id],
+      currentUserId: req.user?._id,
+    });
+
     res.json({
       success: true,
       data: {
-        ...event.toObject(),
+        ...attachInteractionsToDoc(event, interactionMap),
         userEnrollment,
       },
     });
@@ -453,10 +480,14 @@ export const deleteEvent = async (req, res, next) => {
       throw new ForbiddenError('Not authorized to delete this event');
     }
 
+    await Promise.all([
+      deleteInteractionsForPost({
+        postId: event._id,
+        postType: 'Event',
+      }),
+      VolunteerEnrollment.deleteMany({ event: event._id }),
+    ]);
     await event.remove();
-
-    // Also remove all enrollments for this event
-    await VolunteerEnrollment.deleteMany({ event: event._id });
 
     res.json({
       success: true,

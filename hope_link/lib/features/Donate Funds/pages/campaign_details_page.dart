@@ -8,8 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/campaign_controller.dart';
+import '../controllers/post_interactions_controller.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
+import '../models/post_interaction_models.dart';
+import '../widgets/post_engagement_section.dart';
+import '../widgets/post_interaction_summary.dart';
 
 class CampaignDetailsPage extends StatefulWidget {
   const CampaignDetailsPage({super.key});
@@ -30,6 +34,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   CampaignReport? _campaignReport;
   bool _isReportLoading = false;
   String? _reportMessage;
+  PostInteractionsController? _interactionsController;
+  String? _interactionTag;
 
   void _initFromArgs(dynamic args) {
     // Accept String, Campaign, or Map payloads and normalize to id + campaign.
@@ -76,6 +82,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   void initState() {
     super.initState();
     _initFromArgs(Get.arguments);
+    if (campaign != null) {
+      _setupInteractions();
+    }
     if (campaign == null && campaignId.isNotEmpty) {
       _loadCampaignDetails();
     }
@@ -92,9 +101,47 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
 
   Future<void> _loadCampaignDetails() async {
     final loadedCampaign = await _controller.getCampaignById(campaignId);
+    if (!mounted) return;
     setState(() {
       campaign = loadedCampaign;
     });
+    if (campaign != null) {
+      _setupInteractions();
+    }
+  }
+
+  void _setupInteractions() {
+    if (campaign == null) return;
+
+    final nextTag = 'campaign-interactions-${campaign!.id}';
+    if (_interactionTag == nextTag && _interactionsController != null) {
+      return;
+    }
+
+    if (_interactionTag != null &&
+        Get.isRegistered<PostInteractionsController>(tag: _interactionTag)) {
+      Get.delete<PostInteractionsController>(tag: _interactionTag);
+    }
+
+    _interactionTag = nextTag;
+    _interactionsController = Get.put(
+      PostInteractionsController(
+        postId: campaign!.id,
+        initialState: campaign!.interactionState,
+        onInteractionChanged: (PostInteractionState state) {
+          if (!mounted || campaign == null) return;
+          setState(() {
+            campaign = campaign!.copyWith(
+              totalLikes: state.totalLikes,
+              isLikedByCurrentUser: state.isLikedByCurrentUser,
+              commentsCount: state.commentsCount,
+            );
+          });
+          _controller.updateCampaignInteractions(campaign!.id, state);
+        },
+      ),
+      tag: _interactionTag,
+    );
   }
 
   Future<void> _loadCampaignReport() async {
@@ -128,6 +175,10 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
 
   @override
   void dispose() {
+    if (_interactionTag != null &&
+        Get.isRegistered<PostInteractionsController>(tag: _interactionTag)) {
+      Get.delete<PostInteractionsController>(tag: _interactionTag);
+    }
     _animationController.dispose();
     super.dispose();
   }
@@ -258,6 +309,16 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   _buildMainInfo(),
                   // CampaignInfoWidget(),
                   _buildProgressSection(),
+                  if (_interactionsController != null) ...[
+                    24.verticalSpace,
+                    PostEngagementSection(
+                      controller: _interactionsController!,
+                      accentColor: AppColorToken.primary.color,
+                      title: 'Community Support',
+                      subtitle:
+                          'Like this campaign and add a thoughtful comment.',
+                    ),
+                  ],
                   _buildTabBar(),
                   _buildTabContent(),
                   32.verticalSpace,
@@ -488,6 +549,12 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                 ),
               ],
             ),
+          ),
+          16.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: campaign!.totalLikes,
+            commentsCount: campaign!.commentsCount,
+            accentColor: AppColorToken.primary.color,
           ),
         ],
       ),

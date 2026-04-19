@@ -15,15 +15,23 @@ import {
   getEventsByOrganization,
   grantEventCreditHours,
 } from '../controllers/event.controller.js';
-import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import {
+  authenticate,
+  authenticateIfPresent,
+  authorize,
+} from '../middleware/auth.middleware.js';
 import { upload } from '../middleware/multer.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', getEvents);
-router.get('/organization/:organizationId', getEventsByOrganization);
-router.get('/:id', getEventById);
+router.get('/', authenticateIfPresent, getEvents);
+router.get(
+  '/organization/:organizationId',
+  authenticateIfPresent,
+  getEventsByOrganization,
+);
+router.get('/:id', authenticateIfPresent, getEventById);
 
 // Protected routes (require authentication)
 router.use(authenticate);

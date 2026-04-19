@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../models/campaign_model.dart';
+import 'post_interaction_summary.dart';
 
 class CampaignsListWidget extends StatelessWidget {
   final CampaignController controller;
@@ -338,6 +339,12 @@ class CampaignsListWidget extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                        12.verticalSpace,
+                        PostInteractionSummary(
+                          totalLikes: campaign.totalLikes,
+                          commentsCount: campaign.commentsCount,
+                          accentColor: AppColorToken.primary.color,
                         ),
 
                         20.verticalSpace,

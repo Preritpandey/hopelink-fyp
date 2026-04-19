@@ -55,6 +55,41 @@ export const authenticate = async (req, res, next) => {
 };
 
 /**
+ * Middleware to attach the current user if a valid bearer token is provided.
+ * Requests without a token continue as public requests.
+ */
+export const authenticateIfPresent = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded?.userId || decoded?.id;
+
+    if (!userId) {
+      return next();
+    }
+
+    const user = await User.findById(userId).select('-password');
+    if (user && user.isActive) {
+      req.user = user;
+    }
+
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
+/**
  * Middleware to authorize user roles
  * @param {...string} roles - Allowed roles
  */
@@ -79,6 +114,7 @@ export const checkVerified = (req, res, next) => {
 
 export default {
   authenticate,
+  authenticateIfPresent,
   authorize,
   checkVerified,
 };

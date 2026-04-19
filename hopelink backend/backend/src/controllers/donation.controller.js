@@ -19,6 +19,8 @@ import {
 import mongoose from 'mongoose';
 import path from 'path';
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // @desc    Create a new donation
 // @route   POST /api/v1/donations
 // @access  Private
@@ -310,10 +312,15 @@ export const getDonation = async (req, res) => {
     throw new NotFoundError(`No donation with id ${req.params.id}`);
   }
 
+  const requestUserId = req.user?._id?.toString?.() || req.user?.id?.toString?.();
+  const requestOrgId = req.user?.organization?.toString?.();
+  const donationOrgId = donation.organization?._id?.toString?.() || donation.organization?.toString?.();
+  const donorUserId = donation.donor?._id?.toString?.() || donation.donor?.toString?.();
+
   // Make sure user is the donor, organization owner, or admin
   if (
-    donation.donor._id.toString() !== req.user._id.toString() &&
-    donation.organization._id.toString() !== req.user.organization &&
+    donorUserId !== requestUserId &&
+    donationOrgId !== requestOrgId &&
     req.user.role !== 'admin'
   ) {
     throw new UnauthorizedError('Not authorized to access this donation');
@@ -335,11 +342,11 @@ export const getDonationsForCampaign = async (req, res) => {
     throw new NotFoundError(`No campaign with id ${req.params.campaignId}`);
   }
 
+  const campaignOrgId = campaign.organization?.toString?.();
+  const requestOrgId = req.user?.organization?.toString?.();
+
   // Check if user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
+  if (req.user.role !== 'admin' && campaignOrgId !== requestOrgId) {
     throw new UnauthorizedError('Not authorized to view these donations');
   }
 
@@ -398,11 +405,11 @@ export const updateDonationStatus = async (req, res) => {
     throw new NotFoundError(`No donation with id ${req.params.id}`);
   }
 
+  const donationOrgId = donation.organization?.toString?.();
+  const requestOrgId = req.user?.organization?.toString?.();
+
   // Check if user is authorized (admin or organization owner)
-  if (
-    donation.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
+  if (req.user.role !== 'admin' && donationOrgId !== requestOrgId) {
     throw new UnauthorizedError('Not authorized to update this donation');
   }
 
@@ -695,6 +702,189 @@ const sendDonationStatusUpdate = async ({
     html,
   });
 };
+
+const validateCampaignForDonation = async (campaignId) => {
+  const campaign = await Campaign.findById(campaignId);
+  if (!campaign) {
+    return {
+      error: {
+        status: StatusCodes.NOT_FOUND,
+        body: {
+          success: false,
+          message: `No campaign with id ${campaignId}`,
+        },
+      },
+    };
+  }
+
+  if (campaign.status !== 'active') {
+    return {
+      error: {
+        status: StatusCodes.BAD_REQUEST,
+        body: {
+          success: false,
+          message: 'Cannot donate to an inactive campaign',
+        },
+      },
+    };
+  }
+
+  if (new Date(campaign.endDate) < new Date()) {
+    return {
+      error: {
+        status: StatusCodes.BAD_REQUEST,
+        body: {
+          success: false,
+          message: 'This campaign has ended',
+        },
+      },
+    };
+  }
+
+  return { campaign };
+};
+
+const finalizeDonation = async ({
+  userId,
+  campaign,
+  amount,
+  paymentMethod,
+  paymentId,
+  isAnonymous,
+  message,
+  paymentMeta = {},
+}) => {
+  let donation = await Donation.findOne({ paymentMethod, paymentId });
+  const isNewDonation = !donation;
+
+  if (!donation) {
+    donation = await Donation.create({
+      donor: userId,
+      campaign: campaign._id,
+      organization: campaign.organization,
+      amount,
+      paymentMethod,
+      paymentId,
+      isAnonymous: isAnonymous || false,
+      message: message || '',
+      status: 'completed',
+    });
+  }
+
+  if (isNewDonation) {
+    campaign.currentAmount = (campaign.currentAmount || 0) + amount;
+    campaign.donationsCount = (campaign.donationsCount || 0) + 1;
+    await campaign.save();
+
+    await logUserActivity({
+      user: userId,
+      activityType: 'donation',
+      resourceType: 'Donation',
+      resourceId: donation._id,
+      metadata: {
+        amount,
+        campaignId: campaign._id,
+        campaignTitle: campaign.title,
+        organizationId: campaign.organization,
+        paymentMethod,
+        isAnonymous: isAnonymous || false,
+        ...paymentMeta,
+      },
+    });
+  }
+
+  let organization = null;
+  try {
+    if (isNewDonation) {
+      organization = await Organization.findByIdAndUpdate(
+        campaign.organization,
+        {
+          $inc: {
+            totalDonationsReceived: amount,
+            totalDonationCount: 1,
+          },
+        },
+        { new: true },
+      );
+    } else {
+      organization = await Organization.findById(campaign.organization);
+    }
+  } catch (err) {
+    console.error('[Backend] Error updating organization funds:', err);
+  }
+
+  let user = null;
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    console.error('[Backend] Error fetching user for donation receipt:', err);
+  }
+
+  if (!donation.receiptSent && user?.email) {
+    try {
+      await sendDonationReceipt({
+        to: user.email,
+        userName: user?.name || 'Donor',
+        amount,
+        campaignTitle: campaign.title,
+        organizationName: organization
+          ? organization.organizationName
+          : 'Unknown Organization',
+        donationId: donation._id,
+        date: new Date(donation.createdAt || Date.now()),
+        isAnonymous,
+      });
+      donation.receiptSent = true;
+      await donation.save();
+    } catch (error) {
+      console.error('Error sending donation receipt:', error);
+    }
+  }
+
+  return {
+    donation,
+    campaignUpdated: {
+      currentAmount: campaign.currentAmount,
+      donationsCount: campaign.donationsCount,
+      progress: (campaign.currentAmount / campaign.targetAmount) * 100,
+    },
+    organizationUpdated: organization
+      ? {
+          totalDonationsReceived: organization.totalDonationsReceived,
+          totalDonationCount: organization.totalDonationCount,
+        }
+      : {
+          totalDonationsReceived: null,
+          totalDonationCount: null,
+        },
+    wasAlreadyRecorded: !isNewDonation,
+  };
+};
+
+const lookupCompletedKhaltiPayment = async (
+  pidx,
+  { attempts = 8, delayMs = 1500 } = {},
+) => {
+  let lastResult = null;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    lastResult = await lookupKhaltiEpayment({ pidx });
+    console.log(
+      `[Backend][Khalti Lookup] attempt=${attempt + 1}/${attempts} pidx=${pidx} status=${
+        lastResult?.status || lastResult?.state?.name || lastResult?.state?.code
+      }`,
+    );
+    if (isKhaltiEpaymentCompleted(lastResult)) {
+      return lastResult;
+    }
+
+    if (attempt < attempts - 1) {
+      await wait(delayMs);
+    }
+  }
+
+  return lastResult;
+};
 // @desc    Complete a Stripe payment and create donation record
 // @route   POST /api/v1/donations/complete-payment
 // @access  Private
@@ -723,128 +913,31 @@ export const completeStripePayment = async (req, res, next) => {
       });
     }
 
-    // Check if campaign exists and is active
-    const campaign = await Campaign.findById(campaignId);
-    if (!campaign) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: false,
-        message: `No campaign with id ${campaignId}`,
-      });
+    const { campaign, error: campaignError } =
+      await validateCampaignForDonation(campaignId);
+    if (campaignError) {
+      return res.status(campaignError.status).json(campaignError.body);
     }
 
-    if (campaign.status !== 'active') {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'Cannot donate to an inactive campaign',
-      });
-    }
-
-    // Check if campaign end date has passed
-    if (new Date(campaign.endDate) < new Date()) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'This campaign has ended',
-      });
-    }
-
-    // Create donation record with 'completed' status
-    const donation = await Donation.create({
-      donor: userId,
-      campaign: campaignId,
-      organization: campaign.organization,
+    const finalized = await finalizeDonation({
+      userId,
+      campaign,
       amount,
       paymentMethod: 'stripe',
       paymentId: paymentIntentId,
-      isAnonymous: isAnonymous || false,
-      message: message || '',
-      status: 'completed', // Mark as completed immediately
+      isAnonymous,
+      message,
     });
-
-    // UPDATE CAMPAIGN FUNDS
-    campaign.currentAmount = (campaign.currentAmount || 0) + amount;
-    campaign.donationsCount = (campaign.donationsCount || 0) + 1;
-    await campaign.save();
-
-    await logUserActivity({
-      user: userId,
-      activityType: 'donation',
-      resourceType: 'Donation',
-      resourceId: donation._id,
-      metadata: {
-        amount,
-        campaignId: campaign._id,
-        campaignTitle: campaign.title,
-        organizationId: campaign.organization,
-        paymentMethod: 'stripe',
-        isAnonymous: isAnonymous || false,
-      },
-    });
-
-    // UPDATE ORGANIZATION FUNDS
-    // UPDATE ORGANIZATION FUNDS (guarded)
-    let organization = null;
-    try {
-      organization = await Organization.findByIdAndUpdate(
-        campaign.organization,
-        {
-          $inc: {
-            totalDonationsReceived: amount,
-            totalDonationCount: 1,
-          },
-        },
-        { new: true }
-      );
-    } catch (err) {
-      console.error('[Backend] Error updating organization funds:', err);
-    }
-
-    // Get user and organization details for email
-    let user = null;
-    try {
-      user = await User.findById(userId);
-    } catch (err) {
-      console.error('[Backend] Error fetching user for donation receipt:', err);
-    }
-
-    // Send receipt email (don't fail the response if email fails)
-    try {
-      await sendDonationReceipt({
-        to: user?.email || '',
-        userName: user?.name || 'Donor',
-        amount,
-        campaignTitle: campaign.title,
-        organizationName: organization
-          ? organization.organizationName
-          : 'Unknown Organization',
-        donationId: donation._id,
-        date: new Date(),
-        isAnonymous,
-      });
-    } catch (error) {
-      console.error('Error sending donation receipt:', error);
-    }
-
-    const organizationUpdated = organization
-      ? {
-          totalDonationsReceived: organization.totalDonationsReceived,
-          totalDonationCount: organization.totalDonationCount,
-        }
-      : {
-          totalDonationsReceived: null,
-          totalDonationCount: null,
-        };
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
-      message: 'Donation completed successfully',
+      message: finalized.wasAlreadyRecorded
+        ? 'Donation was already completed'
+        : 'Donation completed successfully',
       data: {
-        donation: donation,
-        campaignUpdated: {
-          currentAmount: campaign.currentAmount,
-          donationsCount: campaign.donationsCount,
-          progress: (campaign.currentAmount / campaign.targetAmount) * 100,
-        },
-        organizationUpdated,
+        donation: finalized.donation,
+        campaignUpdated: finalized.campaignUpdated,
+        organizationUpdated: finalized.organizationUpdated,
       },
     });
   } catch (error) {
@@ -857,6 +950,9 @@ export const completeStripePayment = async (req, res, next) => {
 // @access  Private
 export const completeKhaltiPayment = async (req, res, next) => {
   try {
+    console.log('[Backend][completeKhaltiPayment] headers:', req.headers);
+    console.log('[Backend][completeKhaltiPayment] body:', req.body);
+
     const {
       pidx,
       amount,
@@ -876,7 +972,8 @@ export const completeKhaltiPayment = async (req, res, next) => {
     const { amountInPaisa: normalizedPaisa, amountInRupees } =
       normalizeKhaltiAmount({ amount, amountInPaisa });
 
-    const result = await lookupKhaltiEpayment({ pidx });
+    const result = await lookupCompletedKhaltiPayment(pidx);
+    console.log('[Backend][completeKhaltiPayment] lookup result:', result);
 
     if (!isKhaltiEpaymentCompleted(result)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -895,126 +992,48 @@ export const completeKhaltiPayment = async (req, res, next) => {
       });
     }
 
-    // Check if campaign exists and is active
-    const campaign = await Campaign.findById(campaignId);
-    if (!campaign) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: false,
-        message: `No campaign with id ${campaignId}`,
-      });
-    }
-
-    if (campaign.status !== 'active') {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'Cannot donate to an inactive campaign',
-      });
-    }
-
-    // Check if campaign end date has passed
-    if (new Date(campaign.endDate) < new Date()) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'This campaign has ended',
-      });
+    const { campaign, error: campaignError } =
+      await validateCampaignForDonation(campaignId);
+    if (campaignError) {
+      return res.status(campaignError.status).json(campaignError.body);
     }
 
     const userId = req.user._id || req.user.id;
     const paymentId = getKhaltiPaymentId(result, pidx);
+    console.log(
+      `[Backend][completeKhaltiPayment] finalizing donation pidx=${pidx} paymentId=${paymentId} userId=${userId} campaignId=${campaignId} amount=${amountInRupees}`,
+    );
 
-    const donation = await Donation.create({
-      donor: userId,
-      campaign: campaignId,
-      organization: campaign.organization,
+    const finalized = await finalizeDonation({
+      userId,
+      campaign,
       amount: amountInRupees,
       paymentMethod: 'khalti',
       paymentId,
-      isAnonymous: isAnonymous || false,
-      message: message || '',
-      status: 'completed',
-    });
-
-    campaign.currentAmount =
-      (campaign.currentAmount || 0) + amountInRupees;
-    campaign.donationsCount = (campaign.donationsCount || 0) + 1;
-    await campaign.save();
-
-    await logUserActivity({
-      user: userId,
-      activityType: 'donation',
-      resourceType: 'Donation',
-      resourceId: donation._id,
-      metadata: {
-        amount: amountInRupees,
-        campaignId: campaign._id,
-        campaignTitle: campaign.title,
-        organizationId: campaign.organization,
-        paymentMethod: 'khalti',
-        isAnonymous: isAnonymous || false,
+      isAnonymous,
+      message,
+      paymentMeta: {
+        amountInPaisa: normalizedPaisa,
+        khaltiPidx: pidx,
       },
     });
 
-    let organization = null;
-    try {
-      organization = await Organization.findByIdAndUpdate(
-        campaign.organization,
-        {
-          $inc: {
-            totalDonationsReceived: amountInRupees,
-            totalDonationCount: 1,
-          },
-        },
-        { new: true },
-      );
-    } catch (err) {
-      console.error('[Backend] Error updating organization funds:', err);
-    }
-
-    let user = null;
-    try {
-      user = await User.findById(userId);
-    } catch (err) {
-      console.error('[Backend] Error fetching user for donation receipt:', err);
-    }
-
-    try {
-      await sendDonationReceipt({
-        to: user?.email || '',
-        userName: user?.name || 'Donor',
-        amount: amountInRupees,
-        campaignTitle: campaign.title,
-        organizationName: organization
-          ? organization.organizationName
-          : 'Unknown Organization',
-        donationId: donation._id,
-        date: new Date(),
-        isAnonymous,
-      });
-    } catch (error) {
-      console.error('Error sending donation receipt:', error);
-    }
-
-    const organizationUpdated = organization
-      ? {
-          totalDonationsReceived: organization.totalDonationsReceived,
-          totalDonationCount: organization.totalDonationCount,
-        }
-      : {
-          totalDonationsReceived: null,
-          totalDonationCount: null,
-        };
+    console.log('[Backend][completeKhaltiPayment] finalized donation:', {
+      donationId: finalized.donation?._id,
+      wasAlreadyRecorded: finalized.wasAlreadyRecorded,
+      campaignUpdated: finalized.campaignUpdated,
+      organizationUpdated: finalized.organizationUpdated,
+    });
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
-      message: 'Donation completed successfully',
+      message: finalized.wasAlreadyRecorded
+        ? 'Donation was already completed'
+        : 'Donation completed successfully',
       data: {
-        donation,
-        campaignUpdated: {
-          currentAmount: campaign.currentAmount,
-          donationsCount: campaign.donationsCount,
-          progress: (campaign.currentAmount / campaign.targetAmount) * 100,
-        },
-        organizationUpdated,
+        donation: finalized.donation,
+        campaignUpdated: finalized.campaignUpdated,
+        organizationUpdated: finalized.organizationUpdated,
         khalti: {
           paymentId,
           amountInPaisa: normalizedPaisa,

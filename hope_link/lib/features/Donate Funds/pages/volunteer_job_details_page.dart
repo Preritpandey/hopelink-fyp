@@ -4,7 +4,13 @@ import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:intl/intl.dart';
+
+import '../controllers/post_interactions_controller.dart';
+import '../controllers/volunteer_job_controller.dart';
+import '../models/post_interaction_models.dart';
 import '../models/volunteer_job_model.dart';
+import '../widgets/post_engagement_section.dart';
+import '../widgets/post_interaction_summary.dart';
 import '../widgets/volunteer_job_apply_button.dart';
 
 class VolunteerJobDetailsPage extends StatefulWidget {
@@ -21,34 +27,65 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  late final PostInteractionsController _interactionsController;
+  late final String _interactionTag;
+  late final VolunteerJobController _jobController;
 
   @override
   void initState() {
     super.initState();
     job = Get.arguments as VolunteerJob;
+    _jobController = Get.isRegistered<VolunteerJobController>()
+        ? Get.find<VolunteerJobController>()
+        : Get.put(VolunteerJobController());
+    _interactionTag = 'job-interactions-${job.id}';
+    _interactionsController = Get.put(
+      PostInteractionsController(
+        postId: job.id,
+        initialState: job.interactionState,
+        onInteractionChanged: (PostInteractionState state) {
+          if (!mounted) return;
+          setState(() {
+            job = job.copyWith(
+              totalLikes: state.totalLikes,
+              isLikedByCurrentUser: state.isLikedByCurrentUser,
+              commentsCount: state.commentsCount,
+            );
+          });
+          _jobController.updateJobInteractions(job.id, state);
+        },
+      ),
+      tag: _interactionTag,
+    );
 
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
 
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
 
     _animationController.forward();
   }
 
   @override
   void dispose() {
+    if (Get.isRegistered<PostInteractionsController>(tag: _interactionTag)) {
+      Get.delete<PostInteractionsController>(tag: _interactionTag);
+    }
     _animationController.dispose();
     super.dispose();
   }
@@ -88,6 +125,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                           24.verticalSpace,
                           _buildDescription(),
                           24.verticalSpace,
+                          PostEngagementSection(
+                            controller: _interactionsController,
+                            accentColor: AppColorToken.primary.color,
+                            title: 'Volunteer Voices',
+                            subtitle:
+                                'Show interest, like the post, and ask questions in comments.',
+                          ),
+                          24.verticalSpace,
                           _buildRequiredSkills(),
                           24.verticalSpace,
                           _buildLocationInfo(),
@@ -95,7 +140,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                           _buildBenefits(),
                           24.verticalSpace,
                           _buildDeadlineInfo(),
-                          100.verticalSpace, // Space for apply button
+                          120.verticalSpace,
                         ],
                       ),
                     ),
@@ -144,9 +189,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             ),
           ),
           GestureDetector(
-            onTap: () {
-              // Share functionality
-            },
+            onTap: () {},
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -234,6 +277,12 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                 ),
               ],
             ),
+          ),
+          16.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: job.totalLikes,
+            commentsCount: job.commentsCount,
+            accentColor: AppColorToken.primary.color,
           ),
         ],
       ),

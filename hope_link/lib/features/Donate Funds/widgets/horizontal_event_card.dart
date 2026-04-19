@@ -6,6 +6,7 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import '../pages/event_details_page.dart';
+import 'post_interaction_summary.dart';
 
 class HorizontalEventCard extends StatelessWidget {
   final Event event;
@@ -232,6 +233,13 @@ class HorizontalEventCard extends StatelessWidget {
           ),
           12.verticalSpace,
           _buildProgressSection(),
+          12.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: event.totalLikes,
+            commentsCount: event.commentsCount,
+            accentColor: AppColorToken.primary.color,
+            compact: true,
+          ),
         ],
       ),
     );

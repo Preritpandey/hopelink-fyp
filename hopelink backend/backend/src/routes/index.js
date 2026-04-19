@@ -14,6 +14,8 @@ import volunteerApplicationRoutes from './volunteerApplication.routes.js';
 import certificationRoutes from './certification.routes.js';
 import userRoutes from './users.routes.js';
 import volunteerCreditsRoutes from './volunteerCredits.routes.js';
+import postRoutes from './post.routes.js';
+import commentRoutes from './comment.routes.js';
 
 const router = express.Router();
 
@@ -53,6 +55,8 @@ router.use('/certifications', certificationRoutes);
 router.use('/users', userRoutes);
 router.use('/user/profile', profileRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/posts', postRoutes);
+router.use('/comments', commentRoutes);
 
 // E-commerce Routes
 import productRoutes from './ecommerce/product.routes.js';

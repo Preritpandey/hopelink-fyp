@@ -31,6 +31,11 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from '../services/cloudinary.service.js';
+import {
+  attachInteractionsToDoc,
+  buildInteractionMap,
+  deleteInteractionsForPost,
+} from '../services/postInteraction.service.js';
 
 const buildCampaignMongoFilter = (queryParams = {}, baseFilter = {}) => {
   const reqQuery = { ...queryParams };
@@ -95,12 +100,20 @@ const getCampaignsByBaseFilter = async (req, res, baseFilter = {}) => {
   const transformedCampaigns = campaigns.map((campaign) =>
     transformCampaign(campaign),
   );
+  const interactionMap = await buildInteractionMap({
+    postType: 'Campaign',
+    postIds: transformedCampaigns.map((campaign) => campaign._id),
+    currentUserId: req.user?._id,
+  });
+  const campaignsWithInteractions = transformedCampaigns.map((campaign) =>
+    attachInteractionsToDoc(campaign, interactionMap),
+  );
 
   res.status(StatusCodes.OK).json({
     success: true,
-    count: transformedCampaigns.length,
+    count: campaignsWithInteractions.length,
     pagination,
-    data: transformedCampaigns,
+    data: campaignsWithInteractions,
   });
 };
 
@@ -210,9 +223,15 @@ export const getCampaign = async (req, res) => {
     throw new NotFoundError(`No campaign with the id of ${req.params.id}`);
   }
 
+  const interactionMap = await buildInteractionMap({
+    postType: 'Campaign',
+    postIds: [campaign._id],
+    currentUserId: req.user?._id,
+  });
+
   res.status(StatusCodes.OK).json({
     success: true,
-    data: campaign,
+    data: attachInteractionsToDoc(campaign, interactionMap),
   });
 };
 
@@ -305,6 +324,10 @@ export const deleteCampaign = async (req, res) => {
     );
   }
 
+  await deleteInteractionsForPost({
+    postId: campaign._id,
+    postType: 'Campaign',
+  });
   await campaign.remove();
 
   res.status(StatusCodes.OK).json({
@@ -528,11 +551,19 @@ export const getCampaignsWithDonationsAndEvents = async (req, res) => {
       ),
       donationCount: (donationsByCampaign[campaign._id] || []).length,
     }));
+    const interactionMap = await buildInteractionMap({
+      postType: 'Campaign',
+      postIds: result.map((campaign) => campaign._id),
+      currentUserId: req.user?._id,
+    });
+    const enrichedResult = result.map((campaign) =>
+      attachInteractionsToDoc(campaign, interactionMap),
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,
-      count: result.length,
-      data: result,
+      count: enrichedResult.length,
+      data: enrichedResult,
     });
   } catch (error) {
     console.error('Error getting campaigns with details:', error);

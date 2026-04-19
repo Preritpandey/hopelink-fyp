@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../config/constants/api_endpoints.dart';
 import '../models/event_model.dart';
+import '../models/post_interaction_models.dart';
 
 class EventController extends GetxController {
   final Dio _dio = Dio();
@@ -53,7 +54,16 @@ class EventController extends GetxController {
       isLoading.value = true;
       hasError.value = false;
 
-      final response = await _dio.get(ApiEndpoints.events);
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
+      final response = await _dio.get(
+        ApiEndpoints.events,
+        options: Options(
+          headers: {
+            if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
       print(response.data);
 
       if (response.statusCode == 200) {
@@ -254,6 +264,20 @@ class EventController extends GetxController {
 
   Future<void> refreshEvents() async {
     await fetchEvents();
+  }
+
+  void updateEventInteractions(String eventId, PostInteractionState state) {
+    Event patch(Event item) {
+      if (item.id != eventId) return item;
+      return item.copyWith(
+        totalLikes: state.totalLikes,
+        isLikedByCurrentUser: state.isLikedByCurrentUser,
+        commentsCount: state.commentsCount,
+      );
+    }
+
+    events.value = events.map(patch).toList();
+    filteredEvents.value = filteredEvents.map(patch).toList();
   }
 
   @override

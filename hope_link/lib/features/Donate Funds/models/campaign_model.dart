@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'post_interaction_models.dart';
 
 part 'campaign_model.g.dart';
 
@@ -61,6 +62,12 @@ class Campaign extends HiveObject {
   @HiveField(18)
   final bool isActive;
 
+  final int totalLikes;
+
+  final bool isLikedByCurrentUser;
+
+  final int commentsCount;
+
   Campaign({
     required this.id,
     required this.title,
@@ -81,6 +88,9 @@ class Campaign extends HiveObject {
     required this.updatedAt,
     required this.progress,
     required this.isActive,
+    this.totalLikes = 0,
+    this.isLikedByCurrentUser = false,
+    this.commentsCount = 0,
   });
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
@@ -116,6 +126,13 @@ class Campaign extends HiveObject {
       updatedAt: DateTime.parse(json['updatedAt']),
       progress: (json['progress'] ?? 0).toDouble(),
       isActive: json['isActive'] ?? false,
+      totalLikes: (json['totalLikes'] ?? 0) is num
+          ? (json['totalLikes'] as num).toInt()
+          : 0,
+      isLikedByCurrentUser: json['isLikedByCurrentUser'] == true,
+      commentsCount: (json['commentsCount'] ?? 0) is num
+          ? (json['commentsCount'] as num).toInt()
+          : 0,
     );
   }
 
@@ -140,7 +157,67 @@ class Campaign extends HiveObject {
       'updatedAt': updatedAt.toIso8601String(),
       'progress': progress,
       'isActive': isActive,
+      'totalLikes': totalLikes,
+      'isLikedByCurrentUser': isLikedByCurrentUser,
+      'commentsCount': commentsCount,
     };
+  }
+
+  PostInteractionState get interactionState => PostInteractionState(
+    totalLikes: totalLikes,
+    isLikedByCurrentUser: isLikedByCurrentUser,
+    commentsCount: commentsCount,
+  );
+
+  Campaign copyWith({
+    String? id,
+    String? title,
+    String? description,
+    Organization? organization,
+    String? category,
+    double? targetAmount,
+    double? currentAmount,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? status,
+    bool? isFeatured,
+    List<String>? tags,
+    List<String>? images,
+    List<CampaignUpdate>? updates,
+    List<FAQ>? faqs,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    double? progress,
+    bool? isActive,
+    int? totalLikes,
+    bool? isLikedByCurrentUser,
+    int? commentsCount,
+  }) {
+    return Campaign(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      organization: organization ?? this.organization,
+      category: category ?? this.category,
+      targetAmount: targetAmount ?? this.targetAmount,
+      currentAmount: currentAmount ?? this.currentAmount,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      status: status ?? this.status,
+      isFeatured: isFeatured ?? this.isFeatured,
+      tags: tags ?? this.tags,
+      images: images ?? this.images,
+      updates: updates ?? this.updates,
+      faqs: faqs ?? this.faqs,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      progress: progress ?? this.progress,
+      isActive: isActive ?? this.isActive,
+      totalLikes: totalLikes ?? this.totalLikes,
+      isLikedByCurrentUser:
+          isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+      commentsCount: commentsCount ?? this.commentsCount,
+    );
   }
 }
 

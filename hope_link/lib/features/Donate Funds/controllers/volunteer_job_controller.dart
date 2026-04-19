@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/post_interaction_models.dart';
 import '../models/volunteer_job_model.dart';
 
 class VolunteerJobController extends GetxController {
@@ -34,17 +35,12 @@ class VolunteerJobController extends GetxController {
       errorMessage.value = '';
 
       final token = await _getAuthToken();
-      if (token == null) {
-        errorMessage.value = 'Authentication token not found';
-        isLoading.value = false;
-        return;
-      }
 
       final response = await http.get(
         Uri.parse(ApiEndpoints.volunteerJobs),
         headers: {
-          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
+          if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
         },
       );
 
@@ -125,5 +121,19 @@ class VolunteerJobController extends GetxController {
 
   Future<void> refreshJobs() async {
     await fetchVolunteerJobs();
+  }
+
+  void updateJobInteractions(String jobId, PostInteractionState state) {
+    VolunteerJob patch(VolunteerJob item) {
+      if (item.id != jobId) return item;
+      return item.copyWith(
+        totalLikes: state.totalLikes,
+        isLikedByCurrentUser: state.isLikedByCurrentUser,
+        commentsCount: state.commentsCount,
+      );
+    }
+
+    volunteerJobs.value = volunteerJobs.map(patch).toList();
+    filteredJobs.value = filteredJobs.map(patch).toList();
   }
 }

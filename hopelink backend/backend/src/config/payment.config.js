@@ -8,8 +8,15 @@ export const STRIPE_CURRENCY = process.env.STRIPE_CURRENCY || 'npr';
 
 export const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY || '';
 export const KHALTI_PUBLIC_KEY = process.env.KHALTI_PUBLIC_KEY || '';
+export const KHALTI_ENVIRONMENT =
+  (process.env.KHALTI_ENVIRONMENT || 'test').toLowerCase();
+const isKhaltiProduction =
+  KHALTI_ENVIRONMENT === 'prod' || KHALTI_ENVIRONMENT === 'production';
 export const KHALTI_BASE_URL =
-  process.env.KHALTI_BASE_URL || 'https://khalti.com/api/v2';
+  process.env.KHALTI_BASE_URL ||
+  (isKhaltiProduction
+    ? 'https://khalti.com/api/v2'
+    : 'https://dev.khalti.com/api/v2');
 export const KHALTI_RETURN_URL =
   process.env.KHALTI_RETURN_URL || 'https://khalti.com';
 export const KHALTI_WEBSITE_URL =
@@ -28,6 +35,7 @@ export const PAYMENT_CONFIG = {
     enabled: !!KHALTI_SECRET_KEY,
     secretKey: KHALTI_SECRET_KEY,
     publicKey: KHALTI_PUBLIC_KEY,
+    environment: isKhaltiProduction ? 'prod' : 'test',
     verifyUrl: 'https://khalti.com/api/v2/payment/verify/',
     initiateUrl: `${KHALTI_BASE_URL}/epayment/initiate/`,
     lookupUrl: `${KHALTI_BASE_URL}/epayment/lookup/`,

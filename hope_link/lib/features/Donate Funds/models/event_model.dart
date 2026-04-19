@@ -1,6 +1,7 @@
 // lib/features/events/models/event_model.dart
 
 import 'package:hive/hive.dart';
+import 'post_interaction_models.dart';
 
 part 'event_model.g.dart';
 
@@ -66,6 +67,12 @@ class Event {
   @HiveField(19)
   final DateTime updatedAt;
 
+  final int totalLikes;
+
+  final bool isLikedByCurrentUser;
+
+  final int commentsCount;
+
   Event({
     required this.id,
     required this.title,
@@ -87,6 +94,9 @@ class Event {
     required this.tags,
     required this.createdAt,
     required this.updatedAt,
+    this.totalLikes = 0,
+    this.isLikedByCurrentUser = false,
+    this.commentsCount = 0,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -128,6 +138,13 @@ class Event {
           (json['tags'] as List?)?.map((tag) => tag.toString()).toList() ?? [],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      totalLikes: (json['totalLikes'] ?? 0) is num
+          ? (json['totalLikes'] as num).toInt()
+          : 0,
+      isLikedByCurrentUser: json['isLikedByCurrentUser'] == true,
+      commentsCount: (json['commentsCount'] ?? 0) is num
+          ? (json['commentsCount'] as num).toInt()
+          : 0,
     );
   }
 
@@ -153,7 +170,69 @@ class Event {
       'tags': tags,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'totalLikes': totalLikes,
+      'isLikedByCurrentUser': isLikedByCurrentUser,
+      'commentsCount': commentsCount,
     };
+  }
+
+  PostInteractionState get interactionState => PostInteractionState(
+    totalLikes: totalLikes,
+    isLikedByCurrentUser: isLikedByCurrentUser,
+    commentsCount: commentsCount,
+  );
+
+  Event copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? category,
+    String? eventType,
+    EventLocation? location,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<EventImage>? images,
+    String? status,
+    int? maxVolunteers,
+    List<String>? requiredSkills,
+    String? eligibility,
+    String? organizerType,
+    EventOrganizer? organizer,
+    List<String>? volunteers,
+    bool? isFeatured,
+    List<String>? tags,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? totalLikes,
+    bool? isLikedByCurrentUser,
+    int? commentsCount,
+  }) {
+    return Event(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      eventType: eventType ?? this.eventType,
+      location: location ?? this.location,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      images: images ?? this.images,
+      status: status ?? this.status,
+      maxVolunteers: maxVolunteers ?? this.maxVolunteers,
+      requiredSkills: requiredSkills ?? this.requiredSkills,
+      eligibility: eligibility ?? this.eligibility,
+      organizerType: organizerType ?? this.organizerType,
+      organizer: organizer ?? this.organizer,
+      volunteers: volunteers ?? this.volunteers,
+      isFeatured: isFeatured ?? this.isFeatured,
+      tags: tags ?? this.tags,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      totalLikes: totalLikes ?? this.totalLikes,
+      isLikedByCurrentUser:
+          isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+      commentsCount: commentsCount ?? this.commentsCount,
+    );
   }
 
   String get primaryImageUrl {

@@ -4,8 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
+
 import '../controllers/event_controller.dart';
+import '../controllers/post_interactions_controller.dart';
 import '../models/event_model.dart';
+import '../models/post_interaction_models.dart';
+import '../widgets/post_engagement_section.dart';
+import '../widgets/post_interaction_summary.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
@@ -17,18 +22,47 @@ class EventDetailsPage extends StatefulWidget {
 }
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
-  final EventController _controller = Get.put(EventController());
+  final EventController _controller = Get.isRegistered<EventController>()
+      ? Get.find<EventController>()
+      : Get.put(EventController());
   final PageController _pageController = PageController();
   final RxInt _currentImageIndex = 0.obs;
+
+  late Event _event;
+  late final String _interactionTag;
+  late final PostInteractionsController _interactionsController;
 
   @override
   void initState() {
     super.initState();
+    _event = widget.event;
+    _interactionTag = 'event-interactions-${_event.id}';
+    _interactionsController = Get.put(
+      PostInteractionsController(
+        postId: _event.id,
+        initialState: _event.interactionState,
+        onInteractionChanged: (PostInteractionState state) {
+          if (!mounted) return;
+          setState(() {
+            _event = _event.copyWith(
+              totalLikes: state.totalLikes,
+              isLikedByCurrentUser: state.isLikedByCurrentUser,
+              commentsCount: state.commentsCount,
+            );
+          });
+          _controller.updateEventInteractions(_event.id, state);
+        },
+      ),
+      tag: _interactionTag,
+    );
     _controller.fetchMyEnrollments();
   }
 
   @override
   void dispose() {
+    if (Get.isRegistered<PostInteractionsController>(tag: _interactionTag)) {
+      Get.delete<PostInteractionsController>(tag: _interactionTag);
+    }
     _pageController.dispose();
     super.dispose();
   }
@@ -47,11 +81,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 _buildMainInfo(),
                 _buildProgressSection(),
                 _buildDescription(),
+                24.verticalSpace,
+                PostEngagementSection(
+                  controller: _interactionsController,
+                  accentColor: AppColorToken.primary.color,
+                  title: 'Community Buzz',
+                  subtitle: 'Like this event and join the conversation.',
+                ),
+                24.verticalSpace,
                 _buildLocationSection(),
                 _buildDateSection(),
                 _buildSkillsSection(),
                 _buildOrganizerSection(),
-                100.verticalSpace,
+                140.verticalSpace,
               ],
             ),
           ),
@@ -109,9 +151,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               color: AppColorToken.primary.color,
             ),
           ),
-          onPressed: () {
-            // Implement share functionality
-          },
+          onPressed: () {},
         ),
         16.horizontalSpace,
       ],
@@ -119,7 +159,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   }
 
   Widget _buildImageCarousel() {
-    if (widget.event.images.isEmpty) {
+    if (_event.images.isEmpty) {
       return Container(
         height: 300,
         decoration: BoxDecoration(
@@ -149,10 +189,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) => _currentImageIndex.value = index,
-            itemCount: widget.event.images.length,
+            itemCount: _event.images.length,
             itemBuilder: (context, index) {
               return Image.network(
-                widget.event.images[index].url,
+                _event.images[index].url,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -170,7 +210,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             },
           ),
         ),
-        if (widget.event.images.length > 1)
+        if (_event.images.length > 1)
           Positioned(
             bottom: 16,
             left: 0,
@@ -189,7 +229,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(
-                      widget.event.images.length,
+                      _event.images.length,
                       (index) => Container(
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         width: _currentImageIndex.value == index ? 24 : 8,
@@ -207,7 +247,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               ),
             ),
           ),
-        if (widget.event.isFeatured)
+        if (_event.isFeatured)
           Positioned(
             top: 16,
             right: 16,
@@ -260,7 +300,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              widget.event.category.toUpperCase(),
+              _event.category.toUpperCase(),
               style: AppTextStyle.bodySmall.copyWith(
                 color: AppColorToken.primary.color,
                 fontWeight: FontWeight.w700,
@@ -271,7 +311,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ),
           12.verticalSpace,
           Text(
-            widget.event.title,
+            _event.title,
             style: AppTextStyle.h3.copyWith(
               fontWeight: FontWeight.w800,
               fontSize: 26,
@@ -282,17 +322,23 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             children: [
               _buildInfoChip(
                 Icons.event_available_rounded,
-                widget.event.eventType.replaceAll('-', ' ').toUpperCase(),
+                _event.eventType.replaceAll('-', ' ').toUpperCase(),
               ),
               12.horizontalSpace,
               _buildInfoChip(
                 Icons.public_rounded,
-                widget.event.status.toUpperCase(),
-                color: widget.event.status == 'published'
+                _event.status.toUpperCase(),
+                color: _event.status == 'published'
                     ? Colors.green
                     : Colors.orange,
               ),
             ],
+          ),
+          14.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: _event.totalLikes,
+            commentsCount: _event.commentsCount,
+            accentColor: AppColorToken.primary.color,
           ),
         ],
       ),
@@ -347,19 +393,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             children: [
               _buildStatItem(
                 'Enrolled',
-                widget.event.volunteersCount.toString(),
+                _event.volunteersCount.toString(),
                 Icons.people_rounded,
               ),
               Container(width: 1, height: 40, color: Colors.grey[300]),
               _buildStatItem(
                 'Max Capacity',
-                widget.event.maxVolunteers.toString(),
+                _event.maxVolunteers.toString(),
                 Icons.groups_rounded,
               ),
               Container(width: 1, height: 40, color: Colors.grey[300]),
               _buildStatItem(
                 'Spots Left',
-                widget.event.spotsLeft.toString(),
+                _event.spotsLeft.toString(),
                 Icons.event_seat_rounded,
               ),
             ],
@@ -368,11 +414,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: widget.event.progressPercentage / 100,
+              value: _event.progressPercentage / 100,
               minHeight: 10,
               backgroundColor: Colors.grey[200],
               valueColor: AlwaysStoppedAnimation<Color>(
-                widget.event.progressPercentage >= 90
+                _event.progressPercentage >= 90
                     ? Colors.orange
                     : AppColorToken.primary.color,
               ),
@@ -380,7 +426,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ),
           8.verticalSpace,
           Text(
-            '${widget.event.progressPercentage.toStringAsFixed(1)}% enrolled',
+            '${_event.progressPercentage.toStringAsFixed(1)}% enrolled',
             style: AppTextStyle.bodySmall.copyWith(
               color: AppColorToken.primary.color,
               fontWeight: FontWeight.w600,
@@ -432,7 +478,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ),
           12.verticalSpace,
           Text(
-            widget.event.description,
+            _event.description,
             style: AppTextStyle.bodyMedium.copyWith(
               color: Colors.grey[700],
               height: 1.6,
@@ -463,44 +509,40 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColorToken.primary.color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColorToken.primary.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.location_on_rounded,
+                    color: AppColorToken.primary.color,
+                    size: 24,
+                  ),
+                ),
+                12.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _event.location.address,
+                        style: AppTextStyle.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.location_on_rounded,
-                        color: AppColorToken.primary.color,
-                        size: 24,
+                      4.verticalSpace,
+                      Text(
+                        '${_event.location.city}, ${_event.location.state}',
+                        style: AppTextStyle.bodySmall.copyWith(
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                    12.horizontalSpace,
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.event.location.address,
-                            style: AppTextStyle.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          4.verticalSpace,
-                          Text(
-                            '${widget.event.location.city}, ${widget.event.location.state}',
-                            style: AppTextStyle.bodySmall.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -526,7 +568,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               Expanded(
                 child: _buildDateCard(
                   'Start Date',
-                  widget.event.startDate,
+                  _event.startDate,
                   Icons.play_circle_outline_rounded,
                 ),
               ),
@@ -534,7 +576,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               Expanded(
                 child: _buildDateCard(
                   'End Date',
-                  widget.event.endDate,
+                  _event.endDate,
                   Icons.stop_circle_outlined,
                 ),
               ),
@@ -577,9 +619,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   }
 
   Widget _buildSkillsSection() {
-    if (widget.event.requiredSkills.isEmpty) return const SizedBox.shrink();
+    if (_event.requiredSkills.isEmpty) return const SizedBox.shrink();
 
-    final skills = widget.event.requiredSkills
+    final skills = _event.requiredSkills
         .expand((skill) => skill.split(','))
         .map((s) => s.trim())
         .toList();
@@ -640,7 +682,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           GestureDetector(
             onTap: () => Get.toNamed(
               '/organization-profile',
-              arguments: widget.event.organizer.id,
+              arguments: _event.organizer.id,
             ),
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -653,11 +695,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
+                    backgroundColor:
+                        AppColorToken.primary.color.withOpacity(0.1),
                     child: Text(
-                      widget.event.organizer.organizationName.isNotEmpty
-                          ? widget.event.organizer.organizationName[0]
-                                .toUpperCase()
+                      _event.organizer.organizationName.isNotEmpty
+                          ? _event.organizer.organizationName[0].toUpperCase()
                           : 'O',
                       style: AppTextStyle.h2.copyWith(
                         color: AppColorToken.primary.color,
@@ -671,8 +713,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.event.organizer.organizationName.isNotEmpty
-                              ? widget.event.organizer.organizationName
+                          _event.organizer.organizationName.isNotEmpty
+                              ? _event.organizer.organizationName
                               : 'Organizer',
                           style: AppTextStyle.bodyLarge.copyWith(
                             fontWeight: FontWeight.w700,
@@ -681,8 +723,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         ),
                         4.verticalSpace,
                         Text(
-                          widget.event.organizer.officialEmail.isNotEmpty
-                              ? widget.event.organizer.officialEmail
+                          _event.organizer.officialEmail.isNotEmpty
+                              ? _event.organizer.officialEmail
                               : 'contact@organizer.com',
                           style: AppTextStyle.bodySmall.copyWith(
                             color: Colors.grey[600],
@@ -715,9 +757,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       ),
       child: SafeArea(
         child: Obx(() {
-          final status = _controller.enrollmentStatus(widget.event.id);
-          final alreadyEnrolled = _controller.isEnrolled(widget.event.id);
-          final isFull = widget.event.spotsLeft <= 0;
+          final status = _controller.enrollmentStatus(_event.id);
+          final alreadyEnrolled = _controller.isEnrolled(_event.id);
+          final isFull = _event.spotsLeft <= 0;
           final isBusy = _controller.isEnrolling.value;
 
           final canEnroll = !alreadyEnrolled && !isFull && !isBusy;
@@ -732,7 +774,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           }
 
           return ElevatedButton(
-            onPressed: canEnroll ? () => _enrollInEvent() : null,
+            onPressed: canEnroll ? _enrollInEvent : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColorToken.primary.color,
               foregroundColor: Colors.white,
@@ -773,9 +815,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   }
 
   Future<void> _enrollInEvent() async {
-    final success = await _controller.enrollInEvent(widget.event.id);
-    if (success) {
-      // Optionally navigate back or update UI
-    }
+    await _controller.enrollInEvent(_event.id);
   }
 }

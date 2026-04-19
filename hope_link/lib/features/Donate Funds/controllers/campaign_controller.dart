@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
+import '../models/post_interaction_models.dart';
 import '../services/campaign_service.dart';
 
 class CampaignController extends GetxController {
@@ -162,6 +163,20 @@ class CampaignController extends GetxController {
       );
       return null;
     }
+  }
+
+  void updateCampaignInteractions(String campaignId, PostInteractionState state) {
+    Campaign patch(Campaign item) {
+      if (item.id != campaignId) return item;
+      return item.copyWith(
+        totalLikes: state.totalLikes,
+        isLikedByCurrentUser: state.isLikedByCurrentUser,
+        commentsCount: state.commentsCount,
+      );
+    }
+
+    campaigns.value = campaigns.map(patch).toList();
+    filteredCampaigns.value = filteredCampaigns.map(patch).toList();
   }
 
   Future<CampaignReport?> getCampaignReport(String campaignId) async {

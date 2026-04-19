@@ -3,9 +3,9 @@ class ApiEndpoints {
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
-  static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
+  // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
 
-  // static const String baseUrl = 'http://10.24.1.217:3008/api/v1'; // college
+  static const String baseUrl = 'http://192.168.18.48:3008/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Auth
@@ -34,6 +34,12 @@ class ApiEndpoints {
 
   // Volunteer job
   static String get volunteerJobs => '$baseUrl/volunteer-jobs';
+  static String postLike(String postId) => '$baseUrl/posts/$postId/like';
+  static String postUnlike(String postId) => '$baseUrl/posts/$postId/unlike';
+  static String postComments(String postId) =>
+      '$baseUrl/posts/$postId/comments';
+  static String deleteComment(String commentId) =>
+      '$baseUrl/comments/$commentId';
 
   // Organization profile
   static String organizationProfile(String organizationId) =>

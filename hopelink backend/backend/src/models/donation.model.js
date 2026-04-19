@@ -90,7 +90,7 @@ donationSchema.statics.getTotalDonations = async function (campaignId) {
   try {
     await Campaign.findByIdAndUpdate(campaignId, {
       currentAmount: result[0]?.totalAmount || 0,
-      $inc: { donationCount: result[0]?.count || 0 }
+      donationsCount: result[0]?.count || 0,
     });
   } catch (error) {
     console.error('Error updating campaign donation stats:', error);

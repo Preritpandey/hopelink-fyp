@@ -130,9 +130,22 @@ export const verifyKhalti = async (req, res, next) => {
   } catch (error) {
     // Khalti returns 4xx with error details; surface a clean message
     if (error.response?.data) {
-      return res.status(error.response.status || 400).json({
+      const statusCode = error.response.status || 400;
+      const detail = error.response.data?.detail;
+      const isInvalidCredential =
+        statusCode === StatusCodes.UNAUTHORIZED &&
+        typeof detail === 'string' &&
+        detail.toLowerCase().includes('invalid token');
+
+      return res.status(statusCode).json({
         success: false,
-        error: error.response.data,
+        message: isInvalidCredential
+            ? 'Khalti credentials are invalid or the configured environment does not match the active Khalti keys.'
+            : 'Khalti verification failed.',
+        error: {
+          source: 'khalti',
+          ...error.response.data,
+        },
       });
     }
     next(error);
@@ -162,12 +175,16 @@ export const initKhaltiPayment = async (req, res, next) => {
       });
     }
 
+    const requestOrigin = `${req.protocol}://${req.get('host')}`;
+    const defaultReturnUrl = `${requestOrigin}/api/v1/payments/khalti/return`;
+    const defaultWebsiteUrl = requestOrigin;
+
     const result = await initiateKhaltiEpayment({
       amount,
       purchaseOrderId,
       purchaseOrderName,
-      returnUrl,
-      websiteUrl,
+      returnUrl: returnUrl || defaultReturnUrl,
+      websiteUrl: websiteUrl || defaultWebsiteUrl,
       customerInfo,
     });
 
@@ -177,9 +194,22 @@ export const initKhaltiPayment = async (req, res, next) => {
     });
   } catch (error) {
     if (error.response?.data) {
-      return res.status(error.response.status || 400).json({
+      const statusCode = error.response.status || 400;
+      const detail = error.response.data?.detail;
+      const isInvalidCredential =
+        statusCode === StatusCodes.UNAUTHORIZED &&
+        typeof detail === 'string' &&
+        detail.toLowerCase().includes('invalid token');
+
+      return res.status(statusCode).json({
         success: false,
-        error: error.response.data,
+        message: isInvalidCredential
+          ? 'Khalti credentials are invalid or the configured environment does not match the active Khalti keys.'
+          : 'Failed to initiate Khalti payment.',
+        error: {
+          source: 'khalti',
+          ...error.response.data,
+        },
       });
     }
     next(error);
@@ -214,13 +244,89 @@ export const lookupKhaltiPayment = async (req, res, next) => {
     });
   } catch (error) {
     if (error.response?.data) {
-      return res.status(error.response.status || 400).json({
+      const statusCode = error.response.status || 400;
+      const detail = error.response.data?.detail;
+      const isInvalidCredential =
+        statusCode === StatusCodes.UNAUTHORIZED &&
+        typeof detail === 'string' &&
+        detail.toLowerCase().includes('invalid token');
+
+      return res.status(statusCode).json({
         success: false,
-        error: error.response.data,
+        message: isInvalidCredential
+          ? 'Khalti credentials are invalid or the configured environment does not match the active Khalti keys.'
+          : 'Failed to lookup Khalti payment.',
+        error: {
+          source: 'khalti',
+          ...error.response.data,
+        },
       });
     }
     next(error);
   }
+};
+
+export const khaltiReturnPage = async (req, res) => {
+  return res.status(StatusCodes.OK).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Returning to Hope Link</title>
+        <style>
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f4fff8 0%, #eef6ff 100%);
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+          }
+          .card {
+            max-width: 360px;
+            padding: 32px 28px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+            text-align: center;
+          }
+          .spinner {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 18px;
+            border: 4px solid #dbeafe;
+            border-top-color: #2563eb;
+            border-radius: 999px;
+            animation: spin 0.8s linear infinite;
+          }
+          h1 {
+            margin: 0 0 10px;
+            font-size: 22px;
+          }
+          p {
+            margin: 0;
+            line-height: 1.5;
+            color: #4b5563;
+          }
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="spinner"></div>
+          <h1>Payment Confirmed</h1>
+          <p>Returning you to Hope Link. This page will close automatically.</p>
+        </div>
+      </body>
+    </html>
+  `);
 };
 
 export default {
@@ -229,5 +335,6 @@ export default {
   verifyKhalti,
   initKhaltiPayment,
   lookupKhaltiPayment,
+  khaltiReturnPage,
 };
 

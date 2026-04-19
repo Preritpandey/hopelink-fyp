@@ -19,16 +19,24 @@ import {
   getCampaignFundStatus,
   getOrganizationFundStatus,
 } from '../controllers/campaign.controller.js';
-import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import {
+  authenticate,
+  authenticateIfPresent,
+  authorize,
+} from '../middleware/auth.middleware.js';
 import { handleFileUpload } from '../config/multer.config.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', getCampaigns);
-router.get('/closed', getClosedCampaigns);
-router.get('/upcoming', getUpcomingCampaigns);
-router.get('/with-details/all', getCampaignsWithDonationsAndEvents);
+router.get('/', authenticateIfPresent, getCampaigns);
+router.get('/closed', authenticateIfPresent, getClosedCampaigns);
+router.get('/upcoming', authenticateIfPresent, getUpcomingCampaigns);
+router.get(
+  '/with-details/all',
+  authenticateIfPresent,
+  getCampaignsWithDonationsAndEvents,
+);
 // Organization campaigns (protected)
 router.get(
   '/organization',
@@ -37,8 +45,8 @@ router.get(
   getOrganizationCampaigns,
 );
 // Fund tracking routes (public)
-router.get('/:id/fund-status', getCampaignFundStatus);
-router.get('/:id', getCampaign);
+router.get('/:id/fund-status', authenticateIfPresent, getCampaignFundStatus);
+router.get('/:id', authenticateIfPresent, getCampaign);
 
 // Protected routes (require authentication)
 router.use(authenticate);

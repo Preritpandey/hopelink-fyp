@@ -8,13 +8,17 @@ import {
   getMyOrganizationJobs,
 } from '../controllers/volunteerJob.controller.js';
 import { applyToVolunteerJob } from '../controllers/volunteerApplication.controller.js';
-import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import {
+  authenticate,
+  authenticateIfPresent,
+  authorize,
+} from '../middleware/auth.middleware.js';
 import { uploadResume } from '../middleware/multer.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', getVolunteerJobs);
+router.get('/', authenticateIfPresent, getVolunteerJobs);
 
 // User apply
 router.post(
@@ -42,6 +46,6 @@ router.patch(
 );
 
 // Public job detail (keep after /org/my to avoid conflict)
-router.get('/:jobId', getVolunteerJobById);
+router.get('/:jobId', authenticateIfPresent, getVolunteerJobById);
 
 export default router;

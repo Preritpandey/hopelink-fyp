@@ -328,7 +328,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           ),
           12.verticalSpace,
           SizedBox(
-            height: 310,
+            height: 355,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),

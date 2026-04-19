@@ -4,6 +4,7 @@ import 'package:hope_link/config/constants/api_endpoints.dart';
 class PaymentConfig {
   static String? stripePublishableKey;
   static String? khaltiPublicKey;
+  static String khaltiEnvironment = 'test';
   static String currency = 'npr';
 
   static Future<void> fetch() async {
@@ -13,6 +14,8 @@ class PaymentConfig {
       final data = res.data['data'];
       stripePublishableKey = data?['publishableKey'] as String?;
       khaltiPublicKey = data?['khaltiPublicKey'] as String?;
+      khaltiEnvironment =
+          (data?['khaltiEnvironment'] as String?)?.toLowerCase() ?? 'test';
       currency = (data?['currency'] as String?)?.toLowerCase() ?? 'npr';
     } catch (_) {
       // Keep defaults if config fetch fails.

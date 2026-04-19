@@ -31,6 +31,11 @@ const campaignSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    donationsCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     startDate: {
       type: Date,
       required: [true, 'Please provide a start date'],

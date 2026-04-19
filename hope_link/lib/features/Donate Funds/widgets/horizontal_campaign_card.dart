@@ -5,6 +5,7 @@ import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:intl/intl.dart';
 import '../models/campaign_model.dart';
+import 'post_interaction_summary.dart';
 
 class HorizontalCampaignCard extends StatelessWidget {
   final Campaign campaign;
@@ -182,6 +183,13 @@ class HorizontalCampaignCard extends StatelessWidget {
           ),
           10.verticalSpace,
           _buildProgressSection(),
+          12.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: campaign.totalLikes,
+            commentsCount: campaign.commentsCount,
+            accentColor: AppColorToken.primary.color,
+            compact: true,
+          ),
         ],
       ),
     );

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:hope_link/config/payment_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,16 +129,15 @@ class DonationController extends GetxController {
         return;
       }
 
-      final dio = await _buildAuthorizedDio();
       final amountInPaisa = amount * 100; // convert NPR to paisa
 
       print('[Donation] Creating payment intent with amount: $amountInPaisa');
 
-      final res = await dio.post(
+      final res = await _authorizedPost(
         ApiEndpoints.createPaymentIntent,
         data: {
           'amount': amountInPaisa,
-          'currency': 'npr',      
+          'currency': 'npr',
           'type': 'donation',
           'campaignId': campaign!.id,
         },
@@ -199,7 +198,7 @@ class DonationController extends GetxController {
       print('[Donation] Verifying payment on server...');
 
       // Verify on server
-      final verifyRes = await dio.post(
+      final verifyRes = await _authorizedPost(
         ApiEndpoints.verrifyPayment,
         data: {'paymentIntentId': paymentIntentId},
       );
@@ -211,7 +210,7 @@ class DonationController extends GetxController {
       // Show success dialog only if server confirms succeeded
       if (verified != null && (verified['status'] as String?) == 'succeeded') {
         print('[Donation] Payment successful! Creating donation record...');
-        await _completeStripeDonation(dio, paymentIntentId, amount);
+        await _completeStripeDonation(paymentIntentId, amount);
       } else {
         throw Exception(
           'Payment verification failed. Status: ${verified?['status'] ?? 'unknown'}',
@@ -219,9 +218,14 @@ class DonationController extends GetxController {
       }
     } catch (e) {
       print('[Donation] Stripe payment error: $e');
-      if (e is DioException && e.response?.statusCode == 401) {
-        _handleAuthError();
-        return;
+      if (e is dio.DioException) {
+        print('[Donation] DioException status code: ${e.response?.statusCode}');
+        print('[Donation] DioException message: ${e.message}');
+        print('[Donation] DioException response body: ${e.response?.data}');
+        if (e.response?.statusCode == 401) {
+          _handleAuthError();
+          return;
+        }
       }
       rethrow;
     }
@@ -262,10 +266,9 @@ class DonationController extends GetxController {
         return;
       }
 
-      final dio = await _buildAuthorizedDio();
       final amountInPaisa = amount * 100;
 
-      final initRes = await dio.post(
+      final initRes = await _authorizedPost(
         ApiEndpoints.khaltiInitPayment,
         data: {
           'amount': amountInPaisa,
@@ -283,17 +286,50 @@ class DonationController extends GetxController {
       final payConfig = KhaltiPayConfig(
         publicKey: PaymentConfig.khaltiPublicKey!,
         pidx: pidx,
-        environment: _resolveKhaltiEnvironment(PaymentConfig.khaltiPublicKey!),
+        environment: _resolveKhaltiEnvironment(),
       );
 
       final completer = Completer<void>();
+      var checkoutClosed = false;
       final khalti = await Khalti.init(
         enableDebugging: true,
         payConfig: payConfig,
         onPaymentResult: (paymentResult, khalti) async {
+          _closeKhaltiCheckout(
+            khalti,
+            context,
+            completer,
+            alreadyClosed: checkoutClosed,
+          );
+          checkoutClosed = true;
+          _showPaymentConfirmationDialog();
+
           try {
-            await _completeKhaltiDonation(dio, pidx, amountInPaisa);
+            final paidPidx = paymentResult.payload?.pidx ?? pidx;
+            await _completeKhaltiDonation(paidPidx, amountInPaisa);
+          } on dio.DioException catch (e) {
+            print(
+              '[Donation] Khalti completion Dio error body: ${e.response?.data}',
+            );
+            _dismissActiveDialog();
+            if (e.response?.statusCode == 401) {
+              _handleAuthError(logoutUser: false);
+              Get.snackbar(
+                'Payment Pending Review',
+                'Your Khalti payment may have succeeded, but we could not verify it with your current session. Please refresh and check your donation history.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.orange.withOpacity(0.9),
+                colorText: Colors.white,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 12,
+                duration: const Duration(seconds: 5),
+              );
+            } else {
+              rethrow;
+            }
           } catch (e) {
+            print('[Donation] Khalti completion fallback error: $e');
+            _dismissActiveDialog();
             Get.snackbar(
               'Payment Received',
               'Your payment was successful but we encountered an issue recording the donation. Our team will verify it shortly.',
@@ -304,11 +340,6 @@ class DonationController extends GetxController {
               borderRadius: 12,
               duration: const Duration(seconds: 5),
             );
-          } finally {
-            khalti.close(context);
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
           }
         },
         onMessage:
@@ -326,6 +357,7 @@ class DonationController extends GetxController {
                 if (!completer.isCompleted) {
                   completer.complete();
                 }
+                checkoutClosed = true;
               }
             },
         onReturn: () {
@@ -339,21 +371,29 @@ class DonationController extends GetxController {
       await completer.future;
     } catch (e) {
       print('[Donation] Khalti payment error: $e');
-      if (e is DioException && e.response?.statusCode == 401) {
-        _handleAuthError();
-        return;
+      if (e is dio.DioException) {
+        print('[Donation] DioException status code: ${e.response?.statusCode}');
+        print('[Donation] DioException message: ${e.message}');
+        print('[Donation] DioException response body: ${e.response?.data}');
+        if (_isKhaltiCredentialError(e)) {
+          _showKhaltiConfigurationError();
+          return;
+        }
+        if (e.response?.statusCode == 401) {
+          _handleAuthError();
+          return;
+        }
       }
       rethrow;
     }
   }
 
   Future<void> _completeStripeDonation(
-    Dio dio,
     String paymentIntentId,
     int amount,
   ) async {
     try {
-      final completeRes = await dio.post(
+      final completeRes = await _authorizedPost(
         ApiEndpoints.completePayment,
         data: {
           'paymentIntentId': paymentIntentId,
@@ -374,12 +414,11 @@ class DonationController extends GetxController {
     }
   }
 
-  Future<void> _completeKhaltiDonation(
-    Dio dio,
-    String pidx,
-    int amountInPaisa,
-  ) async {
-    final completeRes = await dio.post(
+  Future<void> _completeKhaltiDonation(String pidx, int amountInPaisa) async {
+    print(
+      '[Donation] Completing Khalti donation with pidx=$pidx amountInPaisa=$amountInPaisa campaignId=${campaign?.id}',
+    );
+    final completeRes = await _authorizedPost(
       ApiEndpoints.khaltiCompletePayment,
       data: {
         'pidx': pidx,
@@ -391,12 +430,13 @@ class DonationController extends GetxController {
     );
 
     print('[Donation] Complete Khalti payment response: ${completeRes.data}');
+    _dismissActiveDialog();
     await _updateCampaignCache();
     _showSuccessDialog(amountInPaisa ~/ 100);
     _clearForm();
   }
 
-  Future<Dio> _buildAuthorizedDio() async {
+  Future<dio.Dio> _buildAuthorizedDio() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
     if (token.isEmpty) {
@@ -411,9 +451,9 @@ class DonationController extends GetxController {
       );
       throw Exception('Unauthorized: missing auth token');
     }
-    return Dio(
-      BaseOptions(
-        baseUrl: ApiEndpoints.baseUrl,
+    print('[Donation] Creating Dio with token: ${token.substring(0, 10)}...');
+    return dio.Dio(
+      dio.BaseOptions(
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -422,7 +462,7 @@ class DonationController extends GetxController {
     );
   }
 
-  Future<Dio> _buildAuthorizedDioWithRetry() async {
+  Future<dio.Dio> _buildAuthorizedDioWithRetry() async {
     try {
       return await _buildAuthorizedDio();
     } catch (e) {
@@ -431,10 +471,62 @@ class DonationController extends GetxController {
     }
   }
 
-  void _handleAuthError() {
+  Future<dio.Response<dynamic>> _authorizedPost(
+    String url, {
+    Map<String, dynamic>? data,
+  }) async {
+    final dioClient = await _buildAuthorizedDioWithRetry();
+    try {
+      print('[Donation] POST request to: $url');
+      final response = await dioClient.post(url, data: data);
+      print('[Donation] POST response status: ${response.statusCode}');
+      return response;
+    } catch (e) {
+      if (e is dio.DioException) {
+        print(
+          '[Donation] Dio error - Status: ${e.response?.statusCode}, Message: ${e.message}',
+        );
+        print('[Donation] Response: ${e.response?.data}');
+      }
+      rethrow;
+    }
+  }
+
+  bool _isKhaltiCredentialError(dio.DioException error) {
+    final response = error.response?.data;
+    if (response is! Map) return false;
+
+    final rawError = response['error'];
+    final rawMessage = response['message'];
+
+    final source = rawError is Map ? rawError['source'] : null;
+    final detail = rawError is Map ? rawError['detail'] : null;
+
+    return source == 'khalti' ||
+        (rawMessage is String &&
+            rawMessage.toLowerCase().contains('khalti credentials')) ||
+        (detail is String && detail.toLowerCase().contains('invalid token'));
+  }
+
+  void _showKhaltiConfigurationError() {
+    Get.snackbar(
+      'Khalti Configuration Error',
+      'The server Khalti credentials are invalid or do not match the active Khalti environment. Please update the backend Khalti keys and try again.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.withOpacity(0.9),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      duration: const Duration(seconds: 5),
+    );
+  }
+
+  void _handleAuthError({bool logoutUser = false}) {
     Get.snackbar(
       'Session Expired',
-      'Your session has expired. Please log in again.',
+      logoutUser
+          ? 'Your session has expired. Please log in again.'
+          : 'Your session could not be verified for this payment request. Please try again.',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.orange.withOpacity(0.9),
       colorText: Colors.white,
@@ -442,7 +534,9 @@ class DonationController extends GetxController {
       borderRadius: 12,
       duration: const Duration(seconds: 3),
     );
-    logout();
+    if (logoutUser) {
+      logout();
+    }
   }
 
   Future<bool> isAuthenticated() async {
@@ -563,11 +657,69 @@ class DonationController extends GetxController {
     );
   }
 
-  Environment _resolveKhaltiEnvironment(String publicKey) {
-    if (publicKey.startsWith('test_')) {
-      return Environment.test;
+  void _showPaymentConfirmationDialog() {
+    _dismissActiveDialog();
+    Get.dialog(
+      PopScope(
+        canPop: false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Confirming Payment',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Your Khalti payment was received. We are finalizing your donation in the app.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _dismissActiveDialog() {
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
     }
-    return Environment.prod;
+  }
+
+  void _closeKhaltiCheckout(
+    Khalti khalti,
+    BuildContext context,
+    Completer<void> completer, {
+    required bool alreadyClosed,
+  }) {
+    if (!alreadyClosed) {
+      khalti.close(context);
+    }
+    if (!completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  Environment _resolveKhaltiEnvironment() {
+    final env = PaymentConfig.khaltiEnvironment.toLowerCase();
+    if (env == 'prod' || env == 'production' || env == 'live') {
+      return Environment.prod;
+    }
+    return Environment.test;
   }
 
   void _clearForm() {

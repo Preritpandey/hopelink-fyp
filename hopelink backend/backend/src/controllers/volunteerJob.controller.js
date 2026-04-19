@@ -7,6 +7,10 @@ import {
   NotFoundError,
   ForbiddenError,
 } from '../errors/index.js';
+import {
+  attachInteractionsToDoc,
+  buildInteractionMap,
+} from '../services/postInteraction.service.js';
 
 const parseSkills = (skills) => {
   if (!skills) return [];
@@ -214,14 +218,22 @@ export const getVolunteerJobs = async (req, res) => {
     VolunteerJob.find(query).sort(sortOption).skip(skip).limit(limitNum),
     VolunteerJob.countDocuments(query),
   ]);
+  const interactionMap = await buildInteractionMap({
+    postType: 'VolunteerJob',
+    postIds: jobs.map((job) => job._id),
+    currentUserId: req.user?._id,
+  });
+  const jobsWithInteractions = jobs.map((job) =>
+    attachInteractionsToDoc(job, interactionMap),
+  );
 
   return res.status(StatusCodes.OK).json({
     success: true,
-    count: jobs.length,
+    count: jobsWithInteractions.length,
     total,
     page: pageNum,
     pages: Math.ceil(total / limitNum),
-    data: jobs,
+    data: jobsWithInteractions,
   });
 };
 
@@ -244,9 +256,15 @@ export const getVolunteerJobById = async (req, res) => {
     throw new ForbiddenError('Not authorized to view this job');
   }
 
+  const interactionMap = await buildInteractionMap({
+    postType: 'VolunteerJob',
+    postIds: [job._id],
+    currentUserId: req.user?._id,
+  });
+
   return res.status(StatusCodes.OK).json({
     success: true,
-    data: job,
+    data: attachInteractionsToDoc(job, interactionMap),
   });
 };
 
@@ -259,10 +277,18 @@ export const getMyOrganizationJobs = async (req, res) => {
   const jobs = await VolunteerJob.find({ organization: orgId }).sort({
     createdAt: -1,
   });
+  const interactionMap = await buildInteractionMap({
+    postType: 'VolunteerJob',
+    postIds: jobs.map((job) => job._id),
+    currentUserId: req.user?._id,
+  });
+  const jobsWithInteractions = jobs.map((job) =>
+    attachInteractionsToDoc(job, interactionMap),
+  );
 
   return res.status(StatusCodes.OK).json({
     success: true,
-    count: jobs.length,
-    data: jobs,
+    count: jobsWithInteractions.length,
+    data: jobsWithInteractions,
   });
 };

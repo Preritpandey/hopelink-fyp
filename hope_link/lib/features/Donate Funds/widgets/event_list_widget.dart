@@ -6,6 +6,7 @@ import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import '../controllers/event_controller.dart';
 import '../pages/event_details_page.dart';
+import 'post_interaction_summary.dart';
 
 class EventsListWidget extends StatelessWidget {
   final EventController controller;
@@ -214,6 +215,13 @@ class EventsListWidget extends StatelessWidget {
           ),
           12.verticalSpace,
           _buildProgressBar(event),
+          12.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: event.totalLikes,
+            commentsCount: event.commentsCount,
+            accentColor: AppColorToken.primary.color,
+            compact: true,
+          ),
           12.verticalSpace,
           Row(
             children: [

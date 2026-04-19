@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
 
@@ -9,13 +10,22 @@ class CampaignService {
   static const String campaignsBox = 'campaigns_box';
   static const String lastSyncKey = 'last_sync';
 
+  Future<Map<String, String>> _buildHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return {
+      'Content-Type': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+  }
+
   /// Fetch campaigns from API
   Future<List<Campaign>> fetchCampaigns() async {
     try {
       final response = await http
           .get(
             Uri.parse(ApiEndpoints.campaigns),
-            headers: {'Content-Type': 'application/json'},
+            headers: await _buildHeaders(),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -81,7 +91,7 @@ class CampaignService {
       final response = await http
           .get(
             Uri.parse('${ApiEndpoints.campaigns}/$id'),
-            headers: {'Content-Type': 'application/json'},
+            headers: await _buildHeaders(),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -114,7 +124,7 @@ class CampaignService {
     final response = await http
         .get(
           Uri.parse(ApiEndpoints.campaignReportById(campaignId)),
-          headers: {'Content-Type': 'application/json'},
+          headers: await _buildHeaders(),
         )
         .timeout(const Duration(seconds: 10));
 

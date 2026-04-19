@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
+
 import '../models/volunteer_job_model.dart';
+import 'post_interaction_summary.dart';
 
 class HorizontalVolunteerJobCard extends StatelessWidget {
   final VolunteerJob job;
@@ -37,19 +39,16 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
           offset: Offset(50 * (1 - animation.value), 0),
           child: Opacity(opacity: animation.value, child: child),
         );
-        },
-        child: GestureDetector(
-          onTap: () {
-            Get.toNamed('/volunteer-job-details', arguments: job);
-            // Get.to(() => VolunteerJobDetailsPage());
-          },
-          child: Container(
-            width: width ?? 300,
-            margin:
-                margin ?? EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+      },
+      child: GestureDetector(
+        onTap: () => Get.toNamed('/volunteer-job-details', arguments: job),
+        child: Container(
+          width: width ?? 300,
+          margin:
+              margin ?? EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: AppColorToken.primary.color.withOpacity(0.08),
@@ -73,7 +72,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -153,12 +152,12 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: iconColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: iconColor, size: 24),
+      child: Icon(icon, color: iconColor, size: 28),
     );
   }
 
@@ -189,7 +188,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
 
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -198,24 +197,32 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.grey[900],
+              fontSize: 18,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          12.verticalSpace,
-          Text(
-            maxLines: 2,
-            job.description,
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
           16.verticalSpace,
+          Text(
+            job.description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.bodyMedium.copyWith(
+              color: Colors.grey[600],
+              height: 1.6,
+            ),
+          ),
+          20.verticalSpace,
           _buildSkillsRow(),
           const Spacer(),
           _buildInfoRow(),
+          12.verticalSpace,
+          PostInteractionSummary(
+            totalLikes: job.totalLikes,
+            commentsCount: job.commentsCount,
+            accentColor: AppColorToken.primary.color,
+            compact: true,
+          ),
         ],
       ),
     );
@@ -254,7 +261,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '+${job.requiredSkills.length - 3}',
+              '+${job.requiredSkills.length - 2}',
               style: AppTextStyle.bodySmall.copyWith(
                 color: Colors.grey[700],
                 fontSize: 11,
