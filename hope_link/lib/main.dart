@@ -11,6 +11,7 @@ import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart
 import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
 import 'package:hope_link/features/Home/pages/home_screen.dart';
 import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
+import 'package:hope_link/features/OrganizationProfile/pages/organization_profile_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'config/payment_config.dart';
@@ -85,6 +86,11 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/campaign-details',
           page: () => const CampaignDetailsPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/organization-profile',
+          page: () => const OrganizationProfilePage(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

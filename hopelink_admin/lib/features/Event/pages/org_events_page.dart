@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../Dashboard/controllers/campaign_controller.dart';
 import '../controllers/org_events_controller.dart';
 import '../models/org_event_model.dart';
 import '../widgets/org_events_widgets.dart';
+import 'event_page.dart';
 
 class OrgEventsPage extends StatefulWidget {
   const OrgEventsPage({super.key});
@@ -151,6 +153,18 @@ class _TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
 
+          _PrimaryActionBtn(
+            icon: Icons.add_rounded,
+            label: 'Add Event',
+            onTap: () {
+              final navCtrl = Get.isRegistered<CampaignController>()
+                  ? Get.find<CampaignController>()
+                  : Get.put(CampaignController());
+              Get.to(() => CreateEventPage(ctrl: navCtrl));
+            },
+          ),
+          const SizedBox(width: 10),
+
           // Refresh
           _IconBtn(
             icon: Icons.refresh_rounded,
@@ -158,6 +172,78 @@ class _TopBar extends StatelessWidget {
             onTap: ctrl.refresh,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PrimaryActionBtn extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _PrimaryActionBtn({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  State<_PrimaryActionBtn> createState() => _PrimaryActionBtnState();
+}
+
+class _PrimaryActionBtnState extends State<_PrimaryActionBtn> {
+  bool _h = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [kOeBlue, kOeIndigo],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: _h
+                ? [
+                    BoxShadow(
+                      color: kOeBlue.withOpacity(0.32),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: kOeBlue.withOpacity(0.18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(widget.icon, size: 16, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                widget.label,
+                style: GoogleFonts.ibmPlexSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

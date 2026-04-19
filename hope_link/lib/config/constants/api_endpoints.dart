@@ -3,10 +3,10 @@ class ApiEndpoints {
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
-    static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
+  static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
 
   // static const String baseUrl = 'http://10.24.1.217:3008/api/v1'; // college
-//   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
+  //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Auth
   static String get login => '$baseUrl/auth/login';
@@ -30,9 +30,18 @@ class ApiEndpoints {
   static String get uploadProfilePhoto => '$baseUrl/user/profile/photo';
   static String get uploadCV => '$baseUrl/user/profile/cv';
   static String get userActivities => '$baseUrl/users/me/activities';
+  static String get volunteerCredits => '$baseUrl/volunteer-credits/me';
 
   // Volunteer job
   static String get volunteerJobs => '$baseUrl/volunteer-jobs';
+
+  // Organization profile
+  static String organizationProfile(String organizationId) =>
+      '$baseUrl/organizations/$organizationId/public-profile';
+  static String organizationPosts(String organizationId) =>
+      '$baseUrl/organizations/$organizationId/posts';
+  static String organizationProfileFeed(String organizationId) =>
+      '$baseUrl/organizations/$organizationId/profile-feed';
 
   // Payment
   static String get createPaymentIntent => '$baseUrl/payments/stripe/init';

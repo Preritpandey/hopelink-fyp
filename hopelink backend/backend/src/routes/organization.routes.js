@@ -7,6 +7,9 @@ import {
   updateOrganizationProfile,
   getOrganizations,
   getOrganization,
+  getOrganizationPublicProfile,
+  getOrganizationPosts,
+  getOrganizationProfileFeed,
   deleteOrganization,
   approveOrganization,
   rejectOrganization,
@@ -31,9 +34,12 @@ router.post(
 );
 
 router.get('/', asyncHandler(getOrganizations));
-router.get('/:id', asyncHandler(getOrganization));
+router.get('/:id/public-profile', asyncHandler(getOrganizationPublicProfile));
+router.get('/:id/posts', asyncHandler(getOrganizationPosts));
+router.get('/:id/profile-feed', asyncHandler(getOrganizationProfileFeed));
 // Organization fund tracking (public)
 router.get('/:id/fund-status', asyncHandler(getOrganizationFundStatus));
+router.get('/:id', asyncHandler(getOrganization));
 
 // Protected routes (require authentication)
 router.use(authenticate);

@@ -303,34 +303,43 @@ class CampaignsListWidget extends StatelessWidget {
                         // Organization info
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: AppColorToken.primary.color.withOpacity(
-                                  0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(6),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => Get.toNamed(
+                                '/organization-profile',
+                                arguments: campaign.organization.id,
                               ),
-                              child: Icon(
-                                Icons.business_rounded,
-                                size: 14,
-                                color: AppColorToken.primary.color,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                campaign.organization.organizationName,
-                                style: AppTextStyle.bodySmall.copyWith(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: AppColorToken.primary.color
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Icon(
+                                      Icons.business_rounded,
+                                      size: 14,
+                                      color: AppColorToken.primary.color,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    campaign.organization.organizationName,
+                                    style: AppTextStyle.bodySmall.copyWith(
+                                      color: AppColorToken.primary.color,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
+
                         20.verticalSpace,
                         // Funding progress section
                         Container(

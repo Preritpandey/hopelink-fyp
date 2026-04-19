@@ -96,14 +96,21 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  job.organizationName,
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColorToken.primary.color,
-                    fontWeight: FontWeight.w600,
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Get.toNamed(
+                    '/organization-profile',
+                    arguments: job.organization,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Text(
+                    job.organizationName,
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: AppColorToken.primary.color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 4.verticalSpace,
                 Text(

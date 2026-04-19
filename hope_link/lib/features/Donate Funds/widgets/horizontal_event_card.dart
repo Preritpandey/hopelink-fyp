@@ -213,6 +213,23 @@ class HorizontalEventCard extends StatelessWidget {
             Icons.location_on_rounded,
             event.location.city,
           ),
+          8.verticalSpace,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Get.toNamed(
+              '/organization-profile',
+              arguments: event.organizer.id,
+            ),
+            child: Text(
+              event.organizer.organizationName,
+              style: AppTextStyle.bodySmall.copyWith(
+                color: AppColorToken.primary.color,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           12.verticalSpace,
           _buildProgressSection(),
         ],

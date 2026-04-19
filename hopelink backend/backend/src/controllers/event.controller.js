@@ -11,10 +11,12 @@ import {
 } from '../errors/index.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
+import VolunteerCreditHours from '../models/volunteerCreditHours.model.js';
 import { sendEmail } from '../services/email.service.js';
 import { logUserActivity } from '../services/activity.service.js';
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
+import { updateUserPoints } from './volunteerCredits.controller.js';
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -958,11 +960,48 @@ export const grantEventCreditHours = async (req, res, next) => {
       throw new BadRequestError('Event does not have credit hours defined');
     }
 
-    // Check if credit hours already granted
-    if (enrollment.creditHoursGranted && enrollment.creditHoursGranted > 0) {
+    const existingCredit = await VolunteerCreditHours.findOne({
+      user: enrollment.user._id,
+      source: 'volunteer_enrollment',
+      sourceId: enrollment._id,
+      isApplied: true,
+    });
+
+    if (existingCredit) {
+      if (!enrollment.creditHoursGranted || enrollment.creditHoursGranted <= 0) {
+        enrollment.creditHoursGranted = existingCredit.creditHours;
+        enrollment.creditGrantedAt =
+          enrollment.creditGrantedAt || existingCredit.appliedAt || new Date();
+        await enrollment.save();
+      }
+
+      await updateUserPoints(enrollment.user._id);
+
       return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Credit hours already granted',
+        data: enrollment,
+      });
+    }
+
+    // Check if credit hours already granted
+    if (enrollment.creditHoursGranted && enrollment.creditHoursGranted > 0) {
+      await VolunteerCreditHours.create({
+        user: enrollment.user._id,
+        creditHours: enrollment.creditHoursGranted,
+        source: 'volunteer_enrollment',
+        sourceId: enrollment._id,
+        sourceModel: 'VolunteerEnrollment',
+        description: `Credits from event participation for ${event.title}`,
+        isApplied: true,
+        appliedAt: enrollment.creditGrantedAt || new Date(),
+      });
+
+      await updateUserPoints(enrollment.user._id);
+
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Credit hours synced successfully',
         data: enrollment,
       });
     }
@@ -971,11 +1010,18 @@ export const grantEventCreditHours = async (req, res, next) => {
     enrollment.creditGrantedAt = new Date();
     await enrollment.save();
 
-    // Update user's total volunteer hours
-    await User.findByIdAndUpdate(
-      enrollment.user._id,
-      { $inc: { totalVolunteerHours: event.creditHours } },
-    );
+    await VolunteerCreditHours.create({
+      user: enrollment.user._id,
+      creditHours: event.creditHours,
+      source: 'volunteer_enrollment',
+      sourceId: enrollment._id,
+      sourceModel: 'VolunteerEnrollment',
+      description: `Credits from event participation for ${event.title}`,
+      isApplied: true,
+      appliedAt: enrollment.creditGrantedAt,
+    });
+
+    await updateUserPoints(enrollment.user._id);
 
     res.status(StatusCodes.OK).json({
       success: true,

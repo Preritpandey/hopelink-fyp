@@ -191,43 +191,49 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             ),
           ),
           12.verticalSpace,
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColorToken.primary.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+          GestureDetector(
+            onTap: () => Get.toNamed(
+              '/organization-profile',
+              arguments: job.organization,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColorToken.primary.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.business_rounded,
+                    size: 20,
+                    color: AppColorToken.primary.color,
+                  ),
                 ),
-                child: Icon(
-                  Icons.business_rounded,
-                  size: 20,
-                  color: AppColorToken.primary.color,
-                ),
-              ),
-              12.horizontalSpace,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      job.organizationName,
-                      style: AppTextStyle.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[900],
+                12.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        job.organizationName,
+                        style: AppTextStyle.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColorToken.primary.color,
+                        ),
                       ),
-                    ),
-                    4.verticalSpace,
-                    Text(
-                      job.category,
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[600],
+                      4.verticalSpace,
+                      Text(
+                        job.category,
+                        style: AppTextStyle.bodyMedium.copyWith(
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

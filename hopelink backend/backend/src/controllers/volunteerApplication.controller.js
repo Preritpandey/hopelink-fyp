@@ -3,9 +3,11 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import VolunteerJob from '../models/volunteerJob.model.js';
 import VolunteerApplication from '../models/volunteerApplication.model.js';
+import VolunteerCreditHours from '../models/volunteerCreditHours.model.js';
 import User from '../models/user.model.js';
 import { sendEmail } from '../services/email.service.js';
 import { logUserActivity } from '../services/activity.service.js';
+import { updateUserPoints } from './volunteerCredits.controller.js';
 import {
   BadRequestError,
   NotFoundError,
@@ -337,10 +339,47 @@ export const grantVolunteerCreditHours = async (req, res) => {
     throw new BadRequestError('Job does not define credit hours');
   }
 
-  if (application.creditHoursGranted && application.creditHoursGranted > 0) {
+  const existingCredit = await VolunteerCreditHours.findOne({
+    user: application.user,
+    source: 'volunteer_application',
+    sourceId: application._id,
+    isApplied: true,
+  });
+
+  if (existingCredit) {
+    if (!application.creditHoursGranted || application.creditHoursGranted <= 0) {
+      application.creditHoursGranted = existingCredit.creditHours;
+      application.creditGrantedAt =
+        application.creditGrantedAt || existingCredit.appliedAt || new Date();
+      await application.save();
+    }
+
+    await updateUserPoints(application.user);
+
     return res.status(StatusCodes.OK).json({
       success: true,
       message: 'Credit hours already granted',
+      data: application,
+    });
+  }
+
+  if (application.creditHoursGranted && application.creditHoursGranted > 0) {
+    await VolunteerCreditHours.create({
+      user: application.user,
+      creditHours: application.creditHoursGranted,
+      source: 'volunteer_application',
+      sourceId: application._id,
+      sourceModel: 'VolunteerApplication',
+      description: `Credits from volunteer application for ${job.title}`,
+      isApplied: true,
+      appliedAt: application.creditGrantedAt || new Date(),
+    });
+
+    await updateUserPoints(application.user);
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Credit hours synced successfully',
       data: application,
     });
   }
@@ -349,10 +388,18 @@ export const grantVolunteerCreditHours = async (req, res) => {
   application.creditGrantedAt = new Date();
   await application.save();
 
-  await User.findByIdAndUpdate(
-    application.user,
-    { $inc: { totalVolunteerHours: job.creditHours } },
-  );
+  await VolunteerCreditHours.create({
+    user: application.user,
+    creditHours: job.creditHours,
+    source: 'volunteer_application',
+    sourceId: application._id,
+    sourceModel: 'VolunteerApplication',
+    description: `Credits from volunteer application for ${job.title}`,
+    isApplied: true,
+    appliedAt: application.creditGrantedAt,
+  });
+
+  await updateUserPoints(application.user);
 
   return res.status(StatusCodes.OK).json({
     success: true,

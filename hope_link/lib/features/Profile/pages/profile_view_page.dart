@@ -5,19 +5,58 @@ import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
 import 'package:hope_link/features/Profile/controllers/profile_controller.dart';
+import 'package:hope_link/features/Profile/controllers/volunteer_credit_controller.dart';
+import 'package:hope_link/features/Profile/models/volunteer_credit_model.dart';
 import 'package:hope_link/features/Profile/pages/profile_edit_page.dart';
-import 'package:hope_link/features/Profile/pages/profile_page.dart';
 import 'package:hope_link/features/Profile/widgets/full_screen_image.dart';
+import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileViewPage extends StatelessWidget {
   final String token;
 
   const ProfileViewPage({super.key, required this.token});
 
+  Future<void> _openCv(String cvPath) async {
+    if (cvPath.isEmpty) return;
+
+    final uri = Uri.tryParse(cvPath);
+    final isWebUrl = uri != null &&
+        uri.hasScheme &&
+        (uri.scheme == 'http' || uri.scheme == 'https');
+
+    try {
+      if (isWebUrl) {
+        final didLaunch = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+
+        if (!didLaunch) {
+          Get.snackbar('Open failed', 'Could not open the uploaded CV.');
+        }
+        return;
+      }
+
+      final result = await OpenFilex.open(cvPath);
+      if (result.type != ResultType.done) {
+        Get.snackbar('Open failed', result.message);
+      }
+    } catch (_) {
+      Get.snackbar('Open failed', 'Could not open the uploaded CV.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProfileController(token));
+    final controller = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController(token));
+    final creditController = Get.isRegistered<VolunteerCreditController>()
+        ? Get.find<VolunteerCreditController>()
+        : Get.put(VolunteerCreditController(token));
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -47,6 +86,9 @@ class ProfileViewPage extends StatelessWidget {
                   16.verticalSpace,
 
                   _buildInfoSection(user),
+                  16.verticalSpace,
+
+                  _buildVolunteerCreditsSection(creditController),
                   16.verticalSpace,
 
                   _buildInterestsSection(user),
@@ -218,6 +260,202 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
+  Widget _buildVolunteerCreditsSection(
+    VolunteerCreditController creditController,
+  ) {
+    return Obx(() {
+      final credits = creditController.credits.value;
+      final isLoading = creditController.isLoading.value && credits == null;
+      final hasError =
+          creditController.errorMessage.value.isNotEmpty && credits == null;
+
+      return _cardWrapper(
+        title: 'Volunteer Credits',
+        icon: Icons.workspace_premium_rounded,
+        child: isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: AppColorToken.primary.color,
+                ),
+              )
+            : hasError
+            ? Text(
+                creditController.errorMessage.value,
+                style: AppTextStyle.bodyMedium.copyWith(color: Colors.red[400]),
+              )
+            : credits == null
+            ? const SizedBox.shrink()
+            : Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _statCard(
+                          label: 'Total Points',
+                          value: '${credits.totalPoints}',
+                          icon: Icons.stars_rounded,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _statCard(
+                          label: 'Credit Hours',
+                          value: '${credits.totalCreditHours}h',
+                          icon: Icons.schedule_rounded,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _detailTile(
+                    Icons.bolt_rounded,
+                    'Points Per Hour',
+                    '${credits.pointsPerHour}',
+                  ),
+                  const Divider(),
+                  _detailTile(
+                    Icons.person_outline_rounded,
+                    'Credits Owner',
+                    credits.userName.isNotEmpty
+                        ? credits.userName
+                        : credits.userEmail,
+                  ),
+                  if (credits.creditBreakdown.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Breakdown',
+                        style: AppTextStyle.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...credits.creditBreakdown.map(_buildBreakdownCard),
+                  ],
+                ],
+              ),
+      );
+    });
+  }
+
+  Widget _statCard({
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColorToken.primary.color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColorToken.primary.color),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: AppTextStyle.h3.bold.copyWith(
+              color: AppColorToken.primary.color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[700]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailTile(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyle.bodyMedium.copyWith(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: AppTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBreakdownCard(VolunteerCreditBreakdown item) {
+    final appliedAt = item.appliedAt ?? item.createdAt;
+    final formattedDate = appliedAt == null
+        ? 'No date'
+        : DateFormat('MMM d, yyyy').format(appliedAt.toLocal());
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.description.isNotEmpty ? item.description : item.source,
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColorToken.primary.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${item.creditHours}h',
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: AppColorToken.primary.color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Source: ${item.sourceModel}',
+            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Applied: ${item.isApplied ? 'Yes' : 'No'} | $formattedDate',
+            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _infoRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -266,16 +504,41 @@ class ProfileViewPage extends StatelessWidget {
   // -------------------- DOCUMENTS --------------------
 
   Widget _buildDocumentsSection(user) {
+    final hasCv = user.cv.isNotEmpty;
+
     return _cardWrapper(
       title: 'Documents',
       icon: Icons.folder,
-      child: ListTile(
-        leading: Icon(Icons.description, color: AppColorToken.primary.color),
-        title: const Text('CV / Resume'),
-        subtitle: Text(user.cv.isNotEmpty ? 'Uploaded' : 'Not uploaded'),
-        trailing: user.cv.isNotEmpty
-            ? const Icon(Icons.check_circle, color: Colors.green)
-            : null,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: hasCv ? () => _openCv(user.cv) : null,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: hasCv
+                  ? AppColorToken.primary.color.withValues(alpha: 0.06)
+                  : Colors.grey[100],
+            ),
+            child: ListTile(
+              leading: Icon(
+                Icons.picture_as_pdf_rounded,
+                color: hasCv ? AppColorToken.primary.color : Colors.grey,
+              ),
+              title: const Text('CV / Resume'),
+              subtitle: Text(
+                hasCv ? 'Tap to view uploaded CV' : 'Not uploaded',
+              ),
+              trailing: hasCv
+                  ? Icon(
+                      Icons.open_in_new_rounded,
+                      color: AppColorToken.primary.color,
+                    )
+                  : null,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -634,6 +897,104 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     ],
                   ),
                 ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AnimatedButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final bool isPrimary;
+
+  const AnimatedButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    required this.isPrimary,
+  });
+
+  @override
+  State<AnimatedButton> createState() => _AnimatedButtonState();
+}
+
+class _AnimatedButtonState extends State<AnimatedButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _animationController.forward(),
+      onExit: (_) => _animationController.reverse(),
+      child: GestureDetector(
+        onTapDown: (_) => _animationController.forward(),
+        onTapUp: (_) {
+          _animationController.reverse();
+          widget.onPressed();
+        },
+        onTapCancel: () => _animationController.reverse(),
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: widget.isPrimary
+                  ? AppGradients.primaryGradient
+                  : LinearGradient(
+                      colors: [Colors.grey[300]!, Colors.grey[400]!],
+                    ),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      (widget.isPrimary ? Colors.red[400] : Colors.grey[400])!
+                          .withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onPressed,
+                borderRadius: BorderRadius.circular(12),
+                child: Center(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: widget.isPrimary ? Colors.white : Colors.black87,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

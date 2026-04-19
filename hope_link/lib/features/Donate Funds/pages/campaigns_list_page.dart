@@ -13,7 +13,9 @@ import '../widgets/horizontal_event_card.dart';
 import '../widgets/horizontal_volunteer_job_card.dart';
 
 class CampaignsListPage extends StatefulWidget {
-  const CampaignsListPage({super.key});
+  final String? token;
+
+  const CampaignsListPage({super.key, this.token});
 
   @override
   State<CampaignsListPage> createState() => _CampaignsListPageState();
@@ -69,7 +71,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         child: SafeArea(
           child: Column(
             children: [
-              DonationHeader(),
+              DonationHeader(token: widget.token),
               _buildSearchAndFilter(),
               Expanded(child: _buildContent()),
             ],

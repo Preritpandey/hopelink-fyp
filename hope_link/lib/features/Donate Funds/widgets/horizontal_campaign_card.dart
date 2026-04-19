@@ -164,6 +164,23 @@ class HorizontalCampaignCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           12.verticalSpace,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Get.toNamed(
+              '/organization-profile',
+              arguments: campaign.organization.id,
+            ),
+            child: Text(
+              campaign.organization.organizationName,
+              style: AppTextStyle.bodySmall.copyWith(
+                color: AppColorToken.primary.color,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          10.verticalSpace,
           _buildProgressSection(),
         ],
       ),

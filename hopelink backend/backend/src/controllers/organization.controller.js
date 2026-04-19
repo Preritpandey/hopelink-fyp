@@ -5,6 +5,9 @@ import { StatusCodes } from 'http-status-codes';
 
 import Organization from '../models/organization.model.js';
 import User from '../models/user.model.js';
+import Campaign from '../models/campaign.model.js';
+import Event from '../models/event.model.js';
+import VolunteerJob from '../models/volunteerJob.model.js';
 
 import {
   BadRequestError,
@@ -654,4 +657,189 @@ const sendApprovalEmail = async (org, password) => {
   } catch (err) {
     console.error('Failed to send approval email:', err);
   }
+};
+
+const buildOrganizationProfilePayload = (organization, stats = {}) => ({
+  id: organization._id,
+  name: organization.organizationName,
+  description: organization.missionStatement || '',
+  profileImage: organization.logo?.url || null,
+  location: [organization.city, organization.country].filter(Boolean).join(', '),
+  website: organization.website || '',
+  counts: {
+    campaigns: stats.campaigns ?? 0,
+    events: stats.events ?? 0,
+    volunteerJobs: stats.volunteerJobs ?? 0,
+    totalPosts:
+      (stats.campaigns ?? 0) + (stats.events ?? 0) + (stats.volunteerJobs ?? 0),
+  },
+});
+
+const getPrimaryImage = (images = []) => {
+  if (!Array.isArray(images) || images.length === 0) {
+    return null;
+  }
+
+  const primary = images.find((image) => image?.isPrimary && image?.url);
+  if (primary?.url) {
+    return primary.url;
+  }
+
+  return images[0]?.url || null;
+};
+
+const buildUnifiedPost = (post, type) => {
+  if (type === 'campaign') {
+    return {
+      id: post._id,
+      title: post.title,
+      description: post.description,
+      type,
+      createdAt: post.createdAt,
+      image: getPrimaryImage(post.images),
+    };
+  }
+
+  if (type === 'event') {
+    return {
+      id: post._id,
+      title: post.title,
+      description: post.description,
+      type,
+      createdAt: post.createdAt,
+      image: getPrimaryImage(post.images),
+    };
+  }
+
+  return {
+    id: post._id,
+    title: post.title,
+    description: post.description,
+    type,
+    createdAt: post.createdAt,
+    image: null,
+  };
+};
+
+const ensureOrganizationExists = async (organizationId) => {
+  if (!mongoose.Types.ObjectId.isValid(organizationId)) {
+    throw new NotFoundError(`No organization found with id ${organizationId}`);
+  }
+
+  const organization = await Organization.findById(organizationId).select(
+    'organizationName missionStatement logo city country website status'
+  );
+
+  if (!organization) {
+    throw new NotFoundError(`No organization found with id ${organizationId}`);
+  }
+
+  return organization;
+};
+
+const getOrganizationPostCounts = async (organizationId) => {
+  const [campaigns, events, volunteerJobs] = await Promise.all([
+    Campaign.countDocuments({ organization: organizationId }),
+    Event.countDocuments({
+      organizer: organizationId,
+      organizerType: 'Organization',
+    }),
+    VolunteerJob.countDocuments({ organization: organizationId }),
+  ]);
+
+  return { campaigns, events, volunteerJobs };
+};
+
+export const getOrganizationPublicProfile = async (req, res) => {
+  const organization = await ensureOrganizationExists(req.params.id);
+  const counts = await getOrganizationPostCounts(organization._id);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: buildOrganizationProfilePayload(organization, counts),
+  });
+};
+
+export const getOrganizationPosts = async (req, res) => {
+  const organization = await ensureOrganizationExists(req.params.id);
+
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(
+    Math.max(parseInt(req.query.limit, 10) || 10, 1),
+    50,
+  );
+  const skip = (page - 1) * limit;
+
+  const [campaigns, events, volunteerJobs] = await Promise.all([
+    Campaign.find({ organization: organization._id })
+      .select('title description images createdAt')
+      .lean(),
+    Event.find({
+      organizer: organization._id,
+      organizerType: 'Organization',
+    })
+      .select('title description images createdAt')
+      .lean(),
+    VolunteerJob.find({ organization: organization._id })
+      .select('title description createdAt')
+      .lean(),
+  ]);
+
+  const unifiedPosts = [
+    ...campaigns.map((post) => buildUnifiedPost(post, 'campaign')),
+    ...events.map((post) => buildUnifiedPost(post, 'event')),
+    ...volunteerJobs.map((post) => buildUnifiedPost(post, 'volunteer')),
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const paginatedPosts = unifiedPosts.slice(skip, skip + limit);
+  const total = unifiedPosts.length;
+  const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: total === 0 ? 'No posts found for this organization' : undefined,
+    count: paginatedPosts.length,
+    total,
+    page,
+    pages: totalPages,
+    data: paginatedPosts,
+  });
+};
+
+export const getOrganizationProfileFeed = async (req, res) => {
+  const organization = await ensureOrganizationExists(req.params.id);
+
+  const [counts, campaigns, events, volunteerJobs] = await Promise.all([
+    getOrganizationPostCounts(organization._id),
+    Campaign.find({ organization: organization._id })
+      .select('title description images createdAt')
+      .lean(),
+    Event.find({
+      organizer: organization._id,
+      organizerType: 'Organization',
+    })
+      .select('title description images createdAt')
+      .lean(),
+    VolunteerJob.find({ organization: organization._id })
+      .select('title description createdAt')
+      .lean(),
+  ]);
+
+  const unifiedPosts = [
+    ...campaigns.map((post) => buildUnifiedPost(post, 'campaign')),
+    ...events.map((post) => buildUnifiedPost(post, 'event')),
+    ...volunteerJobs.map((post) => buildUnifiedPost(post, 'volunteer')),
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: {
+      organization: buildOrganizationProfilePayload(organization, counts),
+      posts: unifiedPosts,
+    },
+    message:
+      unifiedPosts.length === 0
+        ? 'Organization found but no posts are available yet'
+        : undefined,
+  });
 };

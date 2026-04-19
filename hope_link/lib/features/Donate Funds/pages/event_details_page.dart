@@ -637,55 +637,62 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             style: AppTextStyle.h3.copyWith(fontWeight: FontWeight.w700),
           ),
           16.verticalSpace,
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
+          GestureDetector(
+            onTap: () => Get.toNamed(
+              '/organization-profile',
+              arguments: widget.event.organizer.id,
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
-                  child: Text(
-                    widget.event.organizer.organizationName.isNotEmpty
-                        ? widget.event.organizer.organizationName[0]
-                              .toUpperCase()
-                        : 'O',
-                    style: AppTextStyle.h2.copyWith(
-                      color: AppColorToken.primary.color,
-                      fontWeight: FontWeight.w800,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
+                    child: Text(
+                      widget.event.organizer.organizationName.isNotEmpty
+                          ? widget.event.organizer.organizationName[0]
+                                .toUpperCase()
+                          : 'O',
+                      style: AppTextStyle.h2.copyWith(
+                        color: AppColorToken.primary.color,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                ),
-                16.horizontalSpace,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.event.organizer.organizationName.isNotEmpty
-                            ? widget.event.organizer.organizationName
-                            : 'Organizer',
-                        style: AppTextStyle.bodyLarge.copyWith(
-                          fontWeight: FontWeight.w700,
+                  16.horizontalSpace,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.event.organizer.organizationName.isNotEmpty
+                              ? widget.event.organizer.organizationName
+                              : 'Organizer',
+                          style: AppTextStyle.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColorToken.primary.color,
+                          ),
                         ),
-                      ),
-                      4.verticalSpace,
-                      Text(
-                        widget.event.organizer.officialEmail.isNotEmpty
-                            ? widget.event.organizer.officialEmail
-                            : 'contact@organizer.com',
-                        style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[600],
+                        4.verticalSpace,
+                        Text(
+                          widget.event.organizer.officialEmail.isNotEmpty
+                              ? widget.event.organizer.officialEmail
+                              : 'contact@organizer.com',
+                          style: AppTextStyle.bodySmall.copyWith(
+                            color: Colors.grey[600],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

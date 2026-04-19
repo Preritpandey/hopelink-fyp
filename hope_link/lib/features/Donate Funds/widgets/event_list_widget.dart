@@ -324,44 +324,51 @@ class EventsListWidget extends StatelessWidget {
   }
 
   Widget _buildOrganizerInfo(event) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
-          child: Text(
-            event.organizer.organizationName[0].toUpperCase(),
-            style: AppTextStyle.bodySmall.copyWith(
-              color: AppColorToken.primary.color,
-              fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: () => Get.toNamed(
+        '/organization-profile',
+        arguments: event.organizer.id,
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: AppColorToken.primary.color.withOpacity(0.1),
+            child: Text(
+              event.organizer.organizationName[0].toUpperCase(),
+              style: AppTextStyle.bodySmall.copyWith(
+                color: AppColorToken.primary.color,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-        8.horizontalSpace,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Organized by',
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[500],
-                  fontSize: 10,
+          8.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Organized by',
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: Colors.grey[500],
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-              Text(
-                event.organizer.organizationName,
-                style: AppTextStyle.bodySmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                Text(
+                  event.organizer.organizationName,
+                  style: AppTextStyle.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: AppColorToken.primary.color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

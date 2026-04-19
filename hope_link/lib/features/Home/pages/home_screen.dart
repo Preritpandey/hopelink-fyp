@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
-import 'package:hope_link/features/Auth/pages/forgot_password_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
 import 'package:hope_link/features/Products/screens/product_page.dart';
+import 'package:hope_link/features/Profile/controllers/volunteer_credit_controller.dart';
 import 'package:hope_link/features/Profile/pages/profile_view_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,10 +31,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late Animation<double> _fabAnimation;
   late Animation<double> _contentFadeAnimation;
   late Animation<Offset> _contentSlideAnimation;
+  late final VolunteerCreditController _volunteerCreditController;
 
   @override
   void initState() {
     super.initState();
+    _volunteerCreditController =
+        Get.isRegistered<VolunteerCreditController>()
+        ? Get.find<VolunteerCreditController>()
+        : Get.put(VolunteerCreditController(widget.token));
 
     _fabAnimationController = AnimationController(
       vsync: this,
@@ -106,7 +111,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _getPageContent() {
     switch (_currentIndex) {
       case 0:
-        return CampaignsListPage();
+        return CampaignsListPage(token: widget.token);
       case 1:
         return ProductsPage();
       case 2:
@@ -224,31 +229,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Make a Difference',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Make a Difference',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Together we can change lives',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          _buildPointsBadge(),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Together we can change lives',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 16,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: AppButton(
+                          title: "Logout",
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.clear();
+                            Get.to(() => LoginPage());
+                          },
                         ),
-                      ),
-                      AppButton(
-                        title: "Logout",
-                        onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.clear();
-                          Get.to(() => LoginPage());
-                        },
                       ),
                     ],
                   ),
@@ -259,6 +282,55 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ],
     );
+  }
+
+  Widget _buildPointsBadge() {
+    return Obx(() {
+      final credits = _volunteerCreditController.credits.value;
+      final isLoading =
+          _volunteerCreditController.isLoading.value && credits == null;
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'Points',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            if (isLoading)
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            else
+              Text(
+                '${credits?.totalPoints ?? 0}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildExplorePage() {

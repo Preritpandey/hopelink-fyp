@@ -445,43 +445,49 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             ),
           ),
           12.verticalSpace,
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColorToken.primary.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+          GestureDetector(
+            onTap: () => Get.toNamed(
+              '/organization-profile',
+              arguments: campaign!.organization.id,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColorToken.primary.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.business_rounded,
+                    size: 20,
+                    color: AppColorToken.primary.color,
+                  ),
                 ),
-                child: Icon(
-                  Icons.business_rounded,
-                  size: 20,
-                  color: AppColorToken.primary.color,
-                ),
-              ),
-              12.horizontalSpace,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Organized by',
-                      style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[500],
+                12.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Organized by',
+                        style: AppTextStyle.bodySmall.copyWith(
+                          color: Colors.grey[500],
+                        ),
                       ),
-                    ),
-                    2.verticalSpace,
-                    Text(
-                      campaign!.organization.organizationName,
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
+                      2.verticalSpace,
+                      Text(
+                        campaign!.organization.organizationName,
+                        style: AppTextStyle.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColorToken.primary.color,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
