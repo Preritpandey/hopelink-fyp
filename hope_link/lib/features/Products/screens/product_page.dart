@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
+import 'package:hope_link/features/Commerce/controllers/cart_controller.dart';
 
 import '../controllers/product_controller.dart';
 import '../widgets/product_card.dart';
@@ -19,6 +20,9 @@ class ProductsPage extends StatefulWidget {
 class _ProductsPageState extends State<ProductsPage>
     with SingleTickerProviderStateMixin {
   late final ProductController _controller = Get.put(ProductController());
+  late final CartController _cartController = Get.isRegistered<CartController>()
+      ? Get.find<CartController>()
+      : Get.put(CartController());
   final TextEditingController _searchController = TextEditingController();
   final RxString _searchText = ''.obs;
   Timer? _searchDebounce;
@@ -161,6 +165,9 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cartController = Get.isRegistered<CartController>()
+        ? Get.find<CartController>()
+        : Get.put(CartController());
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
       child: Row(
@@ -182,6 +189,48 @@ class _HeaderSection extends StatelessWidget {
             icon: const Icon(Icons.refresh_rounded),
             color: AppColorToken.primary.color,
             tooltip: 'Refresh',
+          ),
+          Obx(
+            () => Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconButton(
+                  onPressed: () => Get.toNamed('/cart'),
+                  icon: const Icon(Icons.shopping_bag_outlined),
+                  color: AppColorToken.primary.color,
+                  tooltip: 'Cart',
+                ),
+                if (cartController.itemCount > 0)
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${cartController.itemCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Get.toNamed('/orders'),
+            icon: const Icon(Icons.local_shipping_outlined),
+            color: AppColorToken.primary.color,
+            tooltip: 'Orders',
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:hope_link/config/payment_config.dart';
+import 'package:hope_link/core/services/payment_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
@@ -15,6 +16,10 @@ import 'campaign_controller.dart';
 enum DonationPaymentMethod { stripe, khalti }
 
 class DonationController extends GetxController {
+  DonationController({PaymentService? paymentService})
+      : _paymentService = paymentService ?? PaymentService();
+
+  final PaymentService _paymentService;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -115,107 +120,32 @@ class DonationController extends GetxController {
 
   Future<void> _processStripeDonation(int amount) async {
     try {
-      // Validate Stripe is initialized
-      if (Stripe.publishableKey.isEmpty) {
-        Get.snackbar(
-          'Configuration Error',
-          'Payment system not initialized. Please restart the app.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-        );
-        return;
-      }
-
       final amountInPaisa = amount * 100; // convert NPR to paisa
-
-      print('[Donation] Creating payment intent with amount: $amountInPaisa');
-
-      final res = await _authorizedPost(
-        ApiEndpoints.createPaymentIntent,
-        data: {
-          'amount': amountInPaisa,
-          'currency': 'npr',
-          'type': 'donation',
-          'campaignId': campaign!.id,
+      final paymentIntentId = await _paymentService.processStripePayment(
+        initializePayment: () async {
+          final res = await _authorizedPost(
+            ApiEndpoints.createPaymentIntent,
+            data: {
+              'amount': amountInPaisa,
+              'currency': 'npr',
+              'type': 'donation',
+              'campaignId': campaign!.id,
+            },
+          );
+          return Map<String, dynamic>.from(res.data['data'] as Map);
+        },
+        verifyPayment: (paymentIntentId) async {
+          final verifyRes = await _authorizedPost(
+            ApiEndpoints.verrifyPayment,
+            data: {'paymentIntentId': paymentIntentId},
+          );
+          final verified = verifyRes.data['data'];
+          return verified != null &&
+              (verified['status'] as String?) == 'succeeded';
         },
       );
 
-      print('[Donation] Payment intent response: ${res.data}');
-
-      final intent = res.data['data'];
-      final clientSecret = intent['clientSecret'] as String?;
-      final paymentIntentId = intent['id'] as String?;
-
-      if (clientSecret == null || paymentIntentId == null) {
-        throw Exception(
-          'Failed to create payment intent. Missing clientSecret or paymentIntentId',
-        );
-      }
-
-      print('[Donation] Client secret: $clientSecret');
-      print('[Donation] Payment intent ID: $paymentIntentId');
-
-      // Initialize and present payment sheet
-      try {
-        print('[Donation] Initializing payment sheet...');
-        await Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: clientSecret,
-            merchantDisplayName: 'Hope Link',
-            applePay: PaymentSheetApplePay(merchantCountryCode: 'NP'),
-            googlePay: PaymentSheetGooglePay(
-              merchantCountryCode: 'NP',
-              testEnv: true,
-            ),
-            style: ThemeMode.light,
-          ),
-        );
-
-        print('[Donation] Presenting payment sheet...');
-        await Stripe.instance.presentPaymentSheet();
-        print('[Donation] Payment sheet presented successfully');
-      } catch (e) {
-        print('[Donation] Payment sheet error: $e');
-        // Payment failed / canceled
-        if (e is StripeException) {
-          Get.snackbar(
-            'Payment Failed',
-            e.error.message ?? 'Payment was cancelled',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red.withOpacity(0.9),
-            colorText: Colors.white,
-            margin: const EdgeInsets.all(16),
-            borderRadius: 12,
-          );
-          return;
-        }
-        rethrow;
-      }
-
-      print('[Donation] Verifying payment on server...');
-
-      // Verify on server
-      final verifyRes = await _authorizedPost(
-        ApiEndpoints.verrifyPayment,
-        data: {'paymentIntentId': paymentIntentId},
-      );
-
-      print('[Donation] Verify response: ${verifyRes.data}');
-
-      final verified = verifyRes.data['data'];
-
-      // Show success dialog only if server confirms succeeded
-      if (verified != null && (verified['status'] as String?) == 'succeeded') {
-        print('[Donation] Payment successful! Creating donation record...');
-        await _completeStripeDonation(paymentIntentId, amount);
-      } else {
-        throw Exception(
-          'Payment verification failed. Status: ${verified?['status'] ?? 'unknown'}',
-        );
-      }
+      await _completeStripeDonation(paymentIntentId, amount);
     } catch (e) {
       print('[Donation] Stripe payment error: $e');
       if (e is dio.DioException) {
@@ -267,51 +197,30 @@ class DonationController extends GetxController {
       }
 
       final amountInPaisa = amount * 100;
-
-      final initRes = await _authorizedPost(
-        ApiEndpoints.khaltiInitPayment,
-        data: {
-          'amount': amountInPaisa,
-          'purchaseOrderId': campaign!.id,
-          'purchaseOrderName': campaign!.title,
-        },
-      );
-
-      final initData = initRes.data['data'] ?? initRes.data;
-      final pidx = initData['pidx'] as String?;
-      if (pidx == null || pidx.isEmpty) {
-        throw Exception('Failed to initiate Khalti payment');
-      }
-
-      final payConfig = KhaltiPayConfig(
+      await _paymentService.processKhaltiPayment(
+        context: context,
         publicKey: PaymentConfig.khaltiPublicKey!,
-        pidx: pidx,
         environment: _resolveKhaltiEnvironment(),
-      );
-
-      final completer = Completer<void>();
-      var checkoutClosed = false;
-      final khalti = await Khalti.init(
-        enableDebugging: true,
-        payConfig: payConfig,
-        onPaymentResult: (paymentResult, khalti) async {
-          _closeKhaltiCheckout(
-            khalti,
-            context,
-            completer,
-            alreadyClosed: checkoutClosed,
+        initializePayment: () async {
+          final initRes = await _authorizedPost(
+            ApiEndpoints.khaltiInitPayment,
+            data: {
+              'amount': amountInPaisa,
+              'purchaseOrderId': campaign!.id,
+              'purchaseOrderName': campaign!.title,
+            },
           );
-          checkoutClosed = true;
-          _showPaymentConfirmationDialog();
-
+          return Map<String, dynamic>.from(
+            (initRes.data['data'] ?? initRes.data) as Map,
+          );
+        },
+        onPaymentSuccess: (paidPidx) async {
           try {
-            final paidPidx = paymentResult.payload?.pidx ?? pidx;
             await _completeKhaltiDonation(paidPidx, amountInPaisa);
           } on dio.DioException catch (e) {
             print(
               '[Donation] Khalti completion Dio error body: ${e.response?.data}',
             );
-            _dismissActiveDialog();
             if (e.response?.statusCode == 401) {
               _handleAuthError(logoutUser: false);
               Get.snackbar(
@@ -329,7 +238,6 @@ class DonationController extends GetxController {
             }
           } catch (e) {
             print('[Donation] Khalti completion fallback error: $e');
-            _dismissActiveDialog();
             Get.snackbar(
               'Payment Received',
               'Your payment was successful but we encountered an issue recording the donation. Our team will verify it shortly.',
@@ -342,33 +250,10 @@ class DonationController extends GetxController {
             );
           }
         },
-        onMessage:
-            (
-              khalti, {
-              description,
-              statusCode,
-              event,
-              needsPaymentConfirmation,
-            }) async {
-              if (needsPaymentConfirmation == true) {
-                await khalti.verify();
-              }
-              if (event == KhaltiEvent.kpgDisposed) {
-                if (!completer.isCompleted) {
-                  completer.complete();
-                }
-                checkoutClosed = true;
-              }
-            },
-        onReturn: () {
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        },
+        confirmationTitle: 'Confirming Payment',
+        confirmationMessage:
+            'Your Khalti payment was received. We are finalizing your donation in the app.',
       );
-
-      khalti.open(context);
-      await completer.future;
     } catch (e) {
       print('[Donation] Khalti payment error: $e');
       if (e is dio.DioException) {

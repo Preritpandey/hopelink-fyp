@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import Category from '../models/category.model.js';
+import Campaign from '../models/campaign.model.js';
 import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
 

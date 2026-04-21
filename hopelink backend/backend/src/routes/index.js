@@ -63,10 +63,12 @@ import productRoutes from './ecommerce/product.routes.js';
 import cartRoutes from './ecommerce/cart.routes.js';
 import orderRoutes from './ecommerce/order.routes.js';
 import reviewRoutes from './ecommerce/review.routes.js';
+import wishlistRoutes from './ecommerce/wishlist.routes.js';
 
 router.use('/products', productRoutes);
 router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/wishlist', wishlistRoutes);
 
 export default router;

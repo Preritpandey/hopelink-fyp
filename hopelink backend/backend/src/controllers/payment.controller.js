@@ -8,7 +8,9 @@ import {
   initiateKhaltiEpayment,
   lookupKhaltiEpayment,
   isKhaltiEpaymentCompleted,
+  isStripePaymentSuccessful,
 } from '../services/payment.service.js';
+import * as OrderService from '../services/ecommerce/order.service.js';
 
 /**
  * Initialize Stripe payment for either product order or campaign donation.
@@ -76,10 +78,42 @@ export const verifyStripePayment = async (req, res, next) => {
       data: {
         id: intent.id,
         status: intent.status,
+        successful: isStripePaymentSuccessful(intent),
         amount: intent.amount,
         currency: intent.currency,
         metadata: intent.metadata,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyOrderPayment = async (req, res, next) => {
+  try {
+    const { gateway, transactionId, paymentIntentId, pidx, token, amount, amountInPaisa } =
+      req.body;
+
+    if (!gateway || !transactionId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'gateway and transactionId are required',
+      });
+    }
+
+    const result = await OrderService.verifyAndFinalizeOrderPayment(req.user._id, {
+      gateway,
+      transactionId,
+      paymentIntentId,
+      pidx,
+      token,
+      amount,
+      amountInPaisa,
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -332,9 +366,9 @@ export const khaltiReturnPage = async (req, res) => {
 export default {
   initStripePayment,
   verifyStripePayment,
+  verifyOrderPayment,
   verifyKhalti,
   initKhaltiPayment,
   lookupKhaltiPayment,
   khaltiReturnPage,
 };
-

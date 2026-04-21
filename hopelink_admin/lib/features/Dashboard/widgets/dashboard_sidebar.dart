@@ -203,10 +203,16 @@ class DashboardSidebar extends StatelessWidget {
                   onTap: () => ctrl.navigateTo(4),
                 ),
                 NavItem(
-                  icon: Icons.workspace_premium_outlined,
-                  label: 'Volunteer Credits',
+                  icon: Icons.shopping_bag_outlined,
+                  label: 'Commerce',
                   active: ctrl.currentNavIndex.value == 5,
                   onTap: () => ctrl.navigateTo(5),
+                ),
+                NavItem(
+                  icon: Icons.workspace_premium_outlined,
+                  label: 'Volunteer Credits',
+                  active: ctrl.currentNavIndex.value == 6,
+                  onTap: () => ctrl.navigateTo(6),
                 ),
               ],
             ),

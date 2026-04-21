@@ -22,4 +22,14 @@ class ApiEndpoints {
 
   // Volunteer job
   static String get volunteerJobs => '$baseUrl/volunteer-jobs';
+
+  // Commerce
+  static String get orgOrders => '$baseUrl/orders/org-orders';
+  static String orderDetails(String orderId) => '$baseUrl/orders/$orderId';
+  static String orderStatus(String orderId) => '$baseUrl/orders/$orderId/status';
+  static String get orgSalesSummary => '$baseUrl/orders/org-sales/summary';
+  static String get orgProductSales => '$baseUrl/orders/org-sales/products';
+  static String get products => '$baseUrl/products';
+  static String product(String productId) => '$baseUrl/products/$productId';
+  static String get categories => '$baseUrl/categories';
 }

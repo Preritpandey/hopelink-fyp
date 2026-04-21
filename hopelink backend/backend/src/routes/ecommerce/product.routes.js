@@ -9,8 +9,25 @@ router.get('/', ProductController.listProducts);
 router.get('/:id', ProductController.getProduct);
 
 // Org only routes
-router.post('/', authenticate, uploadImage.array('images', 5), ProductController.createProduct); // Limit 5 images
-router.put('/:id', authenticate, uploadImage.array('images', 5), ProductController.updateProduct);
-router.delete('/:id', authenticate, ProductController.deleteProduct);
+router.post(
+  '/',
+  authenticate,
+  authorize('organization', 'admin'),
+  uploadImage.array('images', 5),
+  ProductController.createProduct,
+);
+router.put(
+  '/:id',
+  authenticate,
+  authorize('organization', 'admin'),
+  uploadImage.array('images', 5),
+  ProductController.updateProduct,
+);
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('organization', 'admin'),
+  ProductController.deleteProduct,
+);
 
 export default router;

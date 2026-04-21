@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/config/hive_config.dart';
 import 'package:hope_link/features/Auth/pages/otp_verification_page.dart';
 import 'package:hope_link/features/Auth/pages/user_registration_page.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
+import 'package:hope_link/features/Commerce/pages/cart_page.dart';
+import 'package:hope_link/features/Commerce/pages/checkout_page.dart';
+import 'package:hope_link/features/Commerce/pages/order_detail_page.dart';
+import 'package:hope_link/features/Commerce/pages/orders_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaign_details_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/all_campaigns_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/all_volunteer_jobs_page.dart';
@@ -33,7 +38,10 @@ void main() async {
   if (PaymentConfig.stripePublishableKey != null &&
       PaymentConfig.stripePublishableKey!.isNotEmpty) {
     Stripe.publishableKey = PaymentConfig.stripePublishableKey!;
-    Stripe.merchantIdentifier = 'merchant.com.example';
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      Stripe.merchantIdentifier = 'merchant.com.example';
+    }
     await Stripe.instance.applySettings();
   }
 
@@ -108,6 +116,26 @@ class MyApp extends StatelessWidget {
                 ? Get.arguments['token']
                 : '',
           ),
+        ),
+        GetPage(
+          name: '/cart',
+          page: () => CartPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/checkout',
+          page: () => CheckoutPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/orders',
+          page: () => OrdersPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/orders/details',
+          page: () => OrderDetailPage(),
+          transition: Transition.rightToLeft,
         ),
         GetPage(
           name: '/home',

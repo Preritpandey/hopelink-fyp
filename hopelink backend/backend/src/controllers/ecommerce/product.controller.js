@@ -26,11 +26,22 @@ export const createProduct = async (req, res) => {
       productData.images = newImages; // Assign to product data
     }
 
-    // For now assuming req.body contains orgId or we trust it for MVP/Admin
-    // Ideally: productData.orgId = req.user.organizationId;
+    if (req.user.role === 'organization') {
+      productData.orgId = req.user.organization;
+    }
+
+    productData.beneficiaryDescription =
+      productData.beneficiaryDescription || productData.description;
     
-    const product = await ProductService.createProduct(productData, variants);
-    res.status(StatusCodes.CREATED).json(product);
+    const product = await ProductService.createProduct(
+      productData,
+      variants,
+      req.user,
+    );
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: product,
+    });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
   }
@@ -72,8 +83,19 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    const product = await ProductService.updateProduct(req.params.id, productUpdates, variants);
-    res.status(StatusCodes.OK).json(product);
+    productUpdates.beneficiaryDescription =
+      productUpdates.beneficiaryDescription || productUpdates.description;
+
+    const product = await ProductService.updateProduct(
+      req.params.id,
+      productUpdates,
+      variants,
+      req.user,
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: product,
+    });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
   }
@@ -83,7 +105,10 @@ export const getProduct = async (req, res) => {
   try {
     const product = await ProductService.getProductById(req.params.id);
     if (!product) return res.status(StatusCodes.NOT_FOUND).json({ error: 'Product not found' });
-    res.status(StatusCodes.OK).json(product);
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: product,
+    });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
   }
@@ -93,7 +118,10 @@ export const listProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10, ...filters } = req.query;
     const result = await ProductService.listProducts(filters, parseInt(page), parseInt(limit));
-    res.status(StatusCodes.OK).json(result);
+    res.status(StatusCodes.OK).json({
+      success: true,
+      ...result,
+    });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
   }
@@ -101,7 +129,7 @@ export const listProducts = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    await ProductService.softDeleteProduct(req.params.id);
+    await ProductService.softDeleteProduct(req.params.id, req.user);
     res.status(StatusCodes.OK).json({ message: 'Product deleted successfully' });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });

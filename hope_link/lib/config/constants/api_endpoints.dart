@@ -5,10 +5,10 @@ class ApiEndpoints {
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
 
-  static const String baseUrl = 'http://192.168.18.48:3008/api/v1'; // college
+  static const String baseUrl = 'http://192.168.1.81:3008/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
-  // Auth
+  // Authentication
   static String get login => '$baseUrl/auth/login';
   static String get register => '$baseUrl/auth/register';
   static String get getProfile => '$baseUrl/auth/me';
@@ -59,4 +59,15 @@ class ApiEndpoints {
 
   // Products
   static String get products => '$baseUrl/products';
+
+  // Commerce
+  static String get cart => '$baseUrl/cart';
+  static String cartItem(String itemId) => '$baseUrl/cart/$itemId';
+  static String get clearCart => '$baseUrl/cart/clear';
+  static String get orders => '$baseUrl/orders';
+  static String orderDetails(String orderId) => '$baseUrl/orders/$orderId';
+  static String cancelOrder(String orderId) =>
+      '$baseUrl/orders/$orderId/cancel';
+  static String get ordersCheckout => '$baseUrl/orders/checkout';
+  static String get verifyOrderPayment => '$baseUrl/payments/verify';
 }

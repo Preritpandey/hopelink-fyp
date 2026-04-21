@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hopelink_admin/features/Commerce/pages/org_commerce_page.dart';
 import 'package:hopelink_admin/features/Jobs/pages/jobs_page.dart';
 import 'package:hopelink_admin/features/VolunteerCredits/pages/volunteer_credits_page.dart';
 
@@ -40,6 +41,8 @@ class DashboardShell extends StatelessWidget {
                 case 4:
                   return JobsPage();
                 case 5:
+                  return const OrgCommercePage();
+                case 6:
                   return const VolunteerCreditsPage();
                 default:
                   return _DashboardPage(ctrl: ctrl);

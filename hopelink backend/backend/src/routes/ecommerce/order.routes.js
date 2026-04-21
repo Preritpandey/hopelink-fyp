@@ -7,8 +7,19 @@ const router = express.Router();
 router.use(authenticate);
 
 router.post('/checkout', OrderController.checkout);
+router.get('/', OrderController.getMyOrders);
 router.get('/my-orders', OrderController.getMyOrders);
-router.get('/org-orders', authorize('organization', 'admin'), OrderController.getOrgOrders);
+router.patch(
+  '/:id/status',
+  authorize('organization', 'admin'),
+  OrderController.updateOrderStatus,
+);
+router.patch('/:id/cancel', OrderController.cancelMyOrder);
+router.get(
+  '/org-orders',
+  authorize('organization', 'admin'),
+  OrderController.getOrgOrders,
+);
 router.get(
   '/org-sales/summary',
   authorize('organization', 'admin'),
@@ -19,5 +30,6 @@ router.get(
   authorize('organization', 'admin'),
   OrderController.getOrgProductSalesSummary,
 );
+router.get('/:id', OrderController.getOrder);
 
 export default router;

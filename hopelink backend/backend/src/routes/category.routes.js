@@ -21,7 +21,6 @@ router.get('/:id/subcategories', getSubcategories);
 
 // Protected routes (admin only)
 router.use(authenticate);
-router.use(authorize('admin'));
 
 // File upload configuration for category images and icons
 const uploadFields = [
@@ -29,9 +28,9 @@ const uploadFields = [
   { name: 'image', maxCount: 1 },
 ];
 
-// Admin routes
-router.post('/', handleFileUpload(uploadFields), createCategory);
-router.put('/:id', handleFileUpload(uploadFields), updateCategory);
-router.delete('/:id', deleteCategory);
+// Admin and organization routes
+router.post('/', authorize('admin', 'organization'), handleFileUpload(uploadFields), createCategory);
+router.put('/:id', authorize('admin', 'organization'), handleFileUpload(uploadFields), updateCategory);
+router.delete('/:id', authorize('admin'), deleteCategory);
 
 export default router;

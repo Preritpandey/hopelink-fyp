@@ -42,6 +42,14 @@ export const retrieveStripePaymentIntent = async (paymentIntentId) => {
   return intent;
 };
 
+export const isStripePaymentSuccessful = (intent) => {
+  return String(intent?.status || '').toLowerCase() === 'succeeded';
+};
+
+export const getStripePaymentId = (intent) => {
+  return intent?.latest_charge || intent?.id || '';
+};
+
 export const verifyKhaltiPayment = async ({ token, amount }) => {
   if (!KHALTI_SECRET_KEY) {
     throw new Error('Khalti is not configured on the server');

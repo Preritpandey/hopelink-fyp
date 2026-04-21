@@ -9,7 +9,7 @@ const cartItemSchema = new mongoose.Schema({
   variantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ProductVariant',
-    required: true
+    default: null
   },
   quantity: {
     type: Number,
@@ -17,12 +17,20 @@ const cartItemSchema = new mongoose.Schema({
     min: 1,
     default: 1
   },
-  // We store a price snapshot to detect price changes at checkout if needed, 
-  // but usually Cart should reflect current price.
   priceSnapshot: { 
-    type: Number
+    type: Number,
+    required: true,
+    min: 0
+  },
+  productNameSnapshot: {
+    type: String,
+    trim: true
+  },
+  productImageSnapshot: {
+    type: String,
+    trim: true
   }
-}, { _id: false });
+});
 
 const cartSchema = new mongoose.Schema({
   userId: {

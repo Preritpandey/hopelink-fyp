@@ -14,7 +14,7 @@ class AppTextStyle {
   static TextStyle dp(double fontSize) {
     return _baseStyle.copyWith(fontSize: fontSize);
   }
-
+  
   static TextStyle sp(double fontSize) {
     return _baseStyle.copyWith(fontSize: fontSize);
   }

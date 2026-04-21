@@ -22,6 +22,7 @@ import ProductVariant from './ecommerce/productVariant.model.js';
 import Cart from './ecommerce/cart.model.js';
 import Order from './ecommerce/order.model.js';
 import Review from './ecommerce/review.model.js';
+import Wishlist from './ecommerce/wishlist.model.js';
 
 // Register models with Mongoose if they don't exist
 const models = {
@@ -45,7 +46,8 @@ const models = {
   ProductVariant: mongoose.models.ProductVariant || ProductVariant,
   Cart: mongoose.models.Cart || Cart,
   Order: mongoose.models.Order || Order,
-  Review: mongoose.models.Review || Review
+  Review: mongoose.models.Review || Review,
+  Wishlist: mongoose.models.Wishlist || Wishlist
 };
 
 // Export models for use in controllers
@@ -68,7 +70,8 @@ export {
   ProductVariant,
   Cart,
   Order,
-  Review
+  Review,
+  Wishlist
 };
 
 export default models;

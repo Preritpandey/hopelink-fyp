@@ -2,6 +2,7 @@ import express from 'express';
 import {
   initStripePayment,
   verifyStripePayment,
+  verifyOrderPayment,
   verifyKhalti,
   initKhaltiPayment,
   lookupKhaltiPayment,
@@ -35,6 +36,7 @@ router.use(authenticate);
 // Stripe
 router.post('/stripe/init', initStripePayment);
 router.post('/stripe/verify', verifyStripePayment);
+router.post('/verify', verifyOrderPayment);
 
 // Khalti
 router.post('/khalti/init', initKhaltiPayment);
@@ -42,4 +44,3 @@ router.post('/khalti/lookup', lookupKhaltiPayment);
 router.post('/khalti/verify', verifyKhalti);
 
 export default router;
-

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/features/Commerce/controllers/cart_controller.dart';
 
 import '../controllers/product_controller.dart';
 import '../models/product_model.dart';
@@ -15,6 +16,9 @@ class ProductDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ProductController>();
+    final cartController = Get.isRegistered<CartController>()
+        ? Get.find<CartController>()
+        : Get.put(CartController());
     controller.selectProduct(product);
 
     return Scaffold(
@@ -34,7 +38,10 @@ class ProductDetailPage extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: _AddToCartBar(controller: controller),
+            child: _AddToCartBar(
+              controller: controller,
+              cartController: cartController,
+            ),
           ),
         ],
       ),
@@ -247,13 +254,18 @@ class _DetailBody extends StatelessWidget {
 
 class _AddToCartBar extends StatelessWidget {
   final ProductController controller;
-  const _AddToCartBar({required this.controller});
+  final CartController cartController;
+  const _AddToCartBar({
+    required this.controller,
+    required this.cartController,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final variant = controller.selectedVariant;
-      final inStock = variant?.inStock ?? false;
+      final inStock =
+          variant != null ? variant.inStock : productInStock(controller.selectedProduct);
 
       return Container(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
@@ -272,23 +284,21 @@ class _AddToCartBar extends StatelessWidget {
         child: Row(
           children: [
             _PricePill(variant: variant),
+            IconButton(
+              onPressed: () => Get.toNamed('/cart'),
+              icon: const Icon(Icons.shopping_bag_outlined),
+            ),
             Expanded(
               flex: 2,
               child: FilledButton.icon(
                 onPressed: inStock
                     ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              'Added to cart!',
-                              style: TextStyle(fontFamily: 'DM Sans'),
-                            ),
-                            backgroundColor: AppColors.accent,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                        final product = controller.selectedProduct;
+                        if (product == null) return;
+                        cartController.addToCart(
+                          productId: product.id,
+                          variantId: variant?.id,
+                          quantity: 1,
                         );
                       }
                     : null,
@@ -320,6 +330,12 @@ class _AddToCartBar extends StatelessWidget {
         ),
       );
     });
+  }
+
+  bool productInStock(ProductModel? product) {
+    if (product == null) return false;
+    if (product.variants.isEmpty) return true;
+    return product.variants.any((variant) => variant.inStock);
   }
 }
 
@@ -805,7 +821,7 @@ class _PricePill extends StatelessWidget {
             ),
           ),
           Text(
-            variant != null ? 'NPR ${variant!.price.toStringAsFixed(0)}' : '--',
+            variant != null ? 'NPR ${variant!.price.toStringAsFixed(0)}' : 'Select',
             style: const TextStyle(
               fontFamily: 'Fraunces',
               fontSize: 20,

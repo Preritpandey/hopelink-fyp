@@ -31,18 +31,56 @@ const productSchema = new mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category', // Assuming there is a Category model, otherwise String
+    ref: 'Category',
     required: true
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  sku: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    sparse: true,
+    unique: true
+  },
+  stock: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0
+  },
+  lowStockThreshold: {
+    type: Number,
+    min: 0,
+    default: 5
   },
   images: [{
     url: { type: String, required: true },
     publicId: { type: String },
     altText: String
   }],
+  stockHistory: [{
+    previousStock: { type: Number, min: 0 },
+    newStock: { type: Number, required: true, min: 0 },
+    note: String,
+    source: {
+      type: String,
+      enum: ['create', 'manual', 'variant-sync', 'restore', 'system'],
+      default: 'manual'
+    },
+    changedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   isActive: {
     type: Boolean,
     default: true
   },
+  archivedAt: Date,
   isDeleted: {
     type: Boolean,
     default: false,
@@ -61,36 +99,22 @@ const productSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  // toJSON: { 
-  //   virtuals: true,
-  //   transform: function(doc, ret) {
-  //     if (ret.images && Array.isArray(ret.images)) {
-  //       ret.images = ret.images.map(img => img.url);
-  //     }
-  //     delete ret.createdAt;
-  //     delete ret.updatedAt;
-  //     delete ret.__v;
-  //     return ret;
-  //   }
-  // },
-// Update the toJSON transform in product.model.js
-// In product.model.js, update the toJSON transform to this:
-toJSON: { 
+  toJSON: { 
   virtuals: true,
   transform: function(doc, ret) {
-    // First, handle the populated organization data
-
-    
-    // Transform images array if needed
     if (ret.images && Array.isArray(ret.images)) {
-      ret.images = ret.images.map(img => img.url || img); // Handle both object and string URLs
+      ret.images = ret.images.map(img => img.url || img);
     }
-    
-    // Clean up fields
+
+    ret.averageRating = ret.ratingAverage ?? 0;
+    ret.totalReviews = ret.ratingCount ?? 0;
+    ret.inStock = (ret.stock ?? 0) > 0;
+    ret.lowStock = (ret.stock ?? 0) > 0 && (ret.stock ?? 0) <= (ret.lowStockThreshold ?? 5);
+
     delete ret.createdAt;
     delete ret.updatedAt;
     delete ret.__v;
-    
+
     return ret;
   }
 },
@@ -102,7 +126,6 @@ toJSON: {
 productSchema.pre('validate', function(next) {
   if (this.name && !this.slug) {
     this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    // Add randomness to ensure uniqueness if needed, or handle duplicate error in controller
   }
   next();
 });
@@ -119,6 +142,12 @@ productSchema.virtual('reviews', {
   localField: '_id',
   foreignField: 'productId'
 });
+
+productSchema.index({ name: 'text', description: 'text', beneficiaryDescription: 'text' });
+productSchema.index({ category: 1, isDeleted: 1, isActive: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ stock: 1 });
+productSchema.index({ ratingAverage: -1, ratingCount: -1 });
 
 const Product = mongoose.model('Product', productSchema);
 
