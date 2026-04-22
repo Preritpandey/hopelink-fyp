@@ -9,6 +9,7 @@ import {
 } from '../errors/index.js';
 import fs from 'fs';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/cloudinary.service.js';
+import { getCampaignReportSummary as buildCampaignReportSummary } from '../services/campaignReportSummary.service.js';
 
 const ensurePdfFile = (file) => {
   if (!file) {
@@ -104,6 +105,16 @@ export const uploadCampaignReport = async (req, res) => {
     existingReport.reviewedBy = null;
     existingReport.reviewedAt = null;
     existingReport.rejectionReason = null;
+    existingReport.summary = null;
+    existingReport.summaryGeneratedAt = null;
+    existingReport.summaryModel = null;
+    existingReport.summarySourceUpdatedAt = null;
+    existingReport.aiSummary = {
+      content: null,
+      generatedAt: null,
+      model: null,
+      sourceUpdatedAt: null,
+    };
     report = await existingReport.save();
   } else {
     report = await CampaignReport.create({
@@ -112,6 +123,16 @@ export const uploadCampaignReport = async (req, res) => {
       reportFile,
       status: 'pending',
       submittedAt: new Date(),
+      summary: null,
+      summaryGeneratedAt: null,
+      summaryModel: null,
+      summarySourceUpdatedAt: null,
+      aiSummary: {
+        content: null,
+        generatedAt: null,
+        model: null,
+        sourceUpdatedAt: null,
+      },
     });
   }
 
@@ -293,5 +314,26 @@ export const rejectReport = async (req, res) => {
     success: true,
     data: buildReportResponse(report),
     message: 'Report rejected',
+  });
+};
+
+// @desc    Get AI summary for an approved campaign report
+// @route   GET /api/v1/campaigns/:id/summary
+// @access  Public
+export const getApprovedCampaignReportSummary = async (req, res) => {
+  const { report, summary, generatedAt, model, cached } =
+    await buildCampaignReportSummary(req.params.id);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: {
+      campaignId: report.campaign?._id || report.campaign,
+      reportId: report._id,
+      summary,
+      generatedAt,
+      model,
+      cached,
+      approvedAt: report.reviewedAt,
+    },
   });
 };

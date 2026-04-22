@@ -19,6 +19,7 @@ import {
   getCampaignFundStatus,
   getOrganizationFundStatus,
 } from '../controllers/campaign.controller.js';
+import { getApprovedCampaignReportSummary } from '../controllers/campaignReport.controller.js';
 import {
   authenticate,
   authenticateIfPresent,
@@ -37,6 +38,7 @@ router.get(
   authenticateIfPresent,
   getCampaignsWithDonationsAndEvents,
 );
+router.get('/:id/summary', asyncHandler(getApprovedCampaignReportSummary));
 // Organization campaigns (protected)
 router.get(
   '/organization',

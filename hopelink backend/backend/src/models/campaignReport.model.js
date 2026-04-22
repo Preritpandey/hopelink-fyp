@@ -73,6 +73,42 @@ const campaignReportSchema = new mongoose.Schema(
       maxlength: [500, 'Rejection reason cannot exceed 500 characters'],
       default: null,
     },
+    summary: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    summaryGeneratedAt: {
+      type: Date,
+      default: null,
+    },
+    summaryModel: {
+      type: String,
+      default: null,
+    },
+    summarySourceUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+    aiSummary: {
+      content: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      generatedAt: {
+        type: Date,
+        default: null,
+      },
+      model: {
+        type: String,
+        default: null,
+      },
+      sourceUpdatedAt: {
+        type: Date,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

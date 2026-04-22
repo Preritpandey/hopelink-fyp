@@ -8,10 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/campaign_controller.dart';
+import '../controllers/campaign_report_summary_controller.dart';
 import '../controllers/post_interactions_controller.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
 import '../models/post_interaction_models.dart';
+import '../widgets/campaign_report_insights_section.dart';
 import '../widgets/post_engagement_section.dart';
 import '../widgets/post_interaction_summary.dart';
 
@@ -36,6 +38,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   String? _reportMessage;
   PostInteractionsController? _interactionsController;
   String? _interactionTag;
+  CampaignReportSummaryController? _summaryController;
+  String? _summaryTag;
 
   void _initFromArgs(dynamic args) {
     // Accept String, Campaign, or Map payloads and normalize to id + campaign.
@@ -88,6 +92,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     if (campaign == null && campaignId.isNotEmpty) {
       _loadCampaignDetails();
     }
+    _setupSummaryController();
     if (campaignId.isNotEmpty) {
       _loadCampaignReport();
     }
@@ -97,6 +102,26 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       duration: const Duration(milliseconds: 800),
     );
     _animationController.forward();
+  }
+
+  void _setupSummaryController() {
+    if (campaignId.isEmpty) return;
+
+    final nextTag = 'campaign-summary-$campaignId';
+    if (_summaryTag == nextTag && _summaryController != null) {
+      return;
+    }
+
+    if (_summaryTag != null &&
+        Get.isRegistered<CampaignReportSummaryController>(tag: _summaryTag)) {
+      Get.delete<CampaignReportSummaryController>(tag: _summaryTag);
+    }
+
+    _summaryTag = nextTag;
+    _summaryController = Get.put(
+      CampaignReportSummaryController(),
+      tag: _summaryTag,
+    );
   }
 
   Future<void> _loadCampaignDetails() async {
@@ -157,6 +182,12 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       setState(() {
         _campaignReport = report;
       });
+
+      if (report != null) {
+        _summaryController?.loadSummary(campaignId);
+      } else {
+        _summaryController?.clear();
+      }
     } catch (e) {
       if (!mounted) return;
 
@@ -164,6 +195,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         _campaignReport = null;
         _reportMessage = e.toString().replaceFirst('Exception: ', '');
       });
+      _summaryController?.clear();
     } finally {
       if (!mounted) return;
 
@@ -178,6 +210,10 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     if (_interactionTag != null &&
         Get.isRegistered<PostInteractionsController>(tag: _interactionTag)) {
       Get.delete<PostInteractionsController>(tag: _interactionTag);
+    }
+    if (_summaryTag != null &&
+        Get.isRegistered<CampaignReportSummaryController>(tag: _summaryTag)) {
+      Get.delete<CampaignReportSummaryController>(tag: _summaryTag);
     }
     _animationController.dispose();
     super.dispose();
@@ -822,178 +858,16 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             ),
           ],
           24.verticalSpace,
-          _buildCampaignReportSection(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCampaignReportSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColorToken.primary.color.withOpacity(0.12),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColorToken.primary.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.receipt_long_rounded,
-                  color: AppColorToken.primary.color,
-                ),
-              ),
-              12.horizontalSpace,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Donation report',
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[900],
-                      ),
-                    ),
-                    4.verticalSpace,
-                    Text(
-                      'See the approved report file for this campaign.',
-                      style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          16.verticalSpace,
-          if (_isReportLoading)
-            Row(
-              children: [
-                SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColorToken.primary.color,
-                    ),
-                  ),
-                ),
-                12.horizontalSpace,
-                Expanded(
-                  child: Text(
-                    'Loading campaign report...',
-                    style: AppTextStyle.bodyMedium.copyWith(
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else if (_campaignReport != null)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _campaignReport!.reportFile.originalName,
-                  style: AppTextStyle.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                12.verticalSpace,
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildReportMetaChip(
-                      Icons.picture_as_pdf_rounded,
-                      _campaignReport!.reportFile.mimeType.toUpperCase(),
-                    ),
-                    _buildReportMetaChip(
-                      Icons.sd_storage_rounded,
-                      _formatFileSize(_campaignReport!.reportFile.size),
-                    ),
-                    _buildReportMetaChip(
-                      Icons.upload_file_rounded,
-                      'Uploaded ${_formatDate(_campaignReport!.reportFile.uploadedAt)}',
-                    ),
-                    if (_campaignReport!.approvedAt != null)
-                      _buildReportMetaChip(
-                        Icons.verified_rounded,
-                        'Approved ${_formatDate(_campaignReport!.approvedAt!)}',
-                      ),
-                  ],
-                ),
-                16.verticalSpace,
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    title: 'View Report',
-                    backgroundColor: AppColorToken.primary.color,
-                    onPressed: _openCampaignReport,
-                    radius: 14,
-                  ),
-                ),
-              ],
-            )
-          else
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Text(
-                _reportMessage ??
-                    'Campaign report has not been uploaded or approved yet.',
-                style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[700],
-                  height: 1.5,
-                ),
-              ),
+          if (_summaryController != null)
+            CampaignReportInsightsSection(
+              campaignReport: _campaignReport,
+              isReportLoading: _isReportLoading,
+              reportMessage: _reportMessage,
+              summaryController: _summaryController!,
+              onOpenReport: _openCampaignReport,
+              formatDate: _formatDate,
+              formatFileSize: _formatFileSize,
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportMetaChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppColorToken.primary.color),
-          6.horizontalSpace,
-          Text(
-            label,
-            style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
         ],
       ),
     );

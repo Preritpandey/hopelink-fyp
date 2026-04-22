@@ -5,7 +5,7 @@ class ApiEndpoints {
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
 
-  static const String baseUrl = 'http://192.168.1.81:3008/api/v1'; // college
+  static const String baseUrl = 'http://10.0.2.2:3008/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Authentication
@@ -21,6 +21,8 @@ class ApiEndpoints {
   static String get campaigns => '$baseUrl/campaigns';
   static String campaignReportById(String campaignId) =>
       '$baseUrl/campaign-reports/campaign/$campaignId';
+  static String campaignSummaryById(String campaignId) =>
+      '$baseUrl/campaigns/$campaignId/summary';
   static String get closedCampaigns => '$baseUrl/campaigns/closed';
   static String get upcomingCampaigns => '$baseUrl/campaigns/upcoming';
   static String get events => '$baseUrl/events';

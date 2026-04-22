@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
+import '../models/campaign_report_summary_model.dart';
 
 class CampaignService {
   static const String campaignsBox = 'campaigns_box';
@@ -139,6 +140,31 @@ class CampaignService {
     final message =
         jsonData['message']?.toString() ??
         'Failed to load campaign report: ${response.statusCode}';
+    throw Exception(message);
+  }
+
+  Future<CampaignReportSummary?> getCampaignReportSummary(
+    String campaignId,
+  ) async {
+    final response = await http
+        .get(
+          Uri.parse(ApiEndpoints.campaignSummaryById(campaignId)),
+          headers: await _buildHeaders(),
+        )
+        .timeout(const Duration(seconds: 20));
+
+    final jsonData = json.decode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200 && jsonData['success'] == true) {
+      return CampaignReportSummary.fromJson(
+        Map<String, dynamic>.from(jsonData['data'] ?? {}),
+      );
+    }
+
+    final message =
+        jsonData['message']?.toString() ??
+        jsonData['error']?['message']?.toString() ??
+        'Failed to load campaign summary: ${response.statusCode}';
     throw Exception(message);
   }
 

@@ -1,14 +1,23 @@
 
-# --- Node.js / Express / Backend ---
-hopelink-backend/node_modules/
-hopelink-backend/.env
-hopelink-backend/.env.local
-hopelink-backend/npm-debug.log*
-hopelink-backend/yarn-debug.log*
-hopelink-backend/yarn-error.log*
-hopelink-backend/.DS_Store
+# ==========================================
+# NODE.JS / EXPRESS BACKEND
+# ==========================================
+hopelink\ backend/backend/node_modules/
+hopelink\ backend/node_modules/
+hopelink\ backend/backend/.env
+hopelink\ backend/backend/.env.local
+hopelink\ backend/backend/.env*.local
+hopelink\ backend/backend/npm-debug.log*
+hopelink\ backend/backend/yarn-debug.log*
+hopelink\ backend/backend/yarn-error.log*
+hopelink\ backend/backend/dist/
+hopelink\ backend/backend/coverage/
+hopelink\ backend/backend/uploads/
 
-# --- Flutter / Dart (all apps) ---
+# ==========================================
+# FLUTTER / DART APPS (hope_link & hopelink_admin)
+# ==========================================
+# Build directories
 **/build/
 **/.dart_tool/
 **/.flutter-plugins
@@ -16,32 +25,98 @@ hopelink-backend/.DS_Store
 **/.packages
 **/pubspec.lock
 **/coverage/
+
+# Android specific
 **/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/local.properties
+**/android/.gradle/
+**/android/gradle/
+
+# iOS specific
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Pods/
 **/ios/.symlinks/
+**/ios/.ios
+**/ios/Flutter/ephemeral/
+
+# macOS specific
 **/macos/Pods/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/
+
+# Windows specific
 **/windows/runner/Debug/
 **/windows/runner/Release/
+**/windows/runner/RelWithDebInfo/
+**/windows/runner/MinSizeRel/
 
-# --- IDE / Editor / Qodo files ---
+# Web specific
+**/web/js_interop_unsafe_library_unit.dart
+
+# ==========================================
+# IDE / EDITOR / VERSION CONTROL
+# ==========================================
 .vscode/
 .idea/
 *.iml
 .qodo/
-
-# --- System files ---
+*.sublime-project
+*.sublime-workspace
 .DS_Store
 Thumbs.db
+.git/
+.gitignore
 
-# --- Logs / Temp files ---
+# ==========================================
+# ENVIRONMENT & CONFIGURATION
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# ==========================================
+# LOGS & TEMPORARY FILES
+# ==========================================
 *.log
 *.tmp
+*.swp
+*.swo
+*~
+.sass-cache/
 
-# --- Misc / Environment ---
-.env
-.env.*
+# ==========================================
+# DEPENDENCIES & LOCKS
+# ==========================================
 *.lock
 *.bak
+*.backup
+
+# ==========================================
+# OS SPECIFIC FILES
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# MISC GENERATED FILES
+# ==========================================
+*.iml
+.gradle/
+.gradlew
+local.properties
+profile.json
+output/
