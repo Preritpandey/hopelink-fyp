@@ -114,11 +114,14 @@ class PostEngagementSection extends StatelessWidget {
                           color: accentColor,
                         ),
                         10.horizontalSpace,
-                        Text(
-                          '${controller.interaction.value.commentsCount} comments',
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Text(
+                            '${controller.interaction.value.commentsCount} comments',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.w700,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -333,11 +336,14 @@ class _CommentTile extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: accentColor.withOpacity(0.14),
-            backgroundImage: comment.user.profileImage != null &&
-                    comment.user.profileImage!.isNotEmpty
+            backgroundImage:
+                comment.user.profileImage != null &&
+                    comment.user.profileImage!.isNotEmpty &&
+                    !comment.user.profileImage!.startsWith('file://')
                 ? NetworkImage(comment.user.profileImage!)
                 : null,
-            child: (comment.user.profileImage == null ||
+            child:
+                (comment.user.profileImage == null ||
                     comment.user.profileImage!.isEmpty)
                 ? Text(
                     comment.user.name.isNotEmpty

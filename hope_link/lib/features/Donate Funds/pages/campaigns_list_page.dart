@@ -141,20 +141,6 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             ),
           ),
           16.verticalSpace,
-          // SizedBox(
-          //   height: 40,
-          //   child: ListView(
-          //     scrollDirection: Axis.horizontal,
-          //     children: [
-          //       _buildFilterChip('All', 'all'),
-          //       8.horizontalSpace,
-          //       _buildFilterChip('Active', 'active'),
-          //       8.horizontalSpace,
-          //       _buildFilterChip('Featured', 'featured'),
-          //     ],
-          //   ),
-          // ),
-          16.verticalSpace,
         ],
       ),
     );
@@ -427,7 +413,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           ),
           12.verticalSpace,
           SizedBox(
-            height: 345,
+            height: 385,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -482,7 +468,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           ),
           12.verticalSpace,
           SizedBox(
-            height: 320,
+            height: 391,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),

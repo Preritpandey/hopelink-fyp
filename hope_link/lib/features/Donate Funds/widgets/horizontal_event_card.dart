@@ -26,10 +26,7 @@ class HorizontalEventCard extends StatelessWidget {
       onTap: () => Get.to(() => EventDetailsPage(event: event)),
       child: Container(
         width: 280,
-        margin: EdgeInsets.only(
-          left: index == 0 ? 24 : 12,
-          right: 12,
-        ),
+        margin: EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -43,10 +40,7 @@ class HorizontalEventCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImageSection(),
-            _buildContentSection(),
-          ],
+          children: [_buildImageSection(), _buildContentSection()],
         ),
       ),
     );
@@ -72,7 +66,7 @@ class HorizontalEventCard extends StatelessWidget {
 
   Widget _buildImageSection() {
     final daysLeft = event.startDate.difference(DateTime.now()).inDays;
-    
+
     return Stack(
       children: [
         ClipRRect(
@@ -82,7 +76,7 @@ class HorizontalEventCard extends StatelessWidget {
           ),
           child: Image.network(
             event.primaryImageUrl,
-            height: 160,
+            height: 200,
             width: double.infinity,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
@@ -95,10 +89,7 @@ class HorizontalEventCard extends StatelessWidget {
             top: 12,
             right: 12,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.amber.shade400, Colors.orange.shade400],
@@ -123,10 +114,7 @@ class HorizontalEventCard extends StatelessWidget {
           top: 12,
           left: 12,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
@@ -146,10 +134,7 @@ class HorizontalEventCard extends StatelessWidget {
           bottom: 12,
           right: 12,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
@@ -170,7 +155,7 @@ class HorizontalEventCard extends StatelessWidget {
 
   Widget _buildPlaceholderImage() {
     return Container(
-      height: 160,
+      height: 200,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -210,10 +195,7 @@ class HorizontalEventCard extends StatelessWidget {
             DateFormat('MMM dd, yyyy').format(event.startDate),
           ),
           6.verticalSpace,
-          _buildInfoRow(
-            Icons.location_on_rounded,
-            event.location.city,
-          ),
+          _buildInfoRow(Icons.location_on_rounded, event.location.city),
           8.verticalSpace,
           GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -308,4 +290,3 @@ class HorizontalEventCard extends StatelessWidget {
     );
   }
 }
-

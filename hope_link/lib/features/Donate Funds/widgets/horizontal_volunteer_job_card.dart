@@ -44,6 +44,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         onTap: () => Get.toNamed('/volunteer-job-details', arguments: job),
         child: Container(
           width: width ?? 300,
+          height: 420,
           margin:
               margin ?? EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
           decoration: BoxDecoration(

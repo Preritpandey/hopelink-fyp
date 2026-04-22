@@ -2,8 +2,7 @@
 # ==========================================
 # NODE.JS / EXPRESS BACKEND
 # ==========================================
-hopelink\ backend/backend/node_modules/
-hopelink\ backend/node_modules/
+**/node_modules/
 hopelink\ backend/backend/.env
 hopelink\ backend/backend/.env.local
 hopelink\ backend/backend/.env*.local
@@ -13,6 +12,10 @@ hopelink\ backend/backend/yarn-error.log*
 hopelink\ backend/backend/dist/
 hopelink\ backend/backend/coverage/
 hopelink\ backend/backend/uploads/
+hopelink\ backend/backend/models/
+hopelink\ backend/backend/.transformers-cache/
+hopelink\ backend/backend/.cache/
+**/.cache/
 
 # ==========================================
 # FLUTTER / DART APPS (hope_link & hopelink_admin)
@@ -26,6 +29,12 @@ hopelink\ backend/backend/uploads/
 **/pubspec.lock
 **/coverage/
 
+# Dart generated files
+**/*.g.dart
+**/*.freezed.dart
+**/*.config.dart
+**/lib/generated_plugin_registrant.dart
+
 # Android specific
 **/android/app/debug/
 **/android/app/profile/
@@ -33,6 +42,7 @@ hopelink\ backend/backend/uploads/
 **/android/local.properties
 **/android/.gradle/
 **/android/gradle/
+**/android/gradle.properties
 
 # iOS specific
 **/ios/Flutter/Flutter.framework
@@ -42,19 +52,22 @@ hopelink\ backend/backend/uploads/
 **/ios/ServiceDefinitions.json
 **/ios/Pods/
 **/ios/.symlinks/
-**/ios/.ios
 **/ios/Flutter/ephemeral/
+**/ios/Podfile.lock
+**/ios/.ios
 
 # macOS specific
 **/macos/Pods/
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/macos/Flutter/ephemeral/
+**/macos/Podfile.lock
 
 # Windows specific
 **/windows/runner/Debug/
 **/windows/runner/Release/
 **/windows/runner/RelWithDebInfo/
 **/windows/runner/MinSizeRel/
+**/windows/flutter/ephemeral/
 
 # Web specific
 **/web/js_interop_unsafe_library_unit.dart
@@ -70,8 +83,7 @@ hopelink\ backend/backend/uploads/
 *.sublime-workspace
 .DS_Store
 Thumbs.db
-.git/
-.gitignore
+ehthumbs.db
 
 # ==========================================
 # ENVIRONMENT & CONFIGURATION
@@ -99,6 +111,9 @@ Thumbs.db
 *.bak
 *.backup
 
+local.properties
+.gradle/
+*.gradle
 # ==========================================
 # OS SPECIFIC FILES
 # ==========================================

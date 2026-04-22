@@ -34,10 +34,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildReportCard(),
-        if (campaignReport != null) ...[
-          16.verticalSpace,
-          _buildSummaryCard(),
-        ],
+        if (campaignReport != null) ...[16.verticalSpace, _buildSummaryCard()],
       ],
     );
   }
@@ -135,17 +132,10 @@ class CampaignReportInsightsSection extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     _buildMetaChip(
-                      Icons.picture_as_pdf_rounded,
-                      campaignReport!.reportFile.mimeType.toUpperCase(),
-                    ),
-                    _buildMetaChip(
                       Icons.sd_storage_rounded,
                       formatFileSize(campaignReport!.reportFile.size),
                     ),
-                    _buildMetaChip(
-                      Icons.upload_file_rounded,
-                      'Uploaded ${formatDate(campaignReport!.reportFile.uploadedAt)}',
-                    ),
+
                     if (campaignReport!.approvedAt != null)
                       _buildMetaChip(
                         Icons.verified_rounded,
@@ -196,7 +186,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -292,7 +282,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.88),
                       borderRadius: BorderRadius.circular(16),
@@ -315,17 +305,6 @@ class CampaignReportInsightsSection extends StatelessWidget {
                           Icons.schedule_rounded,
                           'Generated ${formatDate(summary.generatedAt!)}',
                         ),
-                      if (summary.approvedAt != null)
-                        _buildMetaChip(
-                          Icons.fact_check_rounded,
-                          'Based on report approved ${formatDate(summary.approvedAt!)}',
-                        ),
-                      _buildMetaChip(
-                        summary.cached
-                            ? Icons.bolt_rounded
-                            : Icons.sync_rounded,
-                        summary.cached ? 'Cached summary' : 'Fresh summary',
-                      ),
                     ],
                   ),
                 ],
@@ -366,11 +345,14 @@ class CampaignReportInsightsSection extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: AppColorToken.primary.color),
           6.horizontalSpace,
-          Text(
-            label,
-            style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: AppTextStyle.bodySmall.copyWith(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
