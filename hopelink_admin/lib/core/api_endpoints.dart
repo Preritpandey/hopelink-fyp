@@ -32,4 +32,13 @@ class ApiEndpoints {
   static String get products => '$baseUrl/products';
   static String product(String productId) => '$baseUrl/products/$productId';
   static String get categories => '$baseUrl/categories';
+
+  // Essentials
+  static String get essentialRequests => '$baseUrl/essential-requests';
+  static String essentialRequestById(String requestId) =>
+      '$baseUrl/essential-requests/$requestId';
+  static String orgRequestCommitments(String requestId) =>
+      '$baseUrl/org/requests/$requestId/commitments';
+  static String commitDonationStatus(String commitmentId) =>
+      '$baseUrl/commit-donation/$commitmentId/status';
 }

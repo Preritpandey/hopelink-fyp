@@ -214,6 +214,12 @@ class DashboardSidebar extends StatelessWidget {
                   active: ctrl.currentNavIndex.value == 6,
                   onTap: () => ctrl.navigateTo(6),
                 ),
+                NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Essential Requests',
+                  active: ctrl.currentNavIndex.value == 7,
+                  onTap: () => ctrl.navigateTo(7),
+                ),
               ],
             ),
           ),

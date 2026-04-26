@@ -16,6 +16,8 @@ import userRoutes from './users.routes.js';
 import volunteerCreditsRoutes from './volunteerCredits.routes.js';
 import postRoutes from './post.routes.js';
 import commentRoutes from './comment.routes.js';
+import essentialRequestRoutes from './essentialRequest.routes.js';
+import donationCommitmentRoutes from './donationCommitment.routes.js';
 
 const router = express.Router();
 
@@ -57,6 +59,8 @@ router.use('/user/profile', profileRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/posts', postRoutes);
 router.use('/comments', commentRoutes);
+router.use('/essential-requests', essentialRequestRoutes);
+router.use('/', donationCommitmentRoutes);
 
 // E-commerce Routes
 import productRoutes from './ecommerce/product.routes.js';

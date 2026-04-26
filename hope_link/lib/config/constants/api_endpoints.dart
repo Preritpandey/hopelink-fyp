@@ -3,9 +3,9 @@ class ApiEndpoints {
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
   // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
-  // static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
+  static const String baseUrl = 'http://10.0.2.2:3008/api/v1';
 
-  static const String baseUrl = 'http://192.168.1.81:3008/api/v1'; // college
+  // static const String baseUrl = 'http://192.168.1.81:3008/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Authentication
@@ -72,4 +72,13 @@ class ApiEndpoints {
       '$baseUrl/orders/$orderId/cancel';
   static String get ordersCheckout => '$baseUrl/orders/checkout';
   static String get verifyOrderPayment => '$baseUrl/payments/verify';
+
+  // Donate Essentials
+  static String get essentialRequests => '$baseUrl/essential-requests';
+  static String essentialRequestById(String requestId) =>
+      '$baseUrl/essential-requests/$requestId';
+  static String get commitDonation => '$baseUrl/commit-donation';
+  static String commitDonationStatus(String commitmentId) =>
+      '$baseUrl/commit-donation/$commitmentId/status';
+  static String get userEssentialCommitments => '$baseUrl/user/commitments';
 }

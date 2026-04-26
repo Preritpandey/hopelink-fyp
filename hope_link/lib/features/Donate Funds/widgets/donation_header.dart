@@ -55,6 +55,18 @@ class DonationHeader extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  TextButton.icon(
+                    onPressed: () => Get.toNamed('/essentials'),
+                    icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                    label: const Text('Essentials'),
+                  ),
+                  6.horizontalSpace,
+                  TextButton.icon(
+                    onPressed: () => Get.toNamed('/essential-commitments'),
+                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                    label: const Text('My Pledges'),
+                  ),
+                  10.horizontalSpace,
                   if (creditController != null) ...[
                     _buildPointsBadge(creditController),
                     10.horizontalSpace,

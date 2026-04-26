@@ -14,6 +14,10 @@ import 'package:hope_link/features/Donate%20Funds/pages/all_campaigns_page.dart'
 import 'package:hope_link/features/Donate%20Funds/pages/all_volunteer_jobs_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
+import 'package:hope_link/features/DonateEssentials/pages/commit_essential_donation_page.dart';
+import 'package:hope_link/features/DonateEssentials/pages/essential_request_detail_page.dart';
+import 'package:hope_link/features/DonateEssentials/pages/essential_requests_page.dart';
+import 'package:hope_link/features/DonateEssentials/pages/my_essential_commitments_page.dart';
 import 'package:hope_link/features/Home/pages/home_screen.dart';
 import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
 import 'package:hope_link/features/OrganizationProfile/pages/organization_profile_page.dart';
@@ -104,6 +108,26 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/donate',
           page: () => const DonatePage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/essentials',
+          page: () => const EssentialRequestsPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/essential-requests',
+          page: () => const EssentialRequestDetailPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/essential-commit',
+          page: () => const CommitEssentialDonationPage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/essential-commitments',
+          page: () => const MyEssentialCommitmentsPage(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

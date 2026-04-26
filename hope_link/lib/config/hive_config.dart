@@ -25,6 +25,8 @@ class HiveConfig {
     await Hive.openBox('preferences');
     await Hive.openBox('donations');
     await Hive.openBox<Event>('events');
+    await Hive.openBox('essentials_requests_cache');
+    await Hive.openBox('essentials_commitments_cache');
   }
 
   static Future<void> clearAllData() async {
@@ -32,11 +34,15 @@ class HiveConfig {
     final prefsBox = await Hive.openBox('preferences');
     final donationsBox = await Hive.openBox('donations');
     final eventsBox = await Hive.openBox<Event>('events');
+    final essentialsRequestsBox = await Hive.openBox('essentials_requests_cache');
+    final essentialsCommitmentsBox = await Hive.openBox('essentials_commitments_cache');
 
     await campaignsBox.clear();
     await prefsBox.clear();
     await donationsBox.clear();
     await eventsBox.clear();
+    await essentialsRequestsBox.clear();
+    await essentialsCommitmentsBox.clear();
   }
 
   static Future<void> closeAll() async {
