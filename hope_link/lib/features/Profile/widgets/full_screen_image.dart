@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class FullScreenImageView extends StatelessWidget {
   final String imageUrl;
+  final String? heroTag;
 
-  const FullScreenImageView({super.key, required this.imageUrl});
+  const FullScreenImageView({
+    super.key,
+    required this.imageUrl,
+    this.heroTag,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +20,20 @@ class FullScreenImageView extends StatelessWidget {
         elevation: 0,
       ),
       body: Center(
-        child: Hero(
-          tag: 'profile_image',
-          child: InteractiveViewer(
-            minScale: 1,
-            maxScale: 4,
-            child: Image.network(imageUrl, fit: BoxFit.contain),
-          ),
-        ),
+        child: heroTag == null
+            ? InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: Image.network(imageUrl, fit: BoxFit.contain),
+              )
+            : Hero(
+                tag: heroTag!,
+                child: InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 4,
+                  child: Image.network(imageUrl, fit: BoxFit.contain),
+                ),
+              ),
       ),
     );
   }

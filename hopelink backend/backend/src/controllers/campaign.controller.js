@@ -4,13 +4,19 @@ import Organization from '../models/organization.model.js';
 import Donation from '../models/donation.model.js';
 import Event from '../models/event.model.js';
 
+const mapMediaUrls = (items = []) =>
+  (items || [])
+    .map((item) => item?.url)
+    .filter(Boolean);
+
 // Utility function to transform campaign data
 const transformCampaign = (campaign) => {
   const campaignObj = campaign.toObject ? campaign.toObject() : campaign;
 
   return {
     ...campaignObj,
-    images: campaignObj.images.map((img) => img.url),
+    images: mapMediaUrls(campaignObj.images),
+    evidencePhotos: mapMediaUrls(campaignObj.evidencePhotos),
     updates: campaignObj.updates.map(({ title, description, date }) => ({
       title,
       description,
@@ -117,6 +123,30 @@ const getCampaignsByBaseFilter = async (req, res, baseFilter = {}) => {
   });
 };
 
+const ensureCampaignAccess = (campaign, req) => {
+  if (
+    campaign.organization.toString() !== req.user.organization?.toString() &&
+    req.user.role !== 'admin'
+  ) {
+    throw new UnauthorizedError(
+      `User ${req.user.id} is not authorized to update this campaign`,
+    );
+  }
+};
+
+const uploadCampaignAssetFiles = async (files = [], folder) =>
+  Promise.all(
+    files.map(async (file, index) => {
+      const result = await uploadToCloudinary(file, folder);
+      return {
+        url: result.url,
+        publicId: result.public_id,
+        isPrimary: index === 0,
+        uploadedAt: new Date(),
+      };
+    }),
+  );
+
 // @desc    Create a new campaign
 // @route   POST /api/v1/campaigns
 // @access  Private (Organization)
@@ -139,15 +169,9 @@ export const createCampaign = async (req, res) => {
 
   // Handle file uploads
   if (req.files && req.files.images) {
-    req.body.images = await Promise.all(
-      req.files.images.map(async (file) => {
-        const result = await uploadToCloudinary(file.path, 'campaigns');
-        return {
-          url: result.secure_url,
-          publicId: result.public_id,
-          isPrimary: false,
-        };
-      }),
+    req.body.images = await uploadCampaignAssetFiles(
+      req.files.images,
+      'campaigns',
     );
 
     // Set first image as primary if no primary is set
@@ -246,14 +270,7 @@ export const updateCampaign = async (req, res) => {
   }
 
   // Make sure user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to update this campaign`,
-    );
-  }
+  ensureCampaignAccess(campaign, req);
 
   // Handle file uploads if any
   if (req.files && req.files.images) {
@@ -269,16 +286,7 @@ export const updateCampaign = async (req, res) => {
     }
 
     // Upload new images
-    req.body.images = await Promise.all(
-      req.files.images.map(async (file) => {
-        const result = await uploadToCloudinary(file.path, 'campaigns');
-        return {
-          url: result.secure_url,
-          publicId: result.public_id,
-          isPrimary: false,
-        };
-      }),
-    );
+    req.body.images = await uploadCampaignAssetFiles(req.files.images, 'campaigns');
   }
 
   // Update campaign
@@ -304,19 +312,22 @@ export const deleteCampaign = async (req, res) => {
   }
 
   // Make sure user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to delete this campaign`,
-    );
-  }
+  ensureCampaignAccess(campaign, req);
 
   // Delete images from cloudinary
   if (campaign.images && campaign.images.length > 0) {
     await Promise.all(
       campaign.images.map(async (image) => {
+        if (image.publicId) {
+          await deleteFromCloudinary(image.publicId);
+        }
+      }),
+    );
+  }
+
+  if (campaign.evidencePhotos && campaign.evidencePhotos.length > 0) {
+    await Promise.all(
+      campaign.evidencePhotos.map(async (image) => {
         if (image.publicId) {
           await deleteFromCloudinary(image.publicId);
         }
@@ -359,33 +370,19 @@ export const uploadCampaignImages = async (req, res) => {
   //     `User ${req.user.id} is not authorized to update this campaign`
   //   );
   // }
-  if (
-    campaign.organization.toString() !== req.user.organization?.toString() &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to update this campaign`,
-    );
-  }
+  ensureCampaignAccess(campaign, req);
 
   // Upload new images
-  const uploadedImages = await Promise.all(
-    req.files.images.map(async (file) => {
-      try {
-        console.log('Processing file:', file.originalname);
-        const result = await uploadToCloudinary(file, 'campaigns');
-        console.log('Upload result:', result);
-        return {
-          url: result.url, // Changed from result.secure_url to result.url
-          publicId: result.public_id,
-          isPrimary: false,
-        };
-      } catch (error) {
-        console.error('Error uploading file:', error);
-        throw error; // Rethrow to be caught by the outer try-catch
-      }
-    }),
+  const uploadedImages = await uploadCampaignAssetFiles(
+    req.files.images,
+    'campaigns',
   );
+
+  if (campaign.images.length > 0) {
+    uploadedImages.forEach((image) => {
+      image.isPrimary = false;
+    });
+  }
 
   // Add new images to the campaign
   campaign.images = [...campaign.images, ...uploadedImages];
@@ -394,6 +391,77 @@ export const uploadCampaignImages = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     data: campaign.images,
+  });
+};
+
+// @desc    Upload campaign evidence photos
+// @route   PUT /api/v1/campaigns/:id/evidence
+// @access  Private (Organization owner or admin)
+export const uploadCampaignEvidencePhotos = async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    throw new BadRequestError('Please upload at least one evidence photo');
+  }
+
+  const campaign = await Campaign.findById(req.params.id);
+
+  if (!campaign) {
+    throw new NotFoundError(`No campaign with the id of ${req.params.id}`);
+  }
+
+  ensureCampaignAccess(campaign, req);
+
+  const uploadedPhotos = await uploadCampaignAssetFiles(
+    req.files,
+    'campaign-evidence',
+  );
+
+  uploadedPhotos.forEach((photo) => {
+    photo.isPrimary = false;
+  });
+
+  campaign.evidencePhotos = [...(campaign.evidencePhotos || []), ...uploadedPhotos];
+  await campaign.save();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: mapMediaUrls(campaign.evidencePhotos),
+    message: 'Evidence photos uploaded successfully',
+  });
+};
+
+// @desc    Delete campaign evidence photo
+// @route   DELETE /api/v1/campaigns/:id/evidence/:imageId
+// @access  Private (Organization owner or admin)
+export const deleteCampaignEvidencePhoto = async (req, res) => {
+  const campaign = await Campaign.findById(req.params.id);
+
+  if (!campaign) {
+    throw new NotFoundError(`No campaign with the id of ${req.params.id}`);
+  }
+
+  ensureCampaignAccess(campaign, req);
+
+  const imageIndex = campaign.evidencePhotos.findIndex(
+    (img) => img._id.toString() === req.params.imageId,
+  );
+
+  if (imageIndex === -1) {
+    throw new NotFoundError(`No evidence photo with the id of ${req.params.imageId}`);
+  }
+
+  const imageToDelete = campaign.evidencePhotos[imageIndex];
+
+  if (imageToDelete.publicId) {
+    await deleteFromCloudinary(imageToDelete.publicId);
+  }
+
+  campaign.evidencePhotos.splice(imageIndex, 1);
+  await campaign.save();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: {},
+    message: 'Evidence photo deleted successfully',
   });
 };
 
@@ -408,14 +476,7 @@ export const deleteCampaignImage = async (req, res) => {
   }
 
   // Make sure user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to update this campaign`,
-    );
-  }
+  ensureCampaignAccess(campaign, req);
 
   // Find the image to delete
   const imageIndex = campaign.images.findIndex(
@@ -454,14 +515,7 @@ export const setPrimaryCampaignImage = async (req, res) => {
   }
 
   // Make sure user is campaign owner or admin
-  if (
-    campaign.organization.toString() !== req.user.organization &&
-    req.user.role !== 'admin'
-  ) {
-    throw new UnauthorizedError(
-      `User ${req.user.id} is not authorized to update this campaign`,
-    );
-  }
+  ensureCampaignAccess(campaign, req);
 
   // Find the image to set as primary
   const imageIndex = campaign.images.findIndex(

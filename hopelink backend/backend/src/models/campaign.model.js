@@ -1,5 +1,24 @@
 import mongoose from 'mongoose';
 
+const campaignAssetSchema = new mongoose.Schema(
+  {
+    url: String,
+    publicId: {
+      type: String,
+      default: null,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: true }
+);
+
 const campaignSchema = new mongoose.Schema(
   {
     title: {
@@ -50,13 +69,8 @@ const campaignSchema = new mongoose.Schema(
         message: 'End date must be after start date',
       },
     },
-    images: [{
-      url: String,
-      isPrimary: {
-        type: Boolean,
-        default: false,
-      },
-    }],
+    images: [campaignAssetSchema],
+    evidencePhotos: [campaignAssetSchema],
     status: {
       type: String,
       enum: ['draft', 'active', 'completed', 'cancelled'],

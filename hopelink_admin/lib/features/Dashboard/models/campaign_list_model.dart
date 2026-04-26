@@ -68,6 +68,67 @@ class CampaignListFaq {
   }
 }
 
+class CampaignReportFileSnapshot {
+  final String originalName;
+  final String mimeType;
+  final int size;
+  final DateTime uploadedAt;
+  final String url;
+
+  const CampaignReportFileSnapshot({
+    required this.originalName,
+    required this.mimeType,
+    required this.size,
+    required this.uploadedAt,
+    required this.url,
+  });
+
+  factory CampaignReportFileSnapshot.fromJson(Map<String, dynamic> json) {
+    return CampaignReportFileSnapshot(
+      originalName: json['originalName'] as String? ?? '',
+      mimeType: json['mimeType'] as String? ?? 'application/pdf',
+      size: (json['size'] as num?)?.toInt() ?? 0,
+      uploadedAt: DateTime.tryParse(json['uploadedAt'] as String? ?? '') ??
+          DateTime.now(),
+      url: json['url'] as String? ?? '',
+    );
+  }
+}
+
+class CampaignReportSnapshot {
+  final String id;
+  final String status;
+  final DateTime submittedAt;
+  final DateTime? reviewedAt;
+  final String? rejectionReason;
+  final CampaignReportFileSnapshot? reportFile;
+
+  const CampaignReportSnapshot({
+    required this.id,
+    required this.status,
+    required this.submittedAt,
+    this.reviewedAt,
+    this.rejectionReason,
+    required this.reportFile,
+  });
+
+  factory CampaignReportSnapshot.fromJson(Map<String, dynamic> json) {
+    return CampaignReportSnapshot(
+      id: json['id'] as String? ?? json['_id'] as String? ?? '',
+      status: json['status'] as String? ?? 'pending',
+      submittedAt: DateTime.tryParse(json['submittedAt'] as String? ?? '') ??
+          DateTime.now(),
+      reviewedAt: DateTime.tryParse(json['reviewedAt'] as String? ?? ''),
+      rejectionReason: json['rejectionReason'] as String?,
+      reportFile: json['reportFile'] is Map<String, dynamic>
+          ? CampaignReportFileSnapshot.fromJson(
+              json['reportFile'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
 // ── Campaign (list item) ──────────────────────────────────────
 class CampaignListItem {
   final String id;
@@ -83,8 +144,10 @@ class CampaignListItem {
   final bool isFeatured;
   final List<String> tags;
   final List<String> images;
+  final List<String> evidencePhotos;
   final List<CampaignListUpdate> updates;
   final List<CampaignListFaq> faqs;
+  final CampaignReportSnapshot? report;
   final DateTime createdAt;
   final DateTime updatedAt;
   final double progress;
@@ -104,8 +167,10 @@ class CampaignListItem {
     required this.isFeatured,
     required this.tags,
     required this.images,
+    required this.evidencePhotos,
     required this.updates,
     required this.faqs,
+    required this.report,
     required this.createdAt,
     required this.updatedAt,
     required this.progress,
@@ -157,12 +222,18 @@ class CampaignListItem {
       isFeatured: json['isFeatured'] as bool? ?? false,
       tags: (json['tags'] as List? ?? []).map((e) => e.toString()).toList(),
       images: _imgs(json['images']),
+      evidencePhotos: _imgs(json['evidencePhotos']),
       updates: (json['updates'] as List? ?? [])
           .map((e) => CampaignListUpdate.fromJson(e as Map<String, dynamic>))
           .toList(),
       faqs: (json['faqs'] as List? ?? [])
           .map((e) => CampaignListFaq.fromJson(e as Map<String, dynamic>))
           .toList(),
+      report: json['report'] is Map<String, dynamic>
+          ? CampaignReportSnapshot.fromJson(
+              json['report'] as Map<String, dynamic>,
+            )
+          : null,
       createdAt: _dt(json['createdAt'] as String?),
       updatedAt: _dt(json['updatedAt'] as String?),
       progress: (json['progress'] as num?)?.toDouble() ?? 0,
@@ -174,6 +245,7 @@ class CampaignListItem {
   double get progressPercent => progress.clamp(0, 100);
   bool get hasImages => images.isNotEmpty;
   String? get primaryImage => images.isNotEmpty ? images.first : null;
+  bool get hasEvidencePhotos => evidencePhotos.isNotEmpty;
 
   int get daysLeft {
     final diff = endDate.difference(DateTime.now()).inDays;
@@ -195,8 +267,11 @@ class CampaignListItem {
     bool? isFeatured,
     List<String>? tags,
     List<String>? images,
+    List<String>? evidencePhotos,
     List<CampaignListUpdate>? updates,
     List<CampaignListFaq>? faqs,
+    CampaignReportSnapshot? report,
+    bool replaceReport = false,
     DateTime? createdAt,
     DateTime? updatedAt,
     double? progress,
@@ -216,8 +291,10 @@ class CampaignListItem {
       isFeatured: isFeatured ?? this.isFeatured,
       tags: tags ?? this.tags,
       images: images ?? this.images,
+      evidencePhotos: evidencePhotos ?? this.evidencePhotos,
       updates: updates ?? this.updates,
       faqs: faqs ?? this.faqs,
+      report: replaceReport ? report : this.report,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       progress: progress ?? this.progress,

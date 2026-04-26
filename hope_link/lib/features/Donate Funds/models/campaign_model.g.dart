@@ -36,13 +36,14 @@ class CampaignAdapter extends TypeAdapter<Campaign> {
       updatedAt: fields[16] as DateTime,
       progress: fields[17] as double,
       isActive: fields[18] as bool,
+      evidencePhotos: (fields[19] as List?)?.cast<String>() ?? const [],
     );
   }
 
   @override
   void write(BinaryWriter writer, Campaign obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -80,7 +81,9 @@ class CampaignAdapter extends TypeAdapter<Campaign> {
       ..writeByte(17)
       ..write(obj.progress)
       ..writeByte(18)
-      ..write(obj.isActive);
+      ..write(obj.isActive)
+      ..writeByte(19)
+      ..write(obj.evidencePhotos);
   }
 
   @override

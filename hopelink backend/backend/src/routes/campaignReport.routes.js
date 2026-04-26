@@ -5,6 +5,7 @@ import {
   downloadApprovedCampaignReport,
   downloadReportById,
   getOrganizationReports,
+  getOrganizationCampaignReport,
   getPendingReports,
   approveReport,
   rejectReport,
@@ -22,6 +23,11 @@ router.get('/campaign/:campaignId/download', downloadApprovedCampaignReport);
 router.use(authenticate);
 
 // Organization routes
+router.get(
+  '/campaign/:campaignId/organization',
+  authorize('organization'),
+  getOrganizationCampaignReport
+);
 router.post(
   '/:campaignId',
   authorize('organization'),

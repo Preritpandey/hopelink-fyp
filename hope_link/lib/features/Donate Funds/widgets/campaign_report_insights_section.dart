@@ -18,6 +18,8 @@ class CampaignReportInsightsSection extends StatelessWidget {
     required this.onOpenReport,
     required this.formatDate,
     required this.formatFileSize,
+    required this.onGenerateSummary,
+    required this.hasTriedGeneratingSummary,
   });
 
   final CampaignReport? campaignReport;
@@ -27,6 +29,8 @@ class CampaignReportInsightsSection extends StatelessWidget {
   final VoidCallback onOpenReport;
   final String Function(DateTime date) formatDate;
   final String Function(int bytes) formatFileSize;
+  final VoidCallback onGenerateSummary;
+  final bool hasTriedGeneratingSummary;
 
   @override
   Widget build(BuildContext context) {
@@ -310,21 +314,40 @@ class CampaignReportInsightsSection extends StatelessWidget {
                 ],
               )
             else
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.88),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  errorMessage ??
-                      'AI summary is not available for this report yet.',
-                  style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.grey[700],
-                    height: 1.5,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.88),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      hasTriedGeneratingSummary
+                          ? (errorMessage ??
+                              'AI summary is not available for this report yet.')
+                          : 'Generate a quick AI summary from the approved report when you want a short overview.',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
                   ),
-                ),
+                  14.verticalSpace,
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      title: hasTriedGeneratingSummary
+                          ? 'Generate Again'
+                          : 'Generate AI Summary',
+                      backgroundColor: AppColorToken.primary.color,
+                      onPressed: onGenerateSummary,
+                      radius: 14,
+                    ),
+                  ),
+                ],
               ),
           ],
         ),

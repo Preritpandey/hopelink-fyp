@@ -8,7 +8,9 @@ import {
   updateCampaign,
   deleteCampaign,
   uploadCampaignImages,
+  uploadCampaignEvidencePhotos,
   deleteCampaignImage,
+  deleteCampaignEvidencePhoto,
   setPrimaryCampaignImage,
   getCampaignsWithDonationsAndEvents,
   getClosedCampaigns,
@@ -26,6 +28,7 @@ import {
   authorize,
 } from '../middleware/auth.middleware.js';
 import { handleFileUpload } from '../config/multer.config.js';
+import { uploadImage } from '../middleware/multer.js';
 
 const router = express.Router();
 
@@ -78,10 +81,23 @@ router.put(
   uploadCampaignImages
 );
 
+router.put(
+  '/:id/evidence',
+  authorize('organization'),
+  uploadImage.array('evidencePhotos', 10),
+  uploadCampaignEvidencePhotos
+);
+
 router.delete(
   '/:id/images/:imageId',
   authorize('organization'),
   deleteCampaignImage
+);
+
+router.delete(
+  '/:id/evidence/:imageId',
+  authorize('organization'),
+  deleteCampaignEvidencePhoto
 );
 
 router.put(

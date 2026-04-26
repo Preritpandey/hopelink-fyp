@@ -43,6 +43,21 @@ const buildReportResponse = (report) => ({
     : null,
 });
 
+const buildPublicReportPayload = (report) => ({
+  campaign: report.campaign,
+  status: report.status,
+  reportFile: {
+    originalName: report.reportFile.originalName,
+    mimeType: report.reportFile.mimeType,
+    size: report.reportFile.size,
+    uploadedAt: report.reportFile.uploadedAt,
+  },
+  downloadEndpoint:
+    report.reportFile?.url ||
+    `/api/v1/campaign-reports/campaign/${report.campaign}/download`,
+  approvedAt: report.reviewedAt,
+});
+
 // @desc    Upload or replace a campaign report (PDF)
 // @route   POST /api/v1/campaign-reports/:campaignId
 // @access  Private (Organization)
@@ -161,17 +176,40 @@ export const getApprovedCampaignReport = async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    data: {
-      campaign: report.campaign,
-      reportFile: {
-        originalName: report.reportFile.originalName,
-        mimeType: report.reportFile.mimeType,
-        size: report.reportFile.size,
-        uploadedAt: report.reportFile.uploadedAt,
-      },
-      downloadEndpoint: report.reportFile?.url || `/api/v1/campaign-reports/campaign/${report.campaign}/download`,
-      approvedAt: report.reviewedAt,
-    },
+    data: buildPublicReportPayload(report),
+  });
+};
+
+// @desc    Get report details for logged-in organization and campaign
+// @route   GET /api/v1/campaign-reports/campaign/:campaignId/organization
+// @access  Private (Organization)
+export const getOrganizationCampaignReport = async (req, res) => {
+  const campaign = await Campaign.findById(req.params.campaignId);
+
+  if (!campaign) {
+    throw new NotFoundError(`No campaign with the id of ${req.params.campaignId}`);
+  }
+
+  if (campaign.organization.toString() !== req.user.organization?.toString()) {
+    throw new UnauthorizedError('You are not authorized to view this report');
+  }
+
+  const report = await CampaignReport.findOne({
+    campaign: campaign._id,
+    organization: req.user.organization,
+  });
+
+  if (!report) {
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: null,
+      message: 'No report submitted for this campaign yet',
+    });
+  }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: buildReportResponse(report),
   });
 };
 

@@ -492,6 +492,204 @@ class _CampaignDetailPanelState extends State<CampaignDetailPanel>
     );
   }
 
+  Future<void> _showUploadEvidenceDialog(
+    BuildContext context,
+    CampaignListItem c,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cSurf,
+        title: Text('Upload Evidence Photos', style: headingMd()),
+        content: SizedBox(
+          width: 460,
+          child: Obx(() {
+            final files = widget.ctrl.pickedEvidencePhotos;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'These photos become public on the campaign page right after upload.',
+                  style: bodySm().copyWith(color: cTextSub),
+                ),
+                const SizedBox(height: 14),
+                GradBtn(
+                  label: 'Pick Evidence Photos',
+                  icon: Icons.add_a_photo_rounded,
+                  ghost: true,
+                  onTap: widget.ctrl.pickEvidencePhotos,
+                ),
+                const SizedBox(height: 12),
+                if (files.isEmpty)
+                  Text(
+                    'No evidence photos selected yet.',
+                    style: bodySm().copyWith(color: cTextMute),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: files
+                        .map(
+                          (f) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cSurf2,
+                              borderRadius: r10,
+                              border: Border.all(color: cBorder),
+                            ),
+                            child: Text(
+                              f.name,
+                              style: monoSm().copyWith(color: cText),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+              ],
+            );
+          }),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              widget.ctrl.clearPickedEvidencePhotos();
+              Navigator.of(ctx).pop();
+            },
+            child: Text('Close', style: bodySm()),
+          ),
+          Obx(() {
+            final busy = widget.ctrl.isUploadingEvidencePhotos.value;
+            return TextButton(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      final ok = await widget.ctrl.uploadCampaignEvidencePhotos(
+                        c.id,
+                      );
+                      if (ok && mounted) {
+                        Navigator.of(ctx).pop();
+                      }
+                    },
+              child: Text(
+                busy ? 'Uploading...' : 'Publish Photos',
+                style: bodySm().copyWith(
+                  color: busy ? cTextMute : cEmerald,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showUploadReportDialog(
+    BuildContext context,
+    CampaignListItem c,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cSurf,
+        title: Text('Submit PDF Report', style: headingMd()),
+        content: SizedBox(
+          width: 460,
+          child: Obx(() {
+            final file = widget.ctrl.pickedReportFile.value;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Only PDF documents are accepted. Report approval still follows the admin review flow.',
+                  style: bodySm().copyWith(color: cTextSub),
+                ),
+                const SizedBox(height: 14),
+                GradBtn(
+                  label: 'Choose PDF',
+                  icon: Icons.picture_as_pdf_rounded,
+                  ghost: true,
+                  onTap: widget.ctrl.pickReportPdf,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cSurf2,
+                    borderRadius: r10,
+                    border: Border.all(color: cBorder),
+                  ),
+                  child: Text(
+                    file?.name ?? 'No PDF selected yet.',
+                    style: bodySm().copyWith(
+                      color: file == null ? cTextMute : cText,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              widget.ctrl.clearPickedReportFile();
+              Navigator.of(ctx).pop();
+            },
+            child: Text('Close', style: bodySm()),
+          ),
+          Obx(() {
+            final busy = widget.ctrl.isUploadingReport.value;
+            return TextButton(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      final ok = await widget.ctrl.uploadCampaignReport(c.id);
+                      if (ok && mounted) {
+                        Navigator.of(ctx).pop();
+                      }
+                    },
+              child: Text(
+                busy ? 'Submitting...' : 'Submit Report',
+                style: bodySm().copyWith(
+                  color: busy ? cTextMute : cEmerald,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return '0 B';
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  Color _reportStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return cEmerald;
+      case 'rejected':
+        return cRose;
+      default:
+        return cAmber;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = widget.campaign;
@@ -629,6 +827,39 @@ class _CampaignDetailPanelState extends State<CampaignDetailPanel>
                         ],
                       ),
                       const SizedBox(height: 18),
+
+                      _SectionLabel(
+                        'Transparency',
+                        Icons.visibility_rounded,
+                      ),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          GradBtn(
+                            label: 'Submit PDF Report',
+                            icon: Icons.picture_as_pdf_rounded,
+                            ghost: true,
+                            onTap: () => _showUploadReportDialog(context, c),
+                          ),
+                          GradBtn(
+                            label: 'Upload Evidence',
+                            icon: Icons.verified_rounded,
+                            ghost: true,
+                            onTap: () => _showUploadEvidenceDialog(context, c),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _ReportStatusCard(
+                        report: c.report,
+                        ctrl: widget.ctrl,
+                        formatBytes: _formatBytes,
+                        statusColor: _reportStatusColor,
+                      ),
+                      const SizedBox(height: 12),
+                      _EvidenceGallery(evidencePhotos: c.evidencePhotos),
+                      const SizedBox(height: 16),
 
                       _SectionLabel(
                         'Funding Progress',
@@ -989,6 +1220,209 @@ class _NoImageBanner extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReportStatusCard extends StatelessWidget {
+  final CampaignReportSnapshot? report;
+  final CampaignListController ctrl;
+  final String Function(int bytes) formatBytes;
+  final Color Function(String status) statusColor;
+
+  const _ReportStatusCard({
+    required this.report,
+    required this.ctrl,
+    required this.formatBytes,
+    required this.statusColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (report == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: cSurf2,
+          borderRadius: r12,
+          border: Border.all(color: cBorder),
+        ),
+        child: Text(
+          'No campaign report submitted yet.',
+          style: bodySm().copyWith(color: cTextMute),
+        ),
+      );
+    }
+
+    final accent = statusColor(report!.status);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [accent.withOpacity(0.12), cSurf2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: r12,
+        border: Border.all(color: accent.withOpacity(0.28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.16),
+                  borderRadius: r20,
+                ),
+                child: Text(
+                  report!.status.toUpperCase(),
+                  style: monoSm().copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                ctrl.formatDateTime(report!.submittedAt),
+                style: monoSm(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            report!.reportFile?.originalName ?? 'PDF report',
+            style: headingMd().copyWith(fontSize: 13),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            report!.reportFile == null
+                ? 'No report file metadata available.'
+                : '${report!.reportFile!.mimeType} • ${formatBytes(report!.reportFile!.size)}',
+            style: bodySm().copyWith(color: cTextSub),
+          ),
+          if (report!.reviewedAt != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Reviewed ${ctrl.formatDateTime(report!.reviewedAt!)}',
+              style: bodySm().copyWith(color: cTextSub),
+            ),
+          ],
+          if (report!.rejectionReason != null &&
+              report!.rejectionReason!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: cRose.withOpacity(0.08),
+                borderRadius: r10,
+                border: Border.all(color: cRose.withOpacity(0.2)),
+              ),
+              child: Text(
+                report!.rejectionReason!,
+                style: bodySm().copyWith(color: cText),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EvidenceGallery extends StatelessWidget {
+  final List<String> evidencePhotos;
+
+  const _EvidenceGallery({required this.evidencePhotos});
+
+  @override
+  Widget build(BuildContext context) {
+    if (evidencePhotos.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: cSurf2,
+          borderRadius: r12,
+          border: Border.all(color: cBorder),
+        ),
+        child: Text(
+          'No public evidence photos uploaded yet.',
+          style: bodySm().copyWith(color: cTextMute),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Public evidence gallery',
+          style: monoSm().copyWith(letterSpacing: 0.4),
+        ),
+        const SizedBox(height: 10),
+        GridView.builder(
+          itemCount: evidencePhotos.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.15,
+          ),
+          itemBuilder: (context, index) {
+            final imageUrl = evidencePhotos[index];
+            return ClipRRect(
+              borderRadius: r12,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: cSurf3,
+                      child: const Icon(
+                        Icons.broken_image_rounded,
+                        color: cTextMute,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.55),
+                        borderRadius: r8,
+                      ),
+                      child: Text(
+                        'Evidence ${index + 1}',
+                        style: monoSm().copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

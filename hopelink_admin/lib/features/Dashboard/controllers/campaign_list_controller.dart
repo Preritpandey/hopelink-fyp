@@ -36,6 +36,10 @@ class CampaignListController extends GetxController {
   // Images upload
   final pickedImages     = <PlatformFile>[].obs;
   final isUploadingImages = false.obs;
+  final pickedEvidencePhotos = <PlatformFile>[].obs;
+  final isUploadingEvidencePhotos = false.obs;
+  final pickedReportFile = Rxn<PlatformFile>();
+  final isUploadingReport = false.obs;
 
   // Donations
   final donations        = <CampaignDonation>[].obs;
@@ -177,6 +181,7 @@ class CampaignListController extends GetxController {
     expandedFaqIndex.value = -1;
     selectedCampaign.value = c;
     fetchDonations(c.id);
+    fetchCampaignReportStatus(c.id);
   }
 
   void closeDetail() => selectedCampaign.value = null;
@@ -335,6 +340,33 @@ class CampaignListController extends GetxController {
 
   void clearPickedImages() => pickedImages.clear();
 
+  Future<void> pickEvidencePhotos() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+      withReadStream: false,
+    );
+    if (result != null) {
+      pickedEvidencePhotos.assignAll(result.files);
+    }
+  }
+
+  void clearPickedEvidencePhotos() => pickedEvidencePhotos.clear();
+
+  Future<void> pickReportPdf() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['pdf'],
+      allowMultiple: false,
+      withReadStream: false,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      pickedReportFile.value = result.files.single;
+    }
+  }
+
+  void clearPickedReportFile() => pickedReportFile.value = null;
+
   Future<bool> uploadCampaignImages(String campaignId) async {
     if (pickedImages.isEmpty) {
       _showSnack('Please choose images to upload.');
@@ -375,6 +407,121 @@ class CampaignListController extends GetxController {
     }
     isUploadingImages.value = false;
     return false;
+  }
+
+  Future<bool> uploadCampaignEvidencePhotos(String campaignId) async {
+    if (pickedEvidencePhotos.isEmpty) {
+      _showSnack('Please choose evidence photos to upload.');
+      return false;
+    }
+    isUploadingEvidencePhotos.value = true;
+    try {
+      final uri = Uri.parse('$_base/campaigns/$campaignId/evidence');
+      final req = http.MultipartRequest('PUT', uri)
+        ..headers['Authorization'] = 'Bearer $_token';
+      for (final f in pickedEvidencePhotos) {
+        final ext = f.extension?.toLowerCase() ?? 'jpeg';
+        req.files.add(
+          await http.MultipartFile.fromPath(
+            'evidencePhotos',
+            f.path!,
+            contentType: MediaType.parse('image/$ext'),
+          ),
+        );
+      }
+      final streamed = await req.send();
+      final body = await streamed.stream.bytesToString();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      if (streamed.statusCode == 200 || streamed.statusCode == 201) {
+        final urls = (json['data'] as List? ?? [])
+            .map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        _replaceEvidencePhotos(campaignId, urls);
+        clearPickedEvidencePhotos();
+        _showSnack('Evidence photos uploaded.', isError: false);
+        isUploadingEvidencePhotos.value = false;
+        return true;
+      }
+      _showSnack(json['message'] as String? ?? 'Evidence upload failed.');
+    } catch (e) {
+      _showSnack('Upload error: $e');
+    }
+    isUploadingEvidencePhotos.value = false;
+    return false;
+  }
+
+  Future<bool> uploadCampaignReport(String campaignId) async {
+    final file = pickedReportFile.value;
+    if (file == null || file.path == null) {
+      _showSnack('Please choose a PDF report.');
+      return false;
+    }
+    final ext = (file.extension ?? '').toLowerCase();
+    if (ext != 'pdf') {
+      _showSnack('Only PDF documents are allowed.');
+      return false;
+    }
+
+    isUploadingReport.value = true;
+    try {
+      final uri = Uri.parse('$_base/campaign-reports/$campaignId');
+      final req = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $_token'
+        ..files.add(
+          await http.MultipartFile.fromPath(
+            'report',
+            file.path!,
+            contentType: MediaType('application', 'pdf'),
+          ),
+        );
+
+      final streamed = await req.send();
+      final body = await streamed.stream.bytesToString();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      if (streamed.statusCode == 200 ||
+          streamed.statusCode == 201 ||
+          streamed.statusCode == 202) {
+        final reportData = json['data'] as Map<String, dynamic>?;
+        final report = reportData == null
+            ? null
+            : CampaignReportSnapshot.fromJson(reportData);
+        _updateCampaignReport(campaignId, report);
+        clearPickedReportFile();
+        _showSnack(
+          json['message'] as String? ?? 'Report uploaded successfully.',
+          isError: false,
+        );
+        isUploadingReport.value = false;
+        return true;
+      }
+      _showSnack(json['message'] as String? ?? 'Report upload failed.');
+    } catch (e) {
+      _showSnack('Upload error: $e');
+    }
+    isUploadingReport.value = false;
+    return false;
+  }
+
+  Future<void> fetchCampaignReportStatus(String campaignId) async {
+    try {
+      final uri = Uri.parse(
+        '$_base/campaign-reports/campaign/$campaignId/organization',
+      );
+      final res = await http
+          .get(uri, headers: _authHeaders)
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final raw = json['data'];
+        final report = raw is Map<String, dynamic>
+            ? CampaignReportSnapshot.fromJson(raw)
+            : null;
+        _updateCampaignReport(campaignId, report);
+      }
+    } catch (_) {
+      // Keep campaign management responsive even if report status fails to load.
+    }
   }
 
   // â”€â”€ Donations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -481,6 +628,23 @@ class CampaignListController extends GetxController {
     final next = current.copyWith(
       images: [...urls, ...current.images],
     );
+    _replaceCampaign(next);
+  }
+
+  void _replaceEvidencePhotos(String campaignId, List<String> urls) {
+    final current = _getCampaign(campaignId);
+    if (current == null) return;
+    final next = current.copyWith(evidencePhotos: urls);
+    _replaceCampaign(next);
+  }
+
+  void _updateCampaignReport(
+    String campaignId,
+    CampaignReportSnapshot? report,
+  ) {
+    final current = _getCampaign(campaignId);
+    if (current == null) return;
+    final next = current.copyWith(report: report, replaceReport: true);
     _replaceCampaign(next);
   }
 

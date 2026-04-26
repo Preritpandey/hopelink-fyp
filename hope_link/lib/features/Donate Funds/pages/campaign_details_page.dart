@@ -4,6 +4,7 @@ import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/core/widgets/app_button.dart';
+import 'package:hope_link/features/Profile/widgets/full_screen_image.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -40,6 +41,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
   String? _interactionTag;
   CampaignReportSummaryController? _summaryController;
   String? _summaryTag;
+  bool _hasTriedGeneratingSummary = false;
 
   void _initFromArgs(dynamic args) {
     // Accept String, Campaign, or Map payloads and normalize to id + campaign.
@@ -183,10 +185,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         _campaignReport = report;
       });
 
-      if (report != null) {
-        _summaryController?.loadSummary(campaignId);
-      } else {
+      if (report == null) {
         _summaryController?.clear();
+        _hasTriedGeneratingSummary = false;
       }
     } catch (e) {
       if (!mounted) return;
@@ -194,6 +195,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       setState(() {
         _campaignReport = null;
         _reportMessage = e.toString().replaceFirst('Exception: ', '');
+        _hasTriedGeneratingSummary = false;
       });
       _summaryController?.clear();
     } finally {
@@ -292,6 +294,23 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         borderRadius: 12,
       );
     }
+  }
+
+  Future<void> _generateCampaignSummary() async {
+    if (_campaignReport == null || campaignId.isEmpty) return;
+    setState(() {
+      _hasTriedGeneratingSummary = true;
+    });
+    await _summaryController?.loadSummary(campaignId);
+  }
+
+  void _openEvidencePhoto(String imageUrl, int index) {
+    Get.to(
+      () => FullScreenImageView(
+        imageUrl: imageUrl,
+        heroTag: 'campaign_evidence_${campaignId}_$index',
+      ),
+    );
   }
 
   @override
@@ -867,7 +886,178 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               onOpenReport: _openCampaignReport,
               formatDate: _formatDate,
               formatFileSize: _formatFileSize,
+              onGenerateSummary: _generateCampaignSummary,
+              hasTriedGeneratingSummary: _hasTriedGeneratingSummary,
             ),
+          if (campaign!.evidencePhotos.isNotEmpty) ...[
+            24.verticalSpace,
+            _buildEvidenceSection(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEvidenceSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColorToken.primary.color.withOpacity(0.12),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColorToken.primary.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.photo_library_rounded,
+                  color: AppColorToken.primary.color,
+                ),
+              ),
+              12.horizontalSpace,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Photo evidence',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                    4.verticalSpace,
+                    Text(
+                      'Photos shared by the organization to show how campaign funds were used.',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          16.verticalSpace,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.visibility_rounded,
+                  size: 18,
+                  color: AppColorToken.primary.color,
+                ),
+                10.horizontalSpace,
+                Expanded(
+                  child: Text(
+                    'Show photo evidence (${campaign!.evidencePhotos.length})',
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          16.verticalSpace,
+          SizedBox(
+            height: 132,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: campaign!.evidencePhotos.length,
+              separatorBuilder: (_, __) => 12.horizontalSpace,
+              itemBuilder: (context, index) {
+                final imageUrl = campaign!.evidencePhotos[index];
+                final heroTag = 'campaign_evidence_${campaignId}_$index';
+                return GestureDetector(
+                  onTap: () => _openEvidencePhoto(imageUrl, index),
+                  child: Hero(
+                    tag: heroTag,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            imageUrl,
+                            width: 168,
+                            height: 132,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 168,
+                                height: 132,
+                                color: Colors.grey[200],
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.broken_image_rounded,
+                                  color: Colors.grey[400],
+                                ),
+                              );
+                            },
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.45),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: const Icon(
+                                Icons.open_in_full_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 10,
+                            bottom: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.45),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'Evidence ${index + 1}',
+                                style: AppTextStyle.bodySmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

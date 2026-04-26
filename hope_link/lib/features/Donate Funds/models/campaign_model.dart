@@ -62,6 +62,9 @@ class Campaign extends HiveObject {
   @HiveField(18)
   final bool isActive;
 
+  @HiveField(19)
+  final List<String> evidencePhotos;
+
   final int totalLikes;
 
   final bool isLikedByCurrentUser;
@@ -82,6 +85,7 @@ class Campaign extends HiveObject {
     required this.isFeatured,
     required this.tags,
     required this.images,
+    required this.evidencePhotos,
     required this.updates,
     required this.faqs,
     required this.createdAt,
@@ -109,6 +113,15 @@ class Campaign extends HiveObject {
       tags: List<String>.from(json['tags'] ?? []),
       images:
           (json['images'] as List?)?.map((img) {
+            if (img is String) return img;
+            if (img is Map && img['url'] != null) {
+              return img['url'].toString();
+            }
+            return img.toString();
+          }).toList() ??
+          [],
+      evidencePhotos:
+          (json['evidencePhotos'] as List?)?.map((img) {
             if (img is String) return img;
             if (img is Map && img['url'] != null) {
               return img['url'].toString();
@@ -151,6 +164,7 @@ class Campaign extends HiveObject {
       'isFeatured': isFeatured,
       'tags': tags,
       'images': images,
+      'evidencePhotos': evidencePhotos,
       'updates': updates.map((u) => u.toJson()).toList(),
       'faqs': faqs.map((f) => f.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
@@ -183,6 +197,7 @@ class Campaign extends HiveObject {
     bool? isFeatured,
     List<String>? tags,
     List<String>? images,
+    List<String>? evidencePhotos,
     List<CampaignUpdate>? updates,
     List<FAQ>? faqs,
     DateTime? createdAt,
@@ -207,6 +222,7 @@ class Campaign extends HiveObject {
       isFeatured: isFeatured ?? this.isFeatured,
       tags: tags ?? this.tags,
       images: images ?? this.images,
+      evidencePhotos: evidencePhotos ?? this.evidencePhotos,
       updates: updates ?? this.updates,
       faqs: faqs ?? this.faqs,
       createdAt: createdAt ?? this.createdAt,
