@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/features/Profile/controllers/volunteer_credit_controller.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -17,113 +16,111 @@ class DonationHeader extends StatelessWidget {
     final CampaignController campaignController = Get.put(CampaignController());
     final VolunteerCreditController? creditController =
         token != null && token!.isNotEmpty
-        ? (Get.isRegistered<VolunteerCreditController>()
-              ? Get.find<VolunteerCreditController>()
-              : Get.put(VolunteerCreditController(token!)))
-        : (Get.isRegistered<VolunteerCreditController>()
-              ? Get.find<VolunteerCreditController>()
-              : null);
+            ? (Get.isRegistered<VolunteerCreditController>()
+                ? Get.find<VolunteerCreditController>()
+                : Get.put(VolunteerCreditController(token!)))
+            : (Get.isRegistered<VolunteerCreditController>()
+                ? Get.find<VolunteerCreditController>()
+                : null);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 420;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(24, 24, 24, isCompact ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 16,
+            runSpacing: 14,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.spaceBetween,
+            runAlignment: WrapAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Campaigns',
-                    style: AppTextStyle.h4.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColorToken.primary.color,
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isCompact ? screenWidth - 48 : 220,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Campaigns',
+                      style: AppTextStyle.h4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColorToken.primary.color,
+                      ),
                     ),
-                  ),
-                  // Obx(
-                  //   () => Text(
-                  //     '${campaignController.filteredCampaigns.length} active campaigns',
-                  //     style: AppTextStyle.bodySmall.copyWith(
-                  //       color: Colors.grey[600],
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton.icon(
-                    onPressed: () => Get.toNamed('/essentials'),
-                    icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                    label: const Text('Essentials'),
-                  ),
-                  6.horizontalSpace,
-                  TextButton.icon(
-                    onPressed: () => Get.toNamed('/essential-commitments'),
-                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                    label: const Text('My Pledges'),
-                  ),
-                  10.horizontalSpace,
-                  if (creditController != null) ...[
-                    _buildPointsBadge(creditController),
-                    10.horizontalSpace,
+                    // Obx(
+                    //   () => Text(
+                    //     '${campaignController.filteredCampaigns.length} active campaigns',
+                    //     style: AppTextStyle.bodySmall.copyWith(
+                    //       color: Colors.grey[600],
+                    //     ),
+                    //   ),
+                    // ),
                   ],
-                  Obx(
-                    () => campaignController.isOfflineMode.value
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.orange.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.wifi_off_rounded,
-                                  size: 16,
-                                  color: Colors.orange[700],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Offline',
-                                  style: AppTextStyle.bodySmall.copyWith(
-                                    color: Colors.orange[700],
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
+                ),
+              ),
+              SizedBox(
+                width: isCompact ? screenWidth - 48 : null,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment:
+                      isCompact ? WrapAlignment.start : WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _buildHeaderAction(
+                          label: 'Essentials',
+                          icon: Icons.inventory_2_outlined,
+                          onPressed: () => Get.toNamed('/essentials'),
+                          compact: isCompact,
+                        ),
+                        if (creditController != null)
+                          _buildPointsBadge(creditController),
+                      ],
+                    ),
+                    Obx(
+                      () => campaignController.isOfflineMode.value
+                          ? _buildOfflineBadge()
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          // if (campaignController.lastSyncTime.value != null) ...[
-          //   8.verticalSpace,
-          //   // Obx(
-          //   //   () => Text(
-          //   //     'Last updated: ${_formatLastSync(campaignController.lastSyncTime.value!)}',
-          //   //     style: AppTextStyle.bodySmall.copyWith(
-          //   //       color: Colors.grey[500],
-          //   //       fontSize: 11,
-          //   //     ),
-          //   //   ),
-          //   // ),
-          // ],
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required bool compact,
+  }) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 12 : 14,
+          vertical: compact ? 10 : 12,
+        ),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(label),
     );
   }
 
@@ -140,6 +137,7 @@ class DonationHeader extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Points',
@@ -170,6 +168,37 @@ class DonationHeader extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Widget _buildOfflineBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 16,
+            color: Colors.orange[700],
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Offline',
+            style: AppTextStyle.bodySmall.copyWith(
+              color: Colors.orange[700],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatLastSync(DateTime time) {

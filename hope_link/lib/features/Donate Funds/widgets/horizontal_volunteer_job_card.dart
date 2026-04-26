@@ -25,6 +25,21 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final resolvedWidth = width == double.infinity
+        ? screenWidth - ((margin?.horizontal) ?? 48)
+        : width ?? screenWidth.clamp(0.0, 420.0).toDouble() * 0.78;
+    final safeWidth = (resolvedWidth as num)
+        .clamp(260.0, width == double.infinity ? 520.0 : 320.0)
+        .toDouble();
+    final isNarrow = safeWidth < 320;
+    final isWide = safeWidth >= 440;
+    final cardHeight = isWide
+        ? 260.0
+        : isNarrow
+        ? 296.0
+        : 316.0;
+    final borderRadius = BorderRadius.circular(18);
     final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: animationController,
@@ -43,37 +58,46 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () => Get.toNamed('/volunteer-job-details', arguments: job),
         child: Container(
-          width: width ?? 300,
-          height: 420,
           margin:
               margin ?? EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColorToken.primary.color.withOpacity(0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+          child: SizedBox(
+            width: safeWidth,
+            child: Container(
+              height: cardHeight,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: borderRadius,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColorToken.primary.color.withOpacity(0.07),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              Expanded(child: _buildContent()),
-              _buildFooter(),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(isNarrow: isNarrow, borderRadius: borderRadius),
+                  Expanded(
+                    child: _buildContent(isNarrow: isNarrow, isWide: isWide),
+                  ),
+                  _buildFooter(isNarrow: isNarrow, borderRadius: borderRadius),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader({
+    required bool isNarrow,
+    required BorderRadius borderRadius,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isNarrow ? 10 : 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -83,15 +107,15 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+        borderRadius: BorderRadius.only(
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
         ),
       ),
       child: Row(
         children: [
-          _buildJobTypeIcon(),
-          12.horizontalSpace,
+          _buildJobTypeIcon(isNarrow: isNarrow),
+          (isNarrow ? 10 : 12).horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,16 +131,18 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
                     style: AppTextStyle.bodySmall.copyWith(
                       color: AppColorToken.primary.color,
                       fontWeight: FontWeight.w700,
+                      fontSize: isNarrow ? 11 : 12,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                4.verticalSpace,
+                2.verticalSpace,
                 Text(
                   job.category,
                   style: AppTextStyle.bodySmall.copyWith(
                     color: Colors.grey[600],
+                    fontSize: isNarrow ? 11 : 12,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -124,13 +150,13 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               ],
             ),
           ),
-          _buildStatusBadge(),
+          _buildStatusBadge(isNarrow: isNarrow),
         ],
       ),
     );
   }
 
-  Widget _buildJobTypeIcon() {
+  Widget _buildJobTypeIcon({required bool isNarrow}) {
     IconData icon;
     Color iconColor;
 
@@ -153,19 +179,22 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(isNarrow ? 9 : 10),
       decoration: BoxDecoration(
         color: iconColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: iconColor, size: 28),
+      child: Icon(icon, color: iconColor, size: isNarrow ? 22 : 24),
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge({required bool isNarrow}) {
     final bool isAvailable = job.isOpen && job.hasPositionsAvailable;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: isNarrow ? 8 : 10,
+        vertical: isNarrow ? 5 : 6,
+      ),
       decoration: BoxDecoration(
         color: isAvailable
             ? Colors.green.withOpacity(0.1)
@@ -181,15 +210,20 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         style: AppTextStyle.bodySmall.copyWith(
           color: isAvailable ? Colors.green : Colors.red,
           fontWeight: FontWeight.w600,
-          fontSize: 11,
+          fontSize: isNarrow ? 10 : 11,
         ),
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent({required bool isNarrow, required bool isWide}) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(
+        isWide ? 18 : 16,
+        isWide ? 14 : 16,
+        isWide ? 18 : 16,
+        isWide ? 12 : 14,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -198,26 +232,27 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.grey[900],
-              fontSize: 18,
+              fontSize: isNarrow ? 16 : 17,
             ),
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          16.verticalSpace,
+          10.verticalSpace,
           Text(
             job.description,
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyle.bodyMedium.copyWith(
               color: Colors.grey[600],
-              height: 1.6,
+              fontSize: isNarrow ? 12 : 13,
+              height: 1.45,
             ),
           ),
-          20.verticalSpace,
-          _buildSkillsRow(),
-          const Spacer(),
-          _buildInfoRow(),
           12.verticalSpace,
+          _buildSkillsRow(isNarrow: isNarrow),
+          const Spacer(),
+          _buildInfoRow(isNarrow: isNarrow),
+          10.verticalSpace,
           PostInteractionSummary(
             totalLikes: job.totalLikes,
             commentsCount: job.commentsCount,
@@ -229,7 +264,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillsRow() {
+  Widget _buildSkillsRow({required bool isNarrow}) {
     final displaySkills = job.requiredSkills.take(2).toList();
     final hasMore = job.requiredSkills.length > 2;
 
@@ -239,7 +274,10 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
       children: [
         ...displaySkills.map(
           (skill) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: isNarrow ? 8 : 10,
+              vertical: 5,
+            ),
             decoration: BoxDecoration(
               color: AppColorToken.primary.color.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
@@ -248,7 +286,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               skill,
               style: AppTextStyle.bodySmall.copyWith(
                 color: AppColorToken.primary.color,
-                fontSize: 11,
+                fontSize: isNarrow ? 10 : 11,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -256,7 +294,10 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         ),
         if (hasMore)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: isNarrow ? 8 : 10,
+              vertical: 5,
+            ),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
@@ -265,7 +306,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               '+${job.requiredSkills.length - 2}',
               style: AppTextStyle.bodySmall.copyWith(
                 color: Colors.grey[700],
-                fontSize: 11,
+                fontSize: isNarrow ? 10 : 11,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -274,42 +315,58 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow() {
+  Widget _buildInfoRow({required bool isNarrow}) {
     return Row(
       children: [
-        Icon(Icons.people_outline_rounded, size: 16, color: Colors.grey[600]),
-        6.horizontalSpace,
+        Icon(
+          Icons.people_outline_rounded,
+          size: isNarrow ? 15 : 16,
+          color: Colors.grey[600],
+        ),
+        4.horizontalSpace,
         Text(
           '${job.remainingPositions} positions',
           style: AppTextStyle.bodySmall.copyWith(
             color: Colors.grey[700],
             fontWeight: FontWeight.w500,
+            fontSize: isNarrow ? 11 : 12,
           ),
         ),
         const Spacer(),
-        Icon(Icons.schedule_rounded, size: 16, color: Colors.grey[600]),
-        6.horizontalSpace,
+        Icon(
+          Icons.schedule_rounded,
+          size: isNarrow ? 15 : 16,
+          color: Colors.grey[600],
+        ),
+        4.horizontalSpace,
         Text(
           '${job.creditHours}h',
           style: AppTextStyle.bodySmall.copyWith(
             color: Colors.grey[700],
             fontWeight: FontWeight.w500,
+            fontSize: isNarrow ? 11 : 12,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter({
+    required bool isNarrow,
+    required BorderRadius borderRadius,
+  }) {
     final daysLeft = job.applicationDeadline.difference(DateTime.now()).inDays;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.symmetric(
+        horizontal: isNarrow ? 14 : 16,
+        vertical: isNarrow ? 12 : 14,
+      ),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+        borderRadius: BorderRadius.only(
+          bottomLeft: borderRadius.bottomLeft,
+          bottomRight: borderRadius.bottomRight,
         ),
       ),
       child: Row(
@@ -319,28 +376,34 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.verified_rounded,
-                  size: 16,
+                  size: isNarrow ? 14 : 16,
                   color: AppColorToken.primary.color,
                 ),
-                6.horizontalSpace,
+                4.horizontalSpace,
                 Text(
                   'Certificate',
                   style: AppTextStyle.bodySmall.copyWith(
                     color: AppColorToken.primary.color,
                     fontWeight: FontWeight.w600,
+                    fontSize: isNarrow ? 11 : 12,
                   ),
                 ),
-                16.horizontalSpace,
+                12.horizontalSpace,
               ],
             ),
-          Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey[600]),
-          6.horizontalSpace,
+          Icon(
+            Icons.calendar_today_rounded,
+            size: isNarrow ? 13 : 14,
+            color: Colors.grey[600],
+          ),
+          4.horizontalSpace,
           Expanded(
             child: Text(
               daysLeft > 0 ? '$daysLeft days left' : 'Deadline passed',
               style: AppTextStyle.bodySmall.copyWith(
                 color: daysLeft > 0 ? Colors.grey[700] : Colors.red,
                 fontWeight: FontWeight.w500,
+                fontSize: isNarrow ? 11 : 12,
               ),
             ),
           ),

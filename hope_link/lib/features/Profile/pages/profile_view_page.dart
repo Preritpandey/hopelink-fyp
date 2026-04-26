@@ -6,6 +6,7 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
 import 'package:hope_link/features/Profile/controllers/profile_controller.dart';
 import 'package:hope_link/features/Profile/controllers/volunteer_credit_controller.dart';
+import 'package:hope_link/features/Profile/models/user_model.dart';
 import 'package:hope_link/features/Profile/models/volunteer_credit_model.dart';
 import 'package:hope_link/features/Profile/pages/profile_edit_page.dart';
 import 'package:hope_link/features/Profile/widgets/full_screen_image.dart';
@@ -23,7 +24,8 @@ class ProfileViewPage extends StatelessWidget {
     if (cvPath.isEmpty) return;
 
     final uri = Uri.tryParse(cvPath);
-    final isWebUrl = uri != null &&
+    final isWebUrl =
+        uri != null &&
         uri.hasScheme &&
         (uri.scheme == 'http' || uri.scheme == 'https');
 
@@ -49,6 +51,15 @@ class ProfileViewPage extends StatelessWidget {
     }
   }
 
+  void _showComingSoon(String featureName) {
+    Get.snackbar(
+      'Coming soon',
+      '$featureName will be connected next.',
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.isRegistered<ProfileController>()
@@ -59,7 +70,7 @@ class ProfileViewPage extends StatelessWidget {
         : Get.put(VolunteerCreditController(token));
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F7F6),
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(
@@ -75,81 +86,71 @@ class ProfileViewPage extends StatelessWidget {
 
         final user = controller.user.value!;
 
-        return CustomScrollView(
-          slivers: [
-            _buildAppBar(context, user),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  10.verticalSpace,
-                  _buildProfileHeader(user),
-                  16.verticalSpace,
-
-                  _buildInfoSection(user),
-                  16.verticalSpace,
-
-                  _buildVolunteerCreditsSection(creditController),
-                  16.verticalSpace,
-
-                  _buildInterestsSection(user),
-                  16.verticalSpace,
-
-                  _buildDocumentsSection(user),
-                  16.verticalSpace,
-                  _buildLogoutButton(controller),
-
-                  // 30.verticalSpace,
-                ],
+        return RefreshIndicator(
+          onRefresh: controller.fetchProfile,
+          color: AppColorToken.primary.color,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildAppBar(context, user),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    16.verticalSpace,
+                    _buildProfileHero(context, user),
+                    18.verticalSpace,
+                    _buildQuickActionsSection(context, user),
+                    18.verticalSpace,
+                    _buildAboutSection(user),
+                    18.verticalSpace,
+                    _buildVolunteerCreditsSection(creditController),
+                    18.verticalSpace,
+                    _buildInfoSection(user),
+                    18.verticalSpace,
+                    _buildResourcesSection(user),
+                    18.verticalSpace,
+                    _buildInterestsSection(user),
+                    18.verticalSpace,
+                    _buildPlanningSection(),
+                    18.verticalSpace,
+                    _buildLogoutButton(controller),
+                    32.verticalSpace,
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }),
     );
   }
 
-  // -------------------- APP BAR --------------------
-
-  // In _buildAppBar method:
-  Widget _buildAppBar(BuildContext context, user) {
+  Widget _buildAppBar(BuildContext context, UserModel user) {
     return SliverAppBar(
-      expandedHeight: 200, // Increased height
+      expandedHeight: 108,
       pinned: true,
       backgroundColor: AppColorToken.primary.color,
-      flexibleSpace: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColorToken.primary.color,
-                  AppColorToken.primary.color.withValues(alpha: 0.85),
-                ],
-              ),
-            ),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColorToken.primary.color,
+              const Color(0xFF238255),
+            ],
           ),
-          // Centered profile avatar
-          Center(
-            child: Transform.translate(
-              offset: const Offset(0, 20), // Adjust vertical position
-              child: _buildProfileAvatar(
-                user,
-              ), // This will be our larger avatar
-            ),
-          ),
-        ],
+        ),
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.only(right: 12),
           child: IconButton(
             icon: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(Icons.edit_rounded, color: Colors.white),
             ),
@@ -165,8 +166,117 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  // Update _buildProfileAvatar method:
-  Widget _buildProfileAvatar(user) {
+  Widget _buildProfileHero(BuildContext context, UserModel user) {
+    final completion = _profileCompleteness(user);
+    final completionLabel = _completionLabel(completion);
+    final tags = <String>[
+      if (user.location.city.isNotEmpty) user.location.city,
+      if (user.gender.isNotEmpty) user.gender,
+      if (user.status.isNotEmpty) user.status.toUpperCase(),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildProfileAvatar(user),
+          const SizedBox(height: 14),
+          Text(
+            user.name,
+            style: AppTextStyle.h2.bold.copyWith(
+              fontSize: 28,
+              color: const Color(0xFF18211E),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            user.email,
+            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+          ),
+          if (tags.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: tags
+                  .map((tag) => _buildMetaChip(tag, _chipColorForTag(tag)))
+                  .toList(),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F8F7),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Profile completion',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1B2320),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${(completion * 100).round()}%',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColorToken.primary.color,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: completion,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation(
+                      AppColorToken.primary.color,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  completionLabel,
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(UserModel user) {
     return Hero(
       tag: 'profile_image',
       child: GestureDetector(
@@ -184,20 +294,20 @@ class ProfileViewPage extends StatelessWidget {
             border: Border.all(color: Colors.white, width: 4),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: CircleAvatar(
-            radius: 70, // Increased size
-            backgroundColor: Colors.grey[200],
+            radius: 50,
+            backgroundColor: const Color(0xFFE9EFEC),
             backgroundImage: user.profileImage.isNotEmpty
                 ? NetworkImage(user.profileImage)
                 : null,
             child: user.profileImage.isEmpty
-                ? Icon(Icons.person, size: 70, color: Colors.grey[400])
+                ? Icon(Icons.person, size: 52, color: Colors.grey[400])
                 : null,
           ),
         ),
@@ -205,55 +315,96 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  // -------------------- HEADER -----------------
-  Widget _buildProfileHeader(user) {
-    return Column(
-      children: [
-        Text(
-          user.name,
-          style: AppTextStyle.h2.bold.copyWith(fontSize: 28),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          user.email,
-          style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: _getStatusColor(user.status).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            user.status.toUpperCase(),
-            style: AppTextStyle.bodySmall.copyWith(
-              color: _getStatusColor(user.status),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
+  Widget _buildQuickActionsSection(BuildContext context, UserModel user) {
+    return _sectionCard(
+      title: 'Quick Actions',
+      subtitle: 'Fast access to the things people usually reach for first.',
+      icon: Icons.flash_on_rounded,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tileWidth = constraints.maxWidth > 520
+              ? (constraints.maxWidth - 12) / 2
+              : constraints.maxWidth;
+
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              SizedBox(
+                width: tileWidth,
+                child: _quickActionTile(
+                  icon: Icons.edit_outlined,
+                  title: 'Edit Profile',
+                  subtitle: 'Update your personal details and public presence.',
+                  accent: AppColorToken.primary.color,
+                  onTap: () => Get.to(
+                    () => ProfileEditPage(token: token),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: tileWidth,
+                child: _quickActionTile(
+                  icon: Icons.local_shipping_outlined,
+                  title: 'My Pledges',
+                  subtitle: 'Review active essential donation commitments.',
+                  accent: const Color(0xFF0E9F6E),
+                  onTap: () => Get.toNamed('/essential-commitments'),
+                ),
+              ),
+              SizedBox(
+                width: tileWidth,
+                child: _quickActionTile(
+                  icon: Icons.description_outlined,
+                  title: user.cv.isNotEmpty ? 'Open Resume' : 'Add Resume',
+                  subtitle: user.cv.isNotEmpty
+                      ? 'Check the CV currently attached to your profile.'
+                      : 'A dedicated resume workflow will land here next.',
+                  accent: const Color(0xFF2563EB),
+                  onTap: () => user.cv.isNotEmpty
+                      ? _openCv(user.cv)
+                      : _showComingSoon('Resume management'),
+                ),
+              ),
+              SizedBox(
+                width: tileWidth,
+                child: _quickActionTile(
+                  icon: Icons.workspace_premium_outlined,
+                  title: 'Certificates',
+                  subtitle: 'A cleaner place for badges and proof of impact.',
+                  accent: const Color(0xFFF59E0B),
+                  onTap: () => _showComingSoon('Certificates'),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
-  // -------------------- INFO SECTION --------------------
+  Widget _buildAboutSection(UserModel user) {
+    final aboutText = [
+      if (user.bio.trim().isNotEmpty) user.bio.trim(),
+      if (user.description.trim().isNotEmpty) user.description.trim(),
+    ].join('\n\n');
 
-  Widget _buildInfoSection(user) {
-    return _cardWrapper(
-      title: 'Personal Information',
-      icon: Icons.info_outline,
+    return _sectionCard(
+      title: 'About',
+      subtitle: 'How your profile introduces you to organizers and teams.',
+      icon: Icons.auto_awesome_outlined,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _infoRow(Icons.phone, 'Phone', user.phone),
-          const Divider(),
-          _infoRow(Icons.wc, 'Gender', user.gender),
-          const Divider(),
-          _infoRow(
-            Icons.location_on,
-            'Location',
-            '${user.location.city}, ${user.location.country}',
+          Text(
+            aboutText.isNotEmpty
+                ? aboutText
+                : 'Add a short bio and description to make your profile feel more complete and more trustworthy to organizations.',
+            style: AppTextStyle.bodyMedium.copyWith(
+              color: Colors.grey[800],
+              height: 1.55,
+            ),
           ),
         ],
       ),
@@ -269,8 +420,9 @@ class ProfileViewPage extends StatelessWidget {
       final hasError =
           creditController.errorMessage.value.isNotEmpty && credits == null;
 
-      return _cardWrapper(
-        title: 'Volunteer Credits',
+      return _sectionCard(
+        title: 'Volunteer Impact',
+        subtitle: 'A readable snapshot of the contribution you have built.',
         icon: Icons.workspace_premium_rounded,
         child: isLoading
             ? Center(
@@ -284,13 +436,18 @@ class ProfileViewPage extends StatelessWidget {
                 style: AppTextStyle.bodyMedium.copyWith(color: Colors.red[400]),
               )
             : credits == null
-            ? const SizedBox.shrink()
+            ? Text(
+                'Impact data will appear here once credits are available.',
+                style: AppTextStyle.bodyMedium.copyWith(
+                  color: Colors.grey[600],
+                ),
+              )
             : Column(
                 children: [
                   Row(
                     children: [
                       Expanded(
-                        child: _statCard(
+                        child: _metricPanel(
                           label: 'Total Points',
                           value: '${credits.totalPoints}',
                           icon: Icons.stars_rounded,
@@ -298,7 +455,7 @@ class ProfileViewPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _statCard(
+                        child: _metricPanel(
                           label: 'Credit Hours',
                           value: '${credits.totalCreditHours}h',
                           icon: Icons.schedule_rounded,
@@ -306,13 +463,13 @@ class ProfileViewPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _detailTile(
                     Icons.bolt_rounded,
                     'Points Per Hour',
                     '${credits.pointsPerHour}',
                   ),
-                  const Divider(),
+                  const Divider(height: 24),
                   _detailTile(
                     Icons.person_outline_rounded,
                     'Credits Owner',
@@ -321,11 +478,11 @@ class ProfileViewPage extends StatelessWidget {
                         : credits.userEmail,
                   ),
                   if (credits.creditBreakdown.isNotEmpty) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Breakdown',
+                        'Recent Breakdown',
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -340,22 +497,139 @@ class ProfileViewPage extends StatelessWidget {
     });
   }
 
-  Widget _statCard({
+  Widget _buildInfoSection(UserModel user) {
+    return _sectionCard(
+      title: 'Profile Details',
+      subtitle: 'The core information organizations use when reviewing you.',
+      icon: Icons.badge_outlined,
+      child: Column(
+        children: [
+          _infoRow(Icons.phone_outlined, 'Phone', _safeValue(user.phone)),
+          const Divider(height: 24),
+          _infoRow(Icons.wc_outlined, 'Gender', _safeValue(user.gender)),
+          const Divider(height: 24),
+          _infoRow(
+            Icons.location_on_outlined,
+            'Location',
+            _formatLocation(user),
+          ),
+          const Divider(height: 24),
+          _infoRow(Icons.mail_outline_rounded, 'Email', _safeValue(user.email)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResourcesSection(UserModel user) {
+    return _sectionCard(
+      title: 'Resources',
+      subtitle: 'Profile assets and utility areas that deserve faster access.',
+      icon: Icons.dashboard_customize_outlined,
+      child: Column(
+        children: [
+          _actionRow(
+            icon: Icons.picture_as_pdf_rounded,
+            title: 'CV / Resume',
+            subtitle: user.cv.isNotEmpty
+                ? 'Open the resume attached to your profile.'
+                : 'No resume uploaded yet.',
+            onTap: user.cv.isNotEmpty
+                ? () => _openCv(user.cv)
+                : () => _showComingSoon('Resume upload'),
+          ),
+          const SizedBox(height: 10),
+          _actionRow(
+            icon: Icons.bookmark_border_rounded,
+            title: 'Saved Causes',
+            subtitle: 'A future home for campaigns, roles, and organizations you want to revisit.',
+            onTap: () => _showComingSoon('Saved causes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInterestsSection(UserModel user) {
+    return _sectionCard(
+      title: 'Interests',
+      subtitle: 'Your causes, topics, and volunteer preferences at a glance.',
+      icon: Icons.favorite_border_rounded,
+      child: user.interest.isEmpty
+          ? Text(
+              'No interests added yet. This area can become a strong discovery signal once you start curating it.',
+              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+            )
+          : Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: user.interest.map<Widget>((item) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColorToken.primary.color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    item,
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: AppColorToken.primary.color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  Widget _buildPlanningSection() {
+    return _sectionCard(
+      title: 'Ready To Add',
+      subtitle: 'UI concepts that can become useful product features next.',
+      icon: Icons.lightbulb_outline_rounded,
+      child: Column(
+        children: [
+          _suggestionItem(
+            icon: Icons.history_rounded,
+            title: 'Volunteer Timeline',
+            subtitle: 'A scrolling history of jobs, applications, approvals, and earned milestones.',
+          ),
+          const SizedBox(height: 10),
+          _suggestionItem(
+            icon: Icons.notifications_active_outlined,
+            title: 'Profile Alerts',
+            subtitle: 'Deadlines, pledge reminders, document expiry, and new role matches.',
+          ),
+          const SizedBox(height: 10),
+          _suggestionItem(
+            icon: Icons.bar_chart_outlined,
+            title: 'Impact Analytics',
+            subtitle: 'Trends for hours, points, categories served, and organizer engagement.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _metricPanel({
     required String label,
     required String value,
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColorToken.primary.color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFF6FAF8),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: AppColorToken.primary.color),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             value,
             style: AppTextStyle.h3.bold.copyWith(
@@ -405,8 +679,8 @@ class ProfileViewPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(14),
+        color: const Color(0xFFF8FBF9),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
@@ -418,14 +692,15 @@ class ProfileViewPage extends StatelessWidget {
                 child: Text(
                   item.description.isNotEmpty ? item.description : item.source,
                   style: AppTextStyle.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A2320),
                   ),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 4,
+                  vertical: 5,
                 ),
                 decoration: BoxDecoration(
                   color: AppColorToken.primary.color.withValues(alpha: 0.1),
@@ -458,9 +733,18 @@ class ProfileViewPage extends StatelessWidget {
 
   Widget _infoRow(IconData icon, String label, String value) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 16),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF6FAF8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 18, color: AppColorToken.primary.color),
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,7 +756,13 @@ class ProfileViewPage extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Text(value, style: AppTextStyle.bodyMedium),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: AppTextStyle.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -480,82 +770,191 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  // -------------------- INTERESTS --------------------
-
-  Widget _buildInterestsSection(user) {
-    if (user.interest.isEmpty) return const SizedBox();
-
-    return _cardWrapper(
-      title: 'Interests',
-      icon: Icons.favorite,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: user.interest.map<Widget>((e) {
-          return Chip(
-            label: Text(e),
-            backgroundColor: AppColorToken.primary.color.withValues(alpha: 0.1),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  // -------------------- DOCUMENTS --------------------
-
-  Widget _buildDocumentsSection(user) {
-    final hasCv = user.cv.isNotEmpty;
-
-    return _cardWrapper(
-      title: 'Documents',
-      icon: Icons.folder,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: hasCv ? () => _openCv(user.cv) : null,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: hasCv
-                  ? AppColorToken.primary.color.withValues(alpha: 0.06)
-                  : Colors.grey[100],
-            ),
-            child: ListTile(
-              leading: Icon(
-                Icons.picture_as_pdf_rounded,
-                color: hasCv ? AppColorToken.primary.color : Colors.grey,
+  Widget _quickActionTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color accent,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: accent.withValues(alpha: 0.08),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: accent),
               ),
-              title: const Text('CV / Resume'),
-              subtitle: Text(
-                hasCv ? 'Tap to view uploaded CV' : 'Not uploaded',
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1A2320),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[700],
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              trailing: hasCv
-                  ? Icon(
-                      Icons.open_in_new_rounded,
-                      color: AppColorToken.primary.color,
-                    )
-                  : null,
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ---- logout button ----
-
-  Widget _buildLogoutButton(controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: _LogoutButton(controller: controller),
+  Widget _actionRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7FAF8),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColorToken.primary.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColorToken.primary.color),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: Colors.grey[500],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  // -------------------- CARD WRAPPER --------------------
-
-  Widget _cardWrapper({
+  Widget _suggestionItem({
+    required IconData icon,
     required String title,
+    required String subtitle,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7FAF8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColorToken.primary.color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyle.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetaChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyle.bodySmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionCard({
+    required String title,
+    required String subtitle,
     required IconData icon,
     required Widget child,
   }) {
@@ -564,12 +963,12 @@ class ProfileViewPage extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -577,37 +976,110 @@ class ProfileViewPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: AppColorToken.primary.color),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColorToken.primary.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColorToken.primary.color, size: 20),
+              ),
               const SizedBox(width: 12),
-              Text(title, style: AppTextStyle.h4.bold),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyle.h4.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           child,
         ],
       ),
     );
   }
 
-  // -------------------- STATUS COLOR --------------------
+  Widget _buildLogoutButton(ProfileController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: _LogoutButton(controller: controller),
+    );
+  }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return Colors.green;
-      case 'inactive':
-        return Colors.orange;
-      case 'blocked':
-        return Colors.red;
-      default:
-        return Colors.grey;
+  double _profileCompleteness(UserModel user) {
+    var completed = 0;
+    const total = 8;
+
+    if (user.profileImage.isNotEmpty) completed++;
+    if (user.phone.trim().isNotEmpty) completed++;
+    if (user.gender.trim().isNotEmpty) completed++;
+    if (user.bio.trim().isNotEmpty) completed++;
+    if (user.description.trim().isNotEmpty) completed++;
+    if (user.location.city.trim().isNotEmpty || user.location.country.trim().isNotEmpty) {
+      completed++;
     }
+    if (user.interest.isNotEmpty) completed++;
+    if (user.cv.trim().isNotEmpty) completed++;
+
+    return completed / total;
+  }
+
+  String _completionLabel(double value) {
+    if (value >= 0.9) {
+      return 'Your profile looks polished and ready for outreach.';
+    }
+    if (value >= 0.65) {
+      return 'A few more details would make this profile feel much stronger.';
+    }
+    return 'Adding bio, interests, resume, and contact details will improve trust fast.';
+  }
+
+  String _formatLocation(UserModel user) {
+    final city = user.location.city.trim();
+    final country = user.location.country.trim();
+    if (city.isEmpty && country.isEmpty) {
+      return 'Not added yet';
+    }
+    if (city.isEmpty) return country;
+    if (country.isEmpty) return city;
+    return '$city, $country';
+  }
+
+  String _safeValue(String value) {
+    return value.trim().isEmpty ? 'Not added yet' : value.trim();
+  }
+
+  Color _chipColorForTag(String label) {
+    final normalized = label.toLowerCase();
+    if (normalized == 'active') return const Color(0xFF0E9F6E);
+    if (normalized == 'inactive') return const Color(0xFFF59E0B);
+    if (normalized == 'blocked') return const Color(0xFFDC2626);
+    return AppColorToken.primary.color;
   }
 }
 
 class _LogoutButton extends StatefulWidget {
   final ProfileController controller;
+
   const _LogoutButton({required this.controller});
 
   @override
@@ -695,15 +1167,10 @@ class _LogoutButtonState extends State<_LogoutButton>
               height: 56,
               decoration: BoxDecoration(
                 gradient: AppGradients.primaryGradient,
-                //  LinearGradient(
-                //   colors: [Colors.red[400]!, Colors.red[600]!],
-                //   begin: Alignment.topLeft,
-                //   end: Alignment.bottomRight,
-                // ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColorToken.primary.color.withValues(alpha: 0.4),
+                    color: AppColorToken.primary.color.withValues(alpha: 0.35),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -713,19 +1180,19 @@ class _LogoutButtonState extends State<_LogoutButton>
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: _onPressed,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       Icon(Icons.logout_rounded, color: Colors.white, size: 20),
-                      const SizedBox(width: 10),
-                      const Text(
-                        "Logout",
+                      SizedBox(width: 10),
+                      Text(
+                        'Logout',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ],
@@ -740,9 +1207,9 @@ class _LogoutButtonState extends State<_LogoutButton>
   }
 }
 
-// Beautiful Logout Confirmation Dialog
 class _LogoutConfirmationDialog extends StatefulWidget {
   final VoidCallback onConfirm;
+
   const _LogoutConfirmationDialog({required this.onConfirm});
 
   @override
@@ -833,7 +1300,6 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icon with animated background
                   Container(
                     width: 80,
                     height: 80,
@@ -850,10 +1316,8 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Title
                   const Text(
-                    "Logout?",
+                    'Logout?',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -862,8 +1326,6 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Description
                   Text(
                     "Are you sure you want to logout?\nYou'll need to login again to access your account.",
                     textAlign: TextAlign.center,
@@ -875,13 +1337,11 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Action Buttons
                   Row(
                     children: [
                       Expanded(
                         child: AnimatedButton(
-                          label: "Cancel",
+                          label: 'Cancel',
                           onPressed: _handleCancel,
                           isPrimary: false,
                         ),
@@ -889,7 +1349,7 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                       const SizedBox(width: 12),
                       Expanded(
                         child: AnimatedButton(
-                          label: "Logout",
+                          label: 'Logout',
                           onPressed: _handleConfirm,
                           isPrimary: true,
                         ),
