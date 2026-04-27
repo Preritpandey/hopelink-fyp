@@ -6,6 +6,7 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 import 'package:intl/intl.dart';
 import '../models/campaign_model.dart';
 import 'post_interaction_summary.dart';
+import 'save_cause_button.dart';
 
 class HorizontalCampaignCard extends StatelessWidget {
   final Campaign campaign;
@@ -109,6 +110,15 @@ class HorizontalCampaignCard extends StatelessWidget {
               ),
             ),
           ),
+        Positioned(
+          top: 12,
+          left: 12,
+          child: SaveCauseButton(
+            postType: 'campaign',
+            postId: campaign.id,
+            isSaved: campaign.isSavedByCurrentUser,
+          ),
+        ),
         Positioned(
           bottom: 12,
           right: 12,

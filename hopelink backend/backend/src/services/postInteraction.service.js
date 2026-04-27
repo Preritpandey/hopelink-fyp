@@ -4,6 +4,7 @@ import Event from '../models/event.model.js';
 import VolunteerJob from '../models/volunteerJob.model.js';
 import PostLike from '../models/postLike.model.js';
 import PostComment from '../models/postComment.model.js';
+import SavedCause from '../models/savedCause.model.js';
 import { BadRequestError, NotFoundError } from '../errors/index.js';
 
 const POST_MODELS = {
@@ -58,7 +59,7 @@ export const buildInteractionMap = async ({
 
   const objectIds = normalizedIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  const [likeCounts, commentCounts, likedRows] = await Promise.all([
+  const [likeCounts, commentCounts, likedRows, savedRows] = await Promise.all([
     PostLike.aggregate([
       { $match: { postType, postId: { $in: objectIds } } },
       { $group: { _id: '$postId', totalLikes: { $sum: 1 } } },
@@ -76,6 +77,15 @@ export const buildInteractionMap = async ({
           .select('postId')
           .lean()
       : [],
+    currentUserId
+      ? SavedCause.find({
+          postType,
+          postId: { $in: objectIds },
+          userId: currentUserId,
+        })
+          .select('postId')
+          .lean()
+      : [],
   ]);
 
   const map = new Map(
@@ -85,6 +95,7 @@ export const buildInteractionMap = async ({
         totalLikes: 0,
         isLikedByCurrentUser: false,
         commentsCount: 0,
+        isSavedByCurrentUser: false,
       },
     ]),
   );
@@ -113,6 +124,14 @@ export const buildInteractionMap = async ({
     });
   });
 
+  savedRows.forEach(({ postId }) => {
+    const key = normalizeId(postId);
+    map.set(key, {
+      ...(map.get(key) || {}),
+      isSavedByCurrentUser: true,
+    });
+  });
+
   return map;
 };
 
@@ -123,6 +142,7 @@ export const attachInteractionsToDoc = (doc, interactionMap) => {
       totalLikes: 0,
       isLikedByCurrentUser: false,
       commentsCount: 0,
+      isSavedByCurrentUser: false,
     };
 
   return {
@@ -144,5 +164,6 @@ export const deleteInteractionsForPost = async ({ postId, postType }) => {
   await Promise.all([
     PostLike.deleteMany({ postId, postType }),
     PostComment.deleteMany({ postId, postType }),
+    SavedCause.deleteMany({ postId, postType }),
   ]);
 };

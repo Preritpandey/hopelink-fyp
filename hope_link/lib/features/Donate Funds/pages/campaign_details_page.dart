@@ -17,6 +17,7 @@ import '../models/post_interaction_models.dart';
 import '../widgets/campaign_report_insights_section.dart';
 import '../widgets/post_engagement_section.dart';
 import '../widgets/post_interaction_summary.dart';
+import '../widgets/save_cause_button.dart';
 
 class CampaignDetailsPage extends StatefulWidget {
   const CampaignDetailsPage({super.key});
@@ -402,6 +403,20 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         onPressed: () => Get.back(),
       ),
       actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: SaveCauseButton(
+            postType: 'campaign',
+            postId: campaign!.id,
+            isSaved: campaign!.isSavedByCurrentUser,
+            onChanged: (nextState) {
+              if (!mounted || campaign == null) return;
+              setState(() {
+                campaign = campaign!.copyWith(isSavedByCurrentUser: nextState);
+              });
+            },
+          ),
+        ),
         IconButton(
           icon: Icon(Icons.share_rounded, color: AppColorToken.primary.color),
           onPressed: () {

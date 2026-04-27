@@ -21,6 +21,7 @@ class VolunteerJob {
   final int totalLikes;
   final bool isLikedByCurrentUser;
   final int commentsCount;
+  final bool isSavedByCurrentUser;
 
   VolunteerJob({
     required this.id,
@@ -43,6 +44,7 @@ class VolunteerJob {
     this.totalLikes = 0,
     this.isLikedByCurrentUser = false,
     this.commentsCount = 0,
+    this.isSavedByCurrentUser = false,
   });
 
   factory VolunteerJob.fromJson(Map<String, dynamic> json) {
@@ -71,6 +73,7 @@ class VolunteerJob {
       commentsCount: (json['commentsCount'] ?? 0) is num
           ? (json['commentsCount'] as num).toInt()
           : 0,
+      isSavedByCurrentUser: json['isSavedByCurrentUser'] == true,
     );
   }
 
@@ -96,6 +99,7 @@ class VolunteerJob {
       'totalLikes': totalLikes,
       'isLikedByCurrentUser': isLikedByCurrentUser,
       'commentsCount': commentsCount,
+      'isSavedByCurrentUser': isSavedByCurrentUser,
     };
   }
 
@@ -126,6 +130,7 @@ class VolunteerJob {
     int? totalLikes,
     bool? isLikedByCurrentUser,
     int? commentsCount,
+    bool? isSavedByCurrentUser,
   }) {
     return VolunteerJob(
       id: id ?? this.id,
@@ -149,6 +154,7 @@ class VolunteerJob {
       isLikedByCurrentUser:
           isLikedByCurrentUser ?? this.isLikedByCurrentUser,
       commentsCount: commentsCount ?? this.commentsCount,
+      isSavedByCurrentUser: isSavedByCurrentUser ?? this.isSavedByCurrentUser,
     );
   }
 

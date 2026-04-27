@@ -11,6 +11,7 @@ import '../models/event_model.dart';
 import '../models/post_interaction_models.dart';
 import '../widgets/post_engagement_section.dart';
 import '../widgets/post_interaction_summary.dart';
+import '../widgets/save_cause_button.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
@@ -132,6 +133,20 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         onPressed: () => Get.back(),
       ),
       actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: SaveCauseButton(
+            postType: 'event',
+            postId: _event.id,
+            isSaved: _event.isSavedByCurrentUser,
+            onChanged: (nextState) {
+              if (!mounted) return;
+              setState(() {
+                _event = _event.copyWith(isSavedByCurrentUser: nextState);
+              });
+            },
+          ),
+        ),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),

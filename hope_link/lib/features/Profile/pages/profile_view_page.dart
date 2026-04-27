@@ -127,7 +127,7 @@ class ProfileViewPage extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context, UserModel user) {
     return SliverAppBar(
-      expandedHeight: 108,
+      expandedHeight: 30,
       pinned: true,
       backgroundColor: AppColorToken.primary.color,
       flexibleSpace: Container(
@@ -135,10 +135,7 @@ class ProfileViewPage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColorToken.primary.color,
-              const Color(0xFF238255),
-            ],
+            colors: [AppColorToken.primary.color, const Color(0xFF238255)],
           ),
         ),
       ),
@@ -167,8 +164,6 @@ class ProfileViewPage extends StatelessWidget {
   }
 
   Widget _buildProfileHero(BuildContext context, UserModel user) {
-    final completion = _profileCompleteness(user);
-    final completionLabel = _completionLabel(completion);
     final tags = <String>[
       if (user.location.city.isNotEmpty) user.location.city,
       if (user.gender.isNotEmpty) user.gender,
@@ -221,55 +216,7 @@ class ProfileViewPage extends StatelessWidget {
           const SizedBox(height: 18),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF6F8F7),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Profile completion',
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1B2320),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${(completion * 100).round()}%',
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColorToken.primary.color,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: completion,
-                    minHeight: 8,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation(
-                      AppColorToken.primary.color,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  completionLabel,
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
           ),
         ],
       ),
@@ -541,8 +488,8 @@ class ProfileViewPage extends StatelessWidget {
           _actionRow(
             icon: Icons.bookmark_border_rounded,
             title: 'Saved Causes',
-            subtitle: 'A future home for campaigns, roles, and organizations you want to revisit.',
-            onTap: () => _showComingSoon('Saved causes'),
+            subtitle: 'Your bookmarked campaigns, events, and volunteer roles.',
+            onTap: () => Get.toNamed('/saved-causes'),
           ),
         ],
       ),
@@ -595,19 +542,22 @@ class ProfileViewPage extends StatelessWidget {
           _suggestionItem(
             icon: Icons.history_rounded,
             title: 'Volunteer Timeline',
-            subtitle: 'A scrolling history of jobs, applications, approvals, and earned milestones.',
+            subtitle:
+                'A scrolling history of jobs, applications, approvals, and earned milestones.',
           ),
           const SizedBox(height: 10),
           _suggestionItem(
             icon: Icons.notifications_active_outlined,
             title: 'Profile Alerts',
-            subtitle: 'Deadlines, pledge reminders, document expiry, and new role matches.',
+            subtitle:
+                'Deadlines, pledge reminders, document expiry, and new role matches.',
           ),
           const SizedBox(height: 10),
           _suggestionItem(
             icon: Icons.bar_chart_outlined,
             title: 'Impact Analytics',
-            subtitle: 'Trends for hours, points, categories served, and organizer engagement.',
+            subtitle:
+                'Trends for hours, points, categories served, and organizer engagement.',
           ),
         ],
       ),
@@ -1034,7 +984,8 @@ class ProfileViewPage extends StatelessWidget {
     if (user.gender.trim().isNotEmpty) completed++;
     if (user.bio.trim().isNotEmpty) completed++;
     if (user.description.trim().isNotEmpty) completed++;
-    if (user.location.city.trim().isNotEmpty || user.location.country.trim().isNotEmpty) {
+    if (user.location.city.trim().isNotEmpty ||
+        user.location.country.trim().isNotEmpty) {
       completed++;
     }
     if (user.interest.isNotEmpty) completed++;

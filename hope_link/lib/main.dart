@@ -21,6 +21,7 @@ import 'package:hope_link/features/DonateEssentials/pages/my_essential_commitmen
 import 'package:hope_link/features/Home/pages/home_screen.dart';
 import 'package:hope_link/features/Onboarding/pages/splash_screen.dart';
 import 'package:hope_link/features/OrganizationProfile/pages/organization_profile_page.dart';
+import 'package:hope_link/features/Profile/pages/saved_causes_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'config/payment_config.dart';
@@ -103,6 +104,11 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/organization-profile',
           page: () => const OrganizationProfilePage(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/saved-causes',
+          page: () => const SavedCausesPage(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

@@ -42,6 +42,8 @@ class ApiEndpoints {
       '$baseUrl/posts/$postId/comments';
   static String deleteComment(String commentId) =>
       '$baseUrl/comments/$commentId';
+  static String get savedCauses => '$baseUrl/saved-causes';
+  static String savedCauseByPost(String postId) => '$baseUrl/saved-causes/$postId';
 
   // Organization profile
   static String organizationProfile(String organizationId) =>

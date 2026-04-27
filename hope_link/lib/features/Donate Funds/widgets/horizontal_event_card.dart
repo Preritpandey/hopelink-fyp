@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import '../pages/event_details_page.dart';
 import 'post_interaction_summary.dart';
+import 'save_cause_button.dart';
 
 class HorizontalEventCard extends StatelessWidget {
   final Event event;
@@ -110,6 +111,15 @@ class HorizontalEventCard extends StatelessWidget {
               ),
             ),
           ),
+        Positioned(
+          top: 12,
+          child: SaveCauseButton(
+            postType: 'event',
+            postId: event.id,
+            isSaved: event.isSavedByCurrentUser,
+          ),
+          right: event.isFeatured ? 62 : 12,
+        ),
         Positioned(
           top: 12,
           left: 12,

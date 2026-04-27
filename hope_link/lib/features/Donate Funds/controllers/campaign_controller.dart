@@ -179,6 +179,16 @@ class CampaignController extends GetxController {
     filteredCampaigns.value = filteredCampaigns.map(patch).toList();
   }
 
+  void updateCampaignSavedState(String campaignId, bool isSaved) {
+    Campaign patch(Campaign item) {
+      if (item.id != campaignId) return item;
+      return item.copyWith(isSavedByCurrentUser: isSaved);
+    }
+
+    campaigns.value = campaigns.map(patch).toList();
+    filteredCampaigns.value = filteredCampaigns.map(patch).toList();
+  }
+
   Future<CampaignReport?> getCampaignReport(String campaignId) async {
     try {
       return await _service.getCampaignReport(campaignId);

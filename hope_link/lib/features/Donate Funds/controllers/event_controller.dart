@@ -280,6 +280,16 @@ class EventController extends GetxController {
     filteredEvents.value = filteredEvents.map(patch).toList();
   }
 
+  void updateEventSavedState(String eventId, bool isSaved) {
+    Event patch(Event item) {
+      if (item.id != eventId) return item;
+      return item.copyWith(isSavedByCurrentUser: isSaved);
+    }
+
+    events.value = events.map(patch).toList();
+    filteredEvents.value = filteredEvents.map(patch).toList();
+  }
+
   @override
   void onClose() {
     eventBox.close();

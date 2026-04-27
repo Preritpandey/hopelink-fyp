@@ -71,6 +71,8 @@ class Campaign extends HiveObject {
 
   final int commentsCount;
 
+  final bool isSavedByCurrentUser;
+
   Campaign({
     required this.id,
     required this.title,
@@ -95,6 +97,7 @@ class Campaign extends HiveObject {
     this.totalLikes = 0,
     this.isLikedByCurrentUser = false,
     this.commentsCount = 0,
+    this.isSavedByCurrentUser = false,
   });
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
@@ -146,6 +149,7 @@ class Campaign extends HiveObject {
       commentsCount: (json['commentsCount'] ?? 0) is num
           ? (json['commentsCount'] as num).toInt()
           : 0,
+      isSavedByCurrentUser: json['isSavedByCurrentUser'] == true,
     );
   }
 
@@ -174,6 +178,7 @@ class Campaign extends HiveObject {
       'totalLikes': totalLikes,
       'isLikedByCurrentUser': isLikedByCurrentUser,
       'commentsCount': commentsCount,
+      'isSavedByCurrentUser': isSavedByCurrentUser,
     };
   }
 
@@ -207,6 +212,7 @@ class Campaign extends HiveObject {
     int? totalLikes,
     bool? isLikedByCurrentUser,
     int? commentsCount,
+    bool? isSavedByCurrentUser,
   }) {
     return Campaign(
       id: id ?? this.id,
@@ -233,6 +239,7 @@ class Campaign extends HiveObject {
       isLikedByCurrentUser:
           isLikedByCurrentUser ?? this.isLikedByCurrentUser,
       commentsCount: commentsCount ?? this.commentsCount,
+      isSavedByCurrentUser: isSavedByCurrentUser ?? this.isSavedByCurrentUser,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:hope_link/core/theme/app_text_styles.dart';
 
 import '../models/volunteer_job_model.dart';
 import 'post_interaction_summary.dart';
+import 'save_cause_button.dart';
 
 class HorizontalVolunteerJobCard extends StatelessWidget {
   final VolunteerJob job;
@@ -150,7 +151,19 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               ],
             ),
           ),
-          _buildStatusBadge(isNarrow: isNarrow),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SaveCauseButton(
+                postType: 'volunteerJob',
+                postId: job.id,
+                isSaved: job.isSavedByCurrentUser,
+                backgroundColor: Colors.white.withOpacity(0.88),
+              ),
+              8.horizontalSpace,
+              _buildStatusBadge(isNarrow: isNarrow),
+            ],
+          ),
         ],
       ),
     );

@@ -11,6 +11,7 @@ import '../models/post_interaction_models.dart';
 import '../models/volunteer_job_model.dart';
 import '../widgets/post_engagement_section.dart';
 import '../widgets/post_interaction_summary.dart';
+import '../widgets/save_cause_button.dart';
 import '../widgets/volunteer_job_apply_button.dart';
 
 class VolunteerJobDetailsPage extends StatefulWidget {
@@ -188,6 +189,18 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
               ),
             ),
           ),
+          SaveCauseButton(
+            postType: 'volunteerJob',
+            postId: job.id,
+            isSaved: job.isSavedByCurrentUser,
+            onChanged: (nextState) {
+              if (!mounted) return;
+              setState(() {
+                job = job.copyWith(isSavedByCurrentUser: nextState);
+              });
+            },
+          ),
+          12.horizontalSpace,
           GestureDetector(
             onTap: () {},
             child: Container(

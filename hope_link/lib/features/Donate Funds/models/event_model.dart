@@ -73,6 +73,8 @@ class Event {
 
   final int commentsCount;
 
+  final bool isSavedByCurrentUser;
+
   Event({
     required this.id,
     required this.title,
@@ -97,6 +99,7 @@ class Event {
     this.totalLikes = 0,
     this.isLikedByCurrentUser = false,
     this.commentsCount = 0,
+    this.isSavedByCurrentUser = false,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -145,6 +148,7 @@ class Event {
       commentsCount: (json['commentsCount'] ?? 0) is num
           ? (json['commentsCount'] as num).toInt()
           : 0,
+      isSavedByCurrentUser: json['isSavedByCurrentUser'] == true,
     );
   }
 
@@ -173,6 +177,7 @@ class Event {
       'totalLikes': totalLikes,
       'isLikedByCurrentUser': isLikedByCurrentUser,
       'commentsCount': commentsCount,
+      'isSavedByCurrentUser': isSavedByCurrentUser,
     };
   }
 
@@ -206,6 +211,7 @@ class Event {
     int? totalLikes,
     bool? isLikedByCurrentUser,
     int? commentsCount,
+    bool? isSavedByCurrentUser,
   }) {
     return Event(
       id: id ?? this.id,
@@ -232,6 +238,7 @@ class Event {
       isLikedByCurrentUser:
           isLikedByCurrentUser ?? this.isLikedByCurrentUser,
       commentsCount: commentsCount ?? this.commentsCount,
+      isSavedByCurrentUser: isSavedByCurrentUser ?? this.isSavedByCurrentUser,
     );
   }
 

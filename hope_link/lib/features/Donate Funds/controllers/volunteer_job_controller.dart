@@ -136,4 +136,14 @@ class VolunteerJobController extends GetxController {
     volunteerJobs.value = volunteerJobs.map(patch).toList();
     filteredJobs.value = filteredJobs.map(patch).toList();
   }
+
+  void updateJobSavedState(String jobId, bool isSaved) {
+    VolunteerJob patch(VolunteerJob item) {
+      if (item.id != jobId) return item;
+      return item.copyWith(isSavedByCurrentUser: isSaved);
+    }
+
+    volunteerJobs.value = volunteerJobs.map(patch).toList();
+    filteredJobs.value = filteredJobs.map(patch).toList();
+  }
 }
