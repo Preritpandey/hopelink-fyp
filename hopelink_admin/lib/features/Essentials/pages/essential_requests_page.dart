@@ -124,8 +124,12 @@ class _EssentialRequestsManagementPageState
   Widget _statsRow(AdminCommitmentBundle? bundle) {
     final requests = ctrl.requests;
     final active = requests.where((item) => item.status == 'active').length;
-    final fulfilled = requests.where((item) => item.status == 'fulfilled').length;
-    final highUrgency = requests.where((item) => item.urgencyLevel == 'high').length;
+    final fulfilled = requests
+        .where((item) => item.status == 'fulfilled')
+        .length;
+    final highUrgency = requests
+        .where((item) => item.urgencyLevel == 'high')
+        .length;
     final totalPending = requests.fold<int>(
       0,
       (sum, item) => sum + item.reporting.totals.quantityRemaining,
@@ -162,7 +166,9 @@ class _EssentialRequestsManagementPageState
           value: '$totalPending',
           icon: Icons.stacked_bar_chart_rounded,
           accent: kAmber,
-          sub: bundle == null ? null : '${bundle.summary.totalCommitments} pledges',
+          sub: bundle == null
+              ? null
+              : '${bundle.summary.totalCommitments} pledges',
         ),
       ],
     );
@@ -255,7 +261,8 @@ class _EssentialRequestsManagementPageState
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: ctrl.requests.length,
-                separatorBuilder: (_, __) => const Divider(color: kBorder, height: 1),
+                separatorBuilder: (_, __) =>
+                    const Divider(color: kBorder, height: 1),
                 itemBuilder: (context, index) {
                   final request = ctrl.requests[index];
                   final selected = ctrl.selectedRequest.value?.id == request.id;
@@ -300,7 +307,10 @@ class _EssentialRequestsManagementPageState
                               children: [
                                 _pill(request.category, kAccent2),
                                 const SizedBox(height: 8),
-                                _pill(request.urgencyLevel, ctrl.statusColor(request.urgencyLevel)),
+                                _pill(
+                                  request.urgencyLevel,
+                                  ctrl.statusColor(request.urgencyLevel),
+                                ),
                               ],
                             ),
                           ),
@@ -333,11 +343,17 @@ class _EssentialRequestsManagementPageState
                           ),
                           IconButton(
                             onPressed: () => _openEditor(existing: request),
-                            icon: const Icon(Icons.edit_outlined, color: Colors.white70),
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: Colors.white70,
+                            ),
                           ),
                           IconButton(
                             onPressed: () => _confirmDelete(request),
-                            icon: const Icon(Icons.delete_outline_rounded, color: kRed),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: kRed,
+                            ),
                           ),
                         ],
                       ),
@@ -356,7 +372,8 @@ class _EssentialRequestsManagementPageState
     AdminCommitmentBundle? bundle,
   ) {
     final request = bundle?.request ?? selected;
-    final commitments = bundle?.commitments ?? const <AdminDonationCommitment>[];
+    final commitments =
+        bundle?.commitments ?? const <AdminDonationCommitment>[];
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -438,9 +455,7 @@ class _EssentialRequestsManagementPageState
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(item.itemName, style: _whiteBody()),
-                      ),
+                      Expanded(child: Text(item.itemName, style: _whiteBody())),
                       Text(
                         '${item.quantityFulfilled}/${item.quantityRequired} ${item.unit}',
                         style: _subBody(),
@@ -453,7 +468,8 @@ class _EssentialRequestsManagementPageState
                     child: LinearProgressIndicator(
                       value: item.quantityRequired <= 0
                           ? 0
-                          : (item.quantityFulfilled / item.quantityRequired).clamp(0, 1),
+                          : (item.quantityFulfilled / item.quantityRequired)
+                                .clamp(0, 1),
                       minHeight: 8,
                       color: kAccent,
                       backgroundColor: kBorder,
@@ -559,7 +575,12 @@ class _EssentialRequestsManagementPageState
                       spacing: 8,
                       runSpacing: 8,
                       children: commitment.items
-                          .map((item) => _pill('${item.itemName} | ${item.quantity}', kAccent2))
+                          .map(
+                            (item) => _pill(
+                              '${item.itemName} | ${item.quantity}',
+                              kAccent2,
+                            ),
+                          )
                           .toList(),
                     ),
                     const SizedBox(height: 10),
@@ -600,7 +621,10 @@ class _EssentialRequestsManagementPageState
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: kSurface,
-        title: const Text('Delete Request', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Delete Request',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'This will remove the essential request if it has no active commitments.',
           style: TextStyle(color: Colors.white70),
@@ -624,7 +648,10 @@ class _EssentialRequestsManagementPageState
     }
   }
 
-  Future<void> _confirmCommitmentStatus(String commitmentId, String status) async {
+  Future<void> _confirmCommitmentStatus(
+    String commitmentId,
+    String status,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -664,10 +691,7 @@ class _EssentialRequestsManagementPageState
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(24),
-        child: _EssentialRequestEditor(
-          ctrl: ctrl,
-          existing: existing,
-        ),
+        child: _EssentialRequestEditor(ctrl: ctrl, existing: existing),
       ),
     );
   }
@@ -700,28 +724,24 @@ class _EssentialRequestsManagementPageState
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withOpacity(0.35)),
       ),
-      child: Text(
-        label,
-        style: GoogleFonts.dmMono(fontSize: 11, color: color),
-      ),
+      child: Text(label, style: GoogleFonts.dmMono(fontSize: 11, color: color)),
     );
   }
 
-  TextStyle _whiteBody() => GoogleFonts.dmSans(color: Colors.white, fontSize: 13);
+  TextStyle _whiteBody() =>
+      GoogleFonts.dmSans(color: Colors.white, fontSize: 13);
   TextStyle _subBody() => GoogleFonts.dmSans(color: kTextSub, fontSize: 12);
 }
 
 class _EssentialRequestEditor extends StatefulWidget {
-  const _EssentialRequestEditor({
-    required this.ctrl,
-    this.existing,
-  });
+  const _EssentialRequestEditor({required this.ctrl, this.existing});
 
   final EssentialRequestsController ctrl;
   final AdminEssentialRequest? existing;
 
   @override
-  State<_EssentialRequestEditor> createState() => _EssentialRequestEditorState();
+  State<_EssentialRequestEditor> createState() =>
+      _EssentialRequestEditorState();
 }
 
 class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
@@ -803,7 +823,9 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
               Row(
                 children: [
                   Text(
-                    widget.existing == null ? 'Create Essential Request' : 'Edit Essential Request',
+                    widget.existing == null
+                        ? 'Create Essential Request'
+                        : 'Edit Essential Request',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -813,7 +835,10 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
@@ -835,9 +860,15 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                       dropdownColor: kSurface2,
                       decoration: _inputDecoration('Category'),
                       items: const ['food', 'clothes', 'medicine', 'other']
-                          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _category = value ?? _category),
+                      onChanged: (value) =>
+                          setState(() => _category = value ?? _category),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -847,9 +878,15 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                       dropdownColor: kSurface2,
                       decoration: _inputDecoration('Urgency'),
                       items: const ['low', 'medium', 'high']
-                          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _urgency = value ?? _urgency),
+                      onChanged: (value) =>
+                          setState(() => _urgency = value ?? _urgency),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -873,13 +910,14 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
               _buildItemsEditor(),
               const SizedBox(height: 18),
               _buildLocationsEditor(),
-          const SizedBox(height: 18),
-          _buildImagesEditor(),
+              const SizedBox(height: 18),
+              _buildImagesEditor(),
               const SizedBox(height: 22),
               Obx(
                 () => Row(
                   children: [
-                    if (widget.ctrl.error.value.isNotEmpty || _validationMessage.isNotEmpty)
+                    if (widget.ctrl.error.value.isNotEmpty ||
+                        _validationMessage.isNotEmpty)
                       Expanded(
                         child: Text(
                           widget.ctrl.error.value.isNotEmpty
@@ -905,7 +943,11 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Text(widget.existing == null ? 'Create Request' : 'Save Changes'),
+                          : Text(
+                              widget.existing == null
+                                  ? 'Create Request'
+                                  : 'Save Changes',
+                            ),
                     ),
                   ],
                 ),
@@ -930,7 +972,13 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
         children: [
           Row(
             children: [
-              Text('Items Needed', style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                'Items Needed',
+                style: GoogleFonts.dmSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               TextButton.icon(
                 onPressed: _addItem,
@@ -949,7 +997,14 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
             children: [
               Expanded(child: _dialogField(_itemNameCtrl, 'Item name')),
               const SizedBox(width: 10),
-              SizedBox(width: 120, child: _dialogField(_itemQtyCtrl, 'Qty', keyboardType: TextInputType.number)),
+              SizedBox(
+                width: 120,
+                child: _dialogField(
+                  _itemQtyCtrl,
+                  'Qty',
+                  keyboardType: TextInputType.number,
+                ),
+              ),
               const SizedBox(width: 10),
               SizedBox(width: 140, child: _dialogField(_itemUnitCtrl, 'Unit')),
             ],
@@ -958,7 +1013,10 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
           ..._items.asMap().entries.map(
             (entry) => ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text('${entry.value.itemName} | ${entry.value.quantityRequired} ${entry.value.unit}', style: const TextStyle(color: Colors.white)),
+              title: Text(
+                '${entry.value.itemName} | ${entry.value.quantityRequired} ${entry.value.unit}',
+                style: const TextStyle(color: Colors.white),
+              ),
               subtitle: Text(
                 'Fulfilled ${entry.value.quantityFulfilled}',
                 style: const TextStyle(color: kTextSub),
@@ -987,7 +1045,13 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
         children: [
           Row(
             children: [
-              Text('Pickup Locations', style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                'Pickup Locations',
+                style: GoogleFonts.dmSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               TextButton.icon(
                 onPressed: _addLocation,
@@ -1011,7 +1075,9 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                   onPressed: _pickLocationOnMap,
                   icon: const Icon(Icons.map_outlined, size: 18),
                   label: Text(
-                    _hasSelectedMapPoint ? 'Update map location' : 'Select on map',
+                    _hasSelectedMapPoint
+                        ? 'Update map location'
+                        : 'Select on map',
                   ),
                 ),
               ),
@@ -1033,7 +1099,9 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _dialogField(_contactPersonCtrl, 'Contact person')),
+              Expanded(
+                child: _dialogField(_contactPersonCtrl, 'Contact person'),
+              ),
               const SizedBox(width: 10),
               Expanded(child: _dialogField(_contactPhoneCtrl, 'Contact phone')),
             ],
@@ -1044,7 +1112,10 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
           ..._locations.asMap().entries.map(
             (entry) => ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(entry.value.address, style: const TextStyle(color: Colors.white)),
+              title: Text(
+                entry.value.address,
+                style: const TextStyle(color: Colors.white),
+              ),
               subtitle: Text(
                 '${entry.value.contactPerson} | ${entry.value.latitude}, ${entry.value.longitude}',
                 style: const TextStyle(color: kTextSub),
@@ -1073,7 +1144,13 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
         children: [
           Row(
             children: [
-              Text('Images', style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                'Images',
+                style: GoogleFonts.dmSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               TextButton.icon(
                 onPressed: _pickImages,
@@ -1103,7 +1180,10 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                     height: 52,
                     color: kBorder,
                     alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image_outlined, color: Colors.white70),
+                    child: const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
               ),
@@ -1139,7 +1219,8 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
                 style: TextStyle(color: kTextSub),
               ),
               trailing: IconButton(
-                onPressed: () => setState(() => _pickedImages.removeAt(entry.key)),
+                onPressed: () =>
+                    setState(() => _pickedImages.removeAt(entry.key)),
                 icon: const Icon(Icons.delete_outline_rounded, color: kRed),
               ),
             ),
@@ -1163,9 +1244,12 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
 
   void _addItem() {
     final quantity = int.tryParse(_itemQtyCtrl.text.trim()) ?? 0;
-    if (_itemNameCtrl.text.trim().isEmpty || quantity <= 0 || _itemUnitCtrl.text.trim().isEmpty) {
+    if (_itemNameCtrl.text.trim().isEmpty ||
+        quantity <= 0 ||
+        _itemUnitCtrl.text.trim().isEmpty) {
       setState(() {
-        _validationMessage = 'Complete item name, quantity, and unit before adding the item.';
+        _validationMessage =
+            'Complete item name, quantity, and unit before adding the item.';
       });
       return;
     }
@@ -1196,7 +1280,8 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
         _contactPhoneCtrl.text.trim().isEmpty ||
         _timeSlotsCtrl.text.trim().isEmpty) {
       setState(() {
-        _validationMessage = 'Complete all pickup location fields before adding the location.';
+        _validationMessage =
+            'Complete all pickup location fields before adding the location.';
       });
       return;
     }
@@ -1297,7 +1382,8 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
   }
 
   bool get _hasPartialItemDraft {
-    final hasAnyValue = _itemNameCtrl.text.trim().isNotEmpty ||
+    final hasAnyValue =
+        _itemNameCtrl.text.trim().isNotEmpty ||
         _itemQtyCtrl.text.trim().isNotEmpty ||
         _itemUnitCtrl.text.trim().isNotEmpty;
     return hasAnyValue && !_hasCompleteItemDraft;
@@ -1315,7 +1401,8 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
   }
 
   bool get _hasPartialLocationDraft {
-    final hasAnyValue = _addressCtrl.text.trim().isNotEmpty ||
+    final hasAnyValue =
+        _addressCtrl.text.trim().isNotEmpty ||
         _latCtrl.text.trim().isNotEmpty ||
         _lngCtrl.text.trim().isNotEmpty ||
         _contactPersonCtrl.text.trim().isNotEmpty ||
@@ -1340,7 +1427,9 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
     setState(() {
       _validationMessage = '';
       _pickedImages.addAll(
-        result.files.where((file) => file.path != null && file.path!.isNotEmpty),
+        result.files.where(
+          (file) => file.path != null && file.path!.isNotEmpty,
+        ),
       );
     });
   }
@@ -1378,7 +1467,8 @@ class _EssentialRequestEditorState extends State<_EssentialRequestEditor> {
       style: GoogleFonts.dmSans(color: Colors.white),
       decoration: _inputDecoration(label),
       validator: (value) {
-        if (controller == _titleCtrl && (value == null || value.trim().isEmpty)) {
+        if (controller == _titleCtrl &&
+            (value == null || value.trim().isEmpty)) {
           return 'Required';
         }
         return null;
@@ -1396,12 +1486,7 @@ class _SelectedImageThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final Uint8List? bytes = file.bytes;
     if (bytes != null && bytes.isNotEmpty) {
-      return Image.memory(
-        bytes,
-        width: 52,
-        height: 52,
-        fit: BoxFit.cover,
-      );
+      return Image.memory(bytes, width: 52, height: 52, fit: BoxFit.cover);
     }
 
     return Container(
@@ -1433,10 +1518,7 @@ class _MapPreviewCard extends StatelessWidget {
       child: SizedBox(
         height: height,
         child: FlutterMap(
-          options: MapOptions(
-            initialCenter: point,
-            initialZoom: 14,
-          ),
+          options: MapOptions(initialCenter: point, initialZoom: 14),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -1517,7 +1599,10 @@ class _MapSelectionDialogState extends State<_MapSelectionDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
@@ -1531,11 +1616,13 @@ class _MapSelectionDialogState extends State<_MapSelectionDialog> {
                     options: MapOptions(
                       initialCenter: widget.initialPoint,
                       initialZoom: 13,
-                      onTap: (_, point) => setState(() => _selectedPoint = point),
+                      onTap: (_, point) =>
+                          setState(() => _selectedPoint = point),
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName: 'com.example.hopelink_admin',
                       ),
                       MarkerLayer(

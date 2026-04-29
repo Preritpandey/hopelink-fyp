@@ -7,7 +7,7 @@ import 'package:hope_link/features/Auth/pages/steps/step_representative.dart';
 import 'package:hope_link/features/Auth/widgets/step_socials.dart';
 
 class OrginazationRegistrationPage extends StatefulWidget {
-  OrginazationRegistrationPage({super.key});
+  const OrginazationRegistrationPage({super.key});
 
   @override
   State<OrginazationRegistrationPage> createState() =>

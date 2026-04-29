@@ -164,8 +164,7 @@ class ProfileService {
         print('Warning: Could not parse server response as JSON');
       }
     } catch (e) {
-      print('Error in uploadCV: ${e.toString()}');
-      print('Error type: ${e.runtimeType}');
+    
       if (e is http.ClientException) {
         print('HTTP Client Exception: ${e.message}');
         print('URI: ${e.uri}');

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../widgets/form_section.dart';
 
 class StepRepresentative extends StatefulWidget {
+  const StepRepresentative({super.key});
+
   @override
   State<StepRepresentative> createState() => _StepRepresentativeState();
 }

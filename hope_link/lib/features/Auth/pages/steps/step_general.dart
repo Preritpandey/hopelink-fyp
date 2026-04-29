@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hope_link/features/Auth/widgets/form_section.dart';
 
 class StepGeneral extends StatefulWidget {
+  const StepGeneral({super.key});
+
   @override
   State<StepGeneral> createState() => _StepGeneralState();
 }

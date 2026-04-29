@@ -101,12 +101,16 @@ class Campaign extends HiveObject {
   });
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
+    final rawCategory = json['category'];
+
     return Campaign(
       id: json['id'] ?? json['_id'],
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       organization: Organization.fromJson(json['organization'] ?? {}),
-      category: json['category'] ?? '',
+      category: rawCategory is Map
+          ? (rawCategory['name'] ?? rawCategory['title'] ?? '').toString()
+          : (rawCategory ?? '').toString(),
       targetAmount: (json['targetAmount'] ?? 0).toDouble(),
       currentAmount: (json['currentAmount'] ?? 0).toDouble(),
       startDate: DateTime.parse(json['startDate']),
@@ -188,6 +192,18 @@ class Campaign extends HiveObject {
     commentsCount: commentsCount,
   );
 
+  int get daysRemaining {
+    final difference = endDate.difference(DateTime.now()).inDays;
+    return difference < 0 ? 0 : difference;
+  }
+
+  double get remainingAmount {
+    final value = targetAmount - currentAmount;
+    return value < 0 ? 0 : value;
+  }
+
+  bool get hasEnded => endDate.isBefore(DateTime.now());
+
   Campaign copyWith({
     String? id,
     String? title,
@@ -256,7 +272,7 @@ class Organization {
 
   factory Organization.fromJson(Map<String, dynamic> json) {
     return Organization(
-      id: json['_id'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
       organizationName: json['organizationName'] ?? '',
     );
   }

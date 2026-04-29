@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({
+    super.key,
+    required this.prefs,
+    required this.isLoggedIn,
+  });
+
+  final SharedPreferences prefs;
+  final bool isLoggedIn;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -13,256 +19,190 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late AnimationController _imageController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Offset> _topImageAnimation;
-  late Animation<Offset> _bottomImageAnimation;
+  late final AnimationController _logoController;
+  late final AnimationController _pulseController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _slideAnimation;
+  late final Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    /// Logo animation
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 2),
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeInOut),
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
-    );
-
-    _animationController.forward();
-
-    /// Decorative images animation
-    _imageController = AnimationController(
-      duration: const Duration(seconds: 3),
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
       vsync: this,
     )..repeat(reverse: true);
 
-    _topImageAnimation =
-        Tween<Offset>(
-          begin: const Offset(0, -0.05), // slightly up
-          end: const Offset(0, 0.05), // slightly down
-        ).animate(
-          CurvedAnimation(parent: _imageController, curve: Curves.easeInOut),
-        );
+    _fadeAnimation = CurvedAnimation(
+      parent: _logoController,
+      curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+    );
+    _scaleAnimation = Tween<double>(begin: 0.88, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutCubic),
+    );
+    _slideAnimation = Tween<double>(begin: 18, end: 0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutCubic),
+    );
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
-    _bottomImageAnimation =
-        Tween<Offset>(
-          begin: const Offset(0.05, 0), // slightly right
-          end: const Offset(-0.05, 0), // slightly left
-        ).animate(
-          CurvedAnimation(parent: _imageController, curve: Curves.easeInOut),
-        );
+    _logoController.forward();
+    _navigateNext();
+  }
 
-    /// Navigate after 4 seconds
-    Future.delayed(const Duration(seconds: 4), () async {
-      if (!mounted) return;
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token') ?? '';
-      final loggedIn = prefs.getBool('is_logged_in') ?? false;
+  Future<void> _navigateNext() async {
+    await Future<void>.delayed(const Duration(milliseconds: 2300));
+    if (!mounted) return;
 
-      if (loggedIn && token.isNotEmpty) {
-        Get.offAllNamed('/home');
-      } else {
-        Get.offAllNamed('/login');
-      }
-    });
+    final token = widget.prefs.getString('auth_token') ?? '';
+    if (widget.isLoggedIn && token.isNotEmpty) {
+      Get.offAllNamed('/home');
+      return;
+    }
+    Get.offAllNamed('/login');
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _imageController.dispose();
+    _logoController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    /// Transparent system bars
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarColor: Color(0xFFF6F0E6),
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
 
     return Scaffold(
-      body: Stack(
-        children: [
-          /// Background
-          Positioned.fill(
-            child: ClipPath(
-              clipper: BackgroundClipper(),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFF5F3F0),
-                      Color(0xFFEAE7E0),
-                      Color(0xFFF8F6F2),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
+      backgroundColor: const Color(0xFFF6F0E6),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF9F4EC), Color(0xFFF6F0E6), Color(0xFFF0E7D9)],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -90,
+              right: -30,
+              child: _SoftCircle(
+                size: 190,
+                color: const Color(0xFFF2C89B).withValues(alpha: 0.18),
               ),
             ),
-          ),
-
-          /// Top-left image with animation
-          Positioned(
-            top: 0,
-            left: -30,
-            child: SlideTransition(
-              position: _topImageAnimation,
-              child: Transform.rotate(
-                angle: -math.pi / 12,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 40.0),
-                  child: Image.asset(
-                    "assets/images/charity_helping_hands.png",
-                    width: 180,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+            Positioned(
+              bottom: -110,
+              left: -40,
+              child: _SoftCircle(
+                size: 220,
+                color: const Color(0xFF8DBB8F).withValues(alpha: 0.14),
               ),
             ),
-          ),
-
-          /// Bottom-right image with animation
-          Positioned(
-            bottom: -30,
-            right: -30,
-            child: SlideTransition(
-              position: _bottomImageAnimation,
-              child: Transform.rotate(
-                angle: math.pi / 14,
-                child: Image.asset(
-                  "assets/images/giving_help.png",
-                  width: 200,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-
-          /// Center logo with fade + scale animation
-          Center(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Logo text
-                        RichText(
-                          text: const TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Hope',
-                                style: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w300,
-                                  color: Color(0xFFFF8C42),
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                              TextSpan(
-                                text: 'Link',
-                                style: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF2E7D32),
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Loading line
-                        Container(
-                          width: 40,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF8C42), Color(0xFF2E7D32)],
-                            ),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ],
+            Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  _logoController,
+                  _pulseController,
+                ]),
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _fadeAnimation.value,
+                    child: Transform.translate(
+                      offset: Offset(0, _slideAnimation.value),
+                      child: Transform.scale(
+                        scale: _scaleAnimation.value * _pulseAnimation.value,
+                        child: child,
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 132,
+                      height: 132,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(36),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF6B8F71,
+                            ).withValues(alpha: 0.16),
+                            blurRadius: 28,
+                            offset: const Offset(0, 18),
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/icons/splash icon.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    const Text(
+                      'HopeLink',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                        color: Color(0xFF2F5D50),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Connecting kindness with real needs',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF6B786F),
+                        letterSpacing: 0.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Curved background clipper
-class BackgroundClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height * 0.85);
+class _SoftCircle extends StatelessWidget {
+  const _SoftCircle({required this.size, required this.color});
 
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height,
-      size.width * 0.5,
-      size.height * 0.9,
-    );
-
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height * 0.8,
-      size.width,
-      size.height * 0.95,
-    );
-
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
-
-/// Dummy HomeScreen
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final double size;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          "Welcome to Home Screen 🎉",
-          style: TextStyle(fontSize: 24),
-        ),
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

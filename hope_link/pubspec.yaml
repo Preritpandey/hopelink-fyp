@@ -44,6 +44,8 @@ dev_dependencies:
   freezed: 
   json_serializable: 
   hive_generator: ^2.0.1
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.6
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
@@ -56,4 +58,23 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  adaptive_icon_background: "#F6F0E6"
+  adaptive_icon_foreground: "assets/icons/app icon.png"
+
+flutter_native_splash:
+  color: "#F6F0E6"
+  image: "assets/icons/splash icon.png"
+  android_12:
+    color: "#F6F0E6"
+    image: "assets/icons/splash icon.png"
+  ios: true
+  android: true
+  web: false
 

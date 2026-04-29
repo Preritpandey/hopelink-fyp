@@ -9,11 +9,6 @@ import 'package:hope_link/features/Commerce/pages/cart_page.dart';
 import 'package:hope_link/features/Commerce/pages/checkout_page.dart';
 import 'package:hope_link/features/Commerce/pages/order_detail_page.dart';
 import 'package:hope_link/features/Commerce/pages/orders_page.dart';
-import 'package:hope_link/features/Donate%20Funds/pages/campaign_details_page.dart';
-import 'package:hope_link/features/Donate%20Funds/pages/all_campaigns_page.dart';
-import 'package:hope_link/features/Donate%20Funds/pages/all_volunteer_jobs_page.dart';
-import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
-import 'package:hope_link/features/Donate%20Funds/pages/donate_page.dart';
 import 'package:hope_link/features/DonateEssentials/pages/commit_essential_donation_page.dart';
 import 'package:hope_link/features/DonateEssentials/pages/essential_request_detail_page.dart';
 import 'package:hope_link/features/DonateEssentials/pages/essential_requests_page.dart';
@@ -25,6 +20,11 @@ import 'package:hope_link/features/Profile/pages/saved_causes_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'config/payment_config.dart';
+import 'features/Donate Funds/pages/all_campaigns_page.dart';
+import 'features/Donate Funds/pages/all_volunteer_jobs_page.dart';
+import 'features/Donate Funds/pages/campaign_details_page.dart';
+import 'features/Donate Funds/pages/campaigns_list_page.dart';
+import 'features/Donate Funds/pages/donate_page.dart';
 import 'features/Donate Funds/pages/volunteer_job_details_page.dart';
 
 void main() async {
@@ -65,9 +65,12 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Hope Link',
       debugShowCheckedModeBanner: false,
-      initialRoute: isLoggedIn ? '/home' : '/splash',
+      initialRoute: '/splash',
       getPages: [
-        GetPage(name: '/splash', page: () => const SplashScreen()),
+        GetPage(
+          name: '/splash',
+          page: () => SplashScreen(prefs: prefs, isLoggedIn: isLoggedIn),
+        ),
         GetPage(name: '/signup', page: () => const SignUpPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/campaigns-all', page: () => const AllCampaignsPage()),
