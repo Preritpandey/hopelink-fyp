@@ -41,6 +41,9 @@ class ProductModel {
   final double ratingAverage;
   final int ratingCount;
   final String slug;
+  final double basePrice;
+  final String sku;
+  final int stock;
   final List<ProductVariant> variants;
 
   ProductModel({
@@ -56,6 +59,9 @@ class ProductModel {
     required this.ratingAverage,
     required this.ratingCount,
     required this.slug,
+    required this.basePrice,
+    required this.sku,
+    required this.stock,
     required this.variants,
   });
 
@@ -77,6 +83,9 @@ class ProductModel {
       ratingAverage: (json['ratingAverage'] as num?)?.toDouble() ?? 0.0,
       ratingCount: _asInt(json['ratingCount']) ?? 0,
       slug: json['slug'] as String? ?? '',
+      basePrice: (json['price'] as num?)?.toDouble() ?? 0.0,
+      sku: json['sku'] as String? ?? '',
+      stock: _asInt(json['stock']) ?? 0,
       variants: (json['variants'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
               .map(ProductVariant.fromJson)
@@ -85,19 +94,36 @@ class ProductModel {
     );
   }
 
-  double get minPrice => variants.isEmpty
-      ? 0
-      : variants.map((v) => v.price).reduce((a, b) => a < b ? a : b);
+  List<ProductVariant> get displayVariants {
+    final active = variants.where((v) => v.isActive && !v.isDeleted).toList();
+    if (active.isNotEmpty) return active;
 
-  double get maxPrice => variants.isEmpty
-      ? 0
-      : variants.map((v) => v.price).reduce((a, b) => a > b ? a : b);
+    final available = variants.where((v) => !v.isDeleted).toList();
+    if (available.isNotEmpty) return available;
+
+    return variants;
+  }
+
+  ProductVariant? get defaultVariant =>
+      displayVariants.isEmpty ? null : displayVariants.first;
+
+  double get minPrice => displayVariants.isEmpty
+      ? basePrice
+      : displayVariants.map((v) => v.price).reduce((a, b) => a < b ? a : b);
+
+  double get maxPrice => displayVariants.isEmpty
+      ? basePrice
+      : displayVariants.map((v) => v.price).reduce((a, b) => a > b ? a : b);
 
   String get priceDisplay => minPrice == maxPrice
       ? 'NPR ${minPrice.toStringAsFixed(0)}'
       : 'NPR ${minPrice.toStringAsFixed(0)} - ${maxPrice.toStringAsFixed(0)}';
 
   String? get coverImage => images.isNotEmpty ? images.first : null;
+
+  bool get inStock => displayVariants.isEmpty
+      ? stock > 0
+      : displayVariants.any((variant) => variant.inStock);
 }
 
 class OrgModel {

@@ -140,7 +140,7 @@ class _ProductCardImage extends StatelessWidget {
             ),
           ),
         ),
-        if (product.variants.length > 1)
+        if (product.displayVariants.length > 1)
           Positioned(
             top: 10,
             right: 10,
@@ -158,7 +158,7 @@ class _ProductCardImage extends StatelessWidget {
                 ],
               ),
               child: Text(
-                '${product.variants.length} options',
+                '${product.displayVariants.length} options',
                 style: AppTextStyle.labelSmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColorToken.primary.color,

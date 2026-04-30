@@ -459,7 +459,7 @@ class _PriceAndTrustCard extends StatelessWidget {
       final variant = controller.selectedVariant;
       final displayPrice = variant != null
           ? variant.price
-          : (product.minPrice > 0 ? product.minPrice : product.maxPrice);
+          : product.basePrice;
 
       return _BentoCard(
         child: Column(
@@ -1021,8 +1021,7 @@ class _StickyAddToCartBar extends StatelessWidget {
 
   bool _productInStock(ProductModel? product) {
     if (product == null) return false;
-    if (product.variants.isEmpty) return true;
-    return product.variants.any((variant) => variant.inStock);
+    return product.inStock;
   }
 }
 

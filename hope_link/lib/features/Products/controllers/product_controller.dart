@@ -105,11 +105,7 @@ class ProductController extends GetxController {
   void selectProduct(ProductModel product) {
     _selectedProduct.value = product;
     _currentImageIndex.value = 0;
-    // Auto-select the first active variant
-    final firstActive = product.variants
-        .where((v) => v.isActive && !v.isDeleted)
-        .firstOrNull;
-    _selectedVariant.value = firstActive;
+    _selectedVariant.value = product.defaultVariant;
   }
 
   void selectVariant(ProductVariant variant) {
@@ -160,5 +156,5 @@ class ProductController extends GetxController {
   }
 
   List<ProductVariant> activeVariantsFor(ProductModel product) =>
-      product.variants.where((v) => v.isActive && !v.isDeleted).toList();
+      product.displayVariants;
 }

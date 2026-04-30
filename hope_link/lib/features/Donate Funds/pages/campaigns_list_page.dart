@@ -7,7 +7,10 @@ import 'package:intl/intl.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../controllers/event_controller.dart';
+import '../controllers/volunteer_leaderboard_controller.dart';
 import '../controllers/volunteer_job_controller.dart';
+import '../pages/volunteer_leaderboard_page.dart';
+import '../widgets/compact_leaderboard_preview.dart';
 import '../widgets/donation_header.dart';
 import '../widgets/horizontal_campaign_card.dart';
 import '../widgets/horizontal_event_card.dart';
@@ -29,10 +32,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
   final VolunteerJobController _volunteerJobController = Get.put(
     VolunteerJobController(),
   );
+  final String _leaderboardPreviewTag = 'campaign-leaderboard-preview';
   final TextEditingController _searchController = TextEditingController();
   final RxString _searchText = ''.obs;
 
   late AnimationController _animationController;
+  late final VolunteerLeaderboardController _leaderboardPreviewController;
 
   @override
   void initState() {
@@ -40,6 +45,10 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
+    );
+    _leaderboardPreviewController = Get.put(
+      VolunteerLeaderboardController(pageSize: 3),
+      tag: _leaderboardPreviewTag,
     );
     _animationController.forward();
     _searchController.addListener(() {
@@ -49,6 +58,11 @@ class _CampaignsListPageState extends State<CampaignsListPage>
 
   @override
   void dispose() {
+    if (Get.isRegistered<VolunteerLeaderboardController>(
+      tag: _leaderboardPreviewTag,
+    )) {
+      Get.delete<VolunteerLeaderboardController>(tag: _leaderboardPreviewTag);
+    }
     _animationController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -154,6 +168,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         await _campaignController.loadCampaigns(forceRefresh: true);
         await _eventController.fetchEvents();
         await _volunteerJobController.refreshJobs();
+        await _leaderboardPreviewController.refreshLeaderboard();
       },
       color: AppColorToken.primary.color,
       child: SingleChildScrollView(
@@ -163,6 +178,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           children: [
             _buildOverviewRail(),
             18.verticalSpace,
+            CompactLeaderboardPreview(
+              controller: _leaderboardPreviewController,
+              onViewFullLeaderboard: () =>
+                  Get.to(() => const VolunteerLeaderboardPage()),
+            ),
+            24.verticalSpace,
             _buildFeaturedCampaignSpotlight(),
             28.verticalSpace,
             _buildHorizontalCampaignsSection(),
