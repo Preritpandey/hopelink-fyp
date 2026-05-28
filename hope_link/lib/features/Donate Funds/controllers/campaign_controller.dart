@@ -215,11 +215,6 @@ class CampaignController extends GetxController {
     return campaigns.where((c) => c.isActive).length;
   }
 
-  /// Get featured campaigns count
-  int get featuredCampaignsCount {
-    return campaigns.where((c) => c.isFeatured).length;
-  }
-
   /// Get total campaigns count
   int get totalCampaignsCount {
     return campaigns.length;

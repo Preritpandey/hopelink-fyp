@@ -92,16 +92,12 @@ class ProfileViewPage extends StatelessWidget {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              _buildAppBar(context, user),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    16.verticalSpace,
                     _buildProfileHero(context, user),
                     18.verticalSpace,
                     _buildQuickActionsSection(context, user),
-                    18.verticalSpace,
-                    _buildAboutSection(user),
                     18.verticalSpace,
                     _buildVolunteerCreditsSection(creditController),
                     18.verticalSpace,
@@ -111,8 +107,7 @@ class ProfileViewPage extends StatelessWidget {
                     18.verticalSpace,
                     _buildInterestsSection(user),
                     18.verticalSpace,
-                    _buildPlanningSection(),
-                    18.verticalSpace,
+                    // _buildPlanningSection(),
                     _buildLogoutButton(controller),
                     32.verticalSpace,
                   ],
@@ -125,45 +120,8 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, UserModel user) {
-    return SliverAppBar(
-      expandedHeight: 30,
-      pinned: true,
-      backgroundColor: AppColorToken.primary.color,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColorToken.primary.color, const Color(0xFF238255)],
-          ),
-        ),
-      ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.edit_rounded, color: Colors.white),
-            ),
-            onPressed: () {
-              Get.to(
-                () => ProfileEditPage(token: token),
-                transition: Transition.rightToLeft,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildProfileHero(BuildContext context, UserModel user) {
+    final bioText = _heroBioText(user);
     final tags = <String>[
       if (user.location.city.isNotEmpty) user.location.city,
       if (user.gender.isNotEmpty) user.gender,
@@ -171,52 +129,140 @@ class ProfileViewPage extends StatelessWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
         children: [
-          _buildProfileAvatar(user),
-          const SizedBox(height: 14),
-          Text(
-            user.name,
-            style: AppTextStyle.h2.bold.copyWith(
-              fontSize: 28,
-              color: const Color(0xFF18211E),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            user.email,
-            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-          if (tags.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: tags
-                  .map((tag) => _buildMetaChip(tag, _chipColorForTag(tag)))
-                  .toList(),
-            ),
-          ],
-          const SizedBox(height: 18),
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            height: 138,
+            decoration: BoxDecoration(
+              color: AppColorToken.primary.color,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: -18,
+                  top: 18,
+                  child: Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black.withValues(alpha: 0.05),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: -22,
+                  top: -26,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 22,
+                  left: 12,
+                  child: _heroCircleButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    onTap: () {
+                      if (Navigator.of(context).canPop()) {
+                        Get.back();
+                      }
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 22,
+                  right: 12,
+                  child: _heroCircleButton(
+                    icon: Icons.edit_rounded,
+                    onTap: () {
+                      Get.to(
+                        () => ProfileEditPage(token: token),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            margin: const EdgeInsets.fromLTRB(14, 86, 14, 0),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _buildProfileAvatar(user),
+                const SizedBox(height: 14),
+                Text(
+                  user.name,
+                  style: AppTextStyle.h2.bold.copyWith(
+                    fontSize: 22,
+                    color: const Color(0xFF18211E),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (bioText.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    bioText,
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: const Color(0xFF16A46D),
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 6),
+                Text(
+                  user.email,
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: const Color(0xFF8B95A5),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (tags.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: tags
+                        .take(2)
+                        .map(
+                          (tag) => _buildMetaChip(tag, _chipColorForTag(tag)),
+                        )
+                        .toList(),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -241,20 +287,20 @@ class ProfileViewPage extends StatelessWidget {
             border: Border.all(color: Colors.white, width: 4),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
+                color: AppColorToken.black.color.withValues(alpha: 0.4),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
           child: CircleAvatar(
-            radius: 50,
+            radius: 42,
             backgroundColor: const Color(0xFFE9EFEC),
             backgroundImage: user.profileImage.isNotEmpty
                 ? NetworkImage(user.profileImage)
                 : null,
             child: user.profileImage.isEmpty
-                ? Icon(Icons.person, size: 52, color: Colors.grey[400])
+                ? Icon(Icons.person, size: 44, color: Colors.grey[400])
                 : null,
           ),
         ),
@@ -263,95 +309,86 @@ class ProfileViewPage extends StatelessWidget {
   }
 
   Widget _buildQuickActionsSection(BuildContext context, UserModel user) {
-    return _sectionCard(
-      title: 'Quick Actions',
-      subtitle: 'Fast access to the things people usually reach for first.',
-      icon: Icons.flash_on_rounded,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tileWidth = constraints.maxWidth > 520
-              ? (constraints.maxWidth - 12) / 2
-              : constraints.maxWidth;
-
-          return Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              SizedBox(
-                width: tileWidth,
-                child: _quickActionTile(
-                  icon: Icons.edit_outlined,
-                  title: 'Edit Profile',
-                  subtitle: 'Update your personal details and public presence.',
-                  accent: AppColorToken.primary.color,
-                  onTap: () => Get.to(
-                    () => ProfileEditPage(token: token),
-                    transition: Transition.rightToLeft,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: tileWidth,
-                child: _quickActionTile(
-                  icon: Icons.local_shipping_outlined,
-                  title: 'My Pledges',
-                  subtitle: 'Review active essential donation commitments.',
-                  accent: const Color(0xFF0E9F6E),
-                  onTap: () => Get.toNamed('/essential-commitments'),
-                ),
-              ),
-              SizedBox(
-                width: tileWidth,
-                child: _quickActionTile(
-                  icon: Icons.description_outlined,
-                  title: user.cv.isNotEmpty ? 'Open Resume' : 'Add Resume',
-                  subtitle: user.cv.isNotEmpty
-                      ? 'Check the CV currently attached to your profile.'
-                      : 'A dedicated resume workflow will land here next.',
-                  accent: const Color(0xFF2563EB),
-                  onTap: () => user.cv.isNotEmpty
-                      ? _openCv(user.cv)
-                      : _showComingSoon('Resume management'),
-                ),
-              ),
-              SizedBox(
-                width: tileWidth,
-                child: _quickActionTile(
-                  icon: Icons.workspace_premium_outlined,
-                  title: 'Certificates',
-                  subtitle: 'A cleaner place for badges and proof of impact.',
-                  accent: const Color(0xFFF59E0B),
-                  onTap: () => _showComingSoon('Certificates'),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAboutSection(UserModel user) {
-    final aboutText = [
-      if (user.bio.trim().isNotEmpty) user.bio.trim(),
-      if (user.description.trim().isNotEmpty) user.description.trim(),
-    ].join('\n\n');
-
-    return _sectionCard(
-      title: 'About',
-      subtitle: 'How your profile introduces you to organizers and teams.',
-      icon: Icons.auto_awesome_outlined,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            aboutText.isNotEmpty
-                ? aboutText
-                : 'Add a short bio and description to make your profile feel more complete and more trustworthy to organizations.',
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[800],
-              height: 1.55,
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDDF9EC),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.bolt_rounded,
+                  size: 18,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Quick Actions',
+                style: AppTextStyle.h4.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF18211E),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 38),
+            child: Text(
+              'Fast access to your core profile features.',
+              style: AppTextStyle.bodySmall.copyWith(
+                color: const Color(0xFF98A2B3),
+                height: 1.35,
+              ),
             ),
+          ),
+          const SizedBox(height: 14),
+          _quickActionTile(
+            icon: Icons.edit_square,
+            title: 'Edit Profile',
+            subtitle: 'Update personal details and your appearance.',
+            accent: const Color(0xFF10B981),
+            onTap: () => Get.to(
+              () => ProfileEditPage(token: token),
+              transition: Transition.rightToLeft,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _quickActionTile(
+            icon: Icons.shield_outlined,
+            title: 'My Pledges',
+            subtitle: 'Review active donation commitments.',
+            accent: const Color(0xFF10B981),
+            onTap: () => Get.toNamed('/essential-commitments'),
+          ),
+          const SizedBox(height: 10),
+          _quickActionTile(
+            icon: Icons.description_outlined,
+            title: user.cv.isNotEmpty ? 'Open Resume' : 'Add Resume',
+            subtitle: user.cv.isNotEmpty
+                ? 'Check the CV attached to your profile.'
+                : 'Attach your CV to strengthen your profile.',
+            accent: const Color(0xFF5B8DEF),
+            onTap: () => user.cv.isNotEmpty
+                ? _openCv(user.cv)
+                : _showComingSoon('Resume management'),
+          ),
+          const SizedBox(height: 10),
+          _quickActionTile(
+            icon: Icons.verified_user_outlined,
+            title: 'Certificates',
+            subtitle: 'View badges and proof of impact.',
+            accent: const Color(0xFFF5A623),
+            onTap: () => _showComingSoon('Certificates'),
           ),
         ],
       ),
@@ -532,38 +569,6 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPlanningSection() {
-    return _sectionCard(
-      title: 'Ready To Add',
-      subtitle: 'UI concepts that can become useful product features next.',
-      icon: Icons.lightbulb_outline_rounded,
-      child: Column(
-        children: [
-          _suggestionItem(
-            icon: Icons.history_rounded,
-            title: 'Volunteer Timeline',
-            subtitle:
-                'A scrolling history of jobs, applications, approvals, and earned milestones.',
-          ),
-          const SizedBox(height: 10),
-          _suggestionItem(
-            icon: Icons.notifications_active_outlined,
-            title: 'Profile Alerts',
-            subtitle:
-                'Deadlines, pledge reminders, document expiry, and new role matches.',
-          ),
-          const SizedBox(height: 10),
-          _suggestionItem(
-            icon: Icons.bar_chart_outlined,
-            title: 'Impact Analytics',
-            subtitle:
-                'Trends for hours, points, categories served, and organizer engagement.',
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _metricPanel({
     required String label,
     required String value,
@@ -733,22 +738,23 @@ class ProfileViewPage extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            color: accent.withValues(alpha: 0.08),
+            color: accent.withValues(alpha: 0.04),
+            border: Border.all(color: accent.withValues(alpha: 0.16)),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.14),
+                  color: Colors.white.withValues(alpha: 0.82),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accent.withValues(alpha: 0.12)),
                 ),
-                child: Icon(icon, color: accent),
+                child: Icon(icon, color: accent, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -762,19 +768,47 @@ class ProfileViewPage extends StatelessWidget {
                         color: const Color(0xFF1A2320),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[700],
-                        height: 1.4,
+                        color: const Color(0xFF8B95A5),
+                        height: 1.35,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: accent.withValues(alpha: 0.55),
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _heroCircleButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Ink(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.16),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.white, size: 18),
         ),
       ),
     );
@@ -839,49 +873,6 @@ class ProfileViewPage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _suggestionItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7FAF8),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: AppColorToken.primary.color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyle.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[600],
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -1017,6 +1008,12 @@ class ProfileViewPage extends StatelessWidget {
 
   String _safeValue(String value) {
     return value.trim().isEmpty ? 'Not added yet' : value.trim();
+  }
+
+  String _heroBioText(UserModel user) {
+    if (user.bio.trim().isNotEmpty) return user.bio.trim();
+    if (user.description.trim().isNotEmpty) return user.description.trim();
+    return '';
   }
 
   Color _chipColorForTag(String label) {

@@ -14,6 +14,7 @@ import {
   syncRequestStatus,
 } from './essentialRequest.service.js';
 import { notifyOrganizationOnNewCommitment } from './essentialDonationNotification.service.js';
+import { uploadToCloudinary } from './cloudinary.service.js';
 
 const COMMITMENT_POPULATION = [
   { path: 'userId', select: 'name email phoneNumber phone' },
@@ -93,6 +94,30 @@ const getPickupLocationOrThrow = (request, pickupLocationId) => {
   return pickupLocation;
 };
 
+const DATA_URI_IMAGE_PATTERN = /^data:image\/[a-zA-Z0-9.+-]+;base64,/i;
+
+const normalizeProofImage = async (proofImage) => {
+  if (!proofImage || typeof proofImage !== 'string') {
+    return undefined;
+  }
+
+  const trimmedProofImage = proofImage.trim();
+  if (!trimmedProofImage) {
+    return undefined;
+  }
+
+  if (!DATA_URI_IMAGE_PATTERN.test(trimmedProofImage)) {
+    return trimmedProofImage;
+  }
+
+  const uploadedProofImage = await uploadToCloudinary(
+    trimmedProofImage,
+    'essential-donation-proofs',
+  );
+
+  return uploadedProofImage.url;
+};
+
 export const createDonationCommitment = async ({ payload, user }) => {
   await reconcileExpiredRequests();
   await assertUserRole(user);
@@ -111,6 +136,7 @@ export const createDonationCommitment = async ({ payload, user }) => {
     payload.itemsDonating,
   );
   getPickupLocationOrThrow(request, payload.selectedPickupLocationId);
+  const proofImage = await normalizeProofImage(payload.proofImage);
 
   const commitment = await DonationCommitment.create({
     userId: user._id,
@@ -118,7 +144,7 @@ export const createDonationCommitment = async ({ payload, user }) => {
     itemsDonating,
     selectedPickupLocationId: payload.selectedPickupLocationId,
     deliveryDate: payload.deliveryDate,
-    proofImage: payload.proofImage,
+    proofImage,
     status: 'pledged',
   });
 
@@ -237,7 +263,7 @@ export const updateDonationCommitmentStatus = async ({
     commitment.status = 'delivered';
     commitment.deliveryDate = payload.deliveryDate || new Date();
     if (payload.proofImage) {
-      commitment.proofImage = payload.proofImage;
+      commitment.proofImage = await normalizeProofImage(payload.proofImage);
     }
 
     await commitment.save();

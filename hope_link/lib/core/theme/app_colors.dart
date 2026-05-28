@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 enum AppColorToken {
   textBackground(Color(0xffD9D9D9)),
+  transparent(Colors.transparent),
   white(Color(0xFFFFFFFF)),
   grey(Colors.grey),
   error(Color(0xFFE74C3C)),

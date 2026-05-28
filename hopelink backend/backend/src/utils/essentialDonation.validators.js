@@ -230,7 +230,7 @@ export const createCommitmentRules = [
   requiredObjectId('selectedPickupLocationId', { label: 'selectedPickupLocationId' }),
   validateItemsDonating,
   optionalDate('deliveryDate', { label: 'deliveryDate' }),
-  optionalString('proofImage', { maxLength: 500, label: 'proofImage' }),
+  optionalString('proofImage', { maxLength: 2_000_000, label: 'proofImage' }),
 ];
 
 export const commitmentIdParamRules = [
@@ -247,5 +247,5 @@ export const updateCommitmentStatusRules = [
     label: 'status',
   }),
   optionalDate('deliveryDate', { label: 'deliveryDate' }),
-  optionalString('proofImage', { maxLength: 500, label: 'proofImage' }),
+  optionalString('proofImage', { maxLength: 2_000_000, label: 'proofImage' }),
 ];

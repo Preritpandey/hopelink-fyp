@@ -84,13 +84,12 @@ class VolunteerCreditEntry {
   });
 
   factory VolunteerCreditEntry.fromJobJson(Map<String, dynamic> json) {
+    final userJson = _resolveJobUserJson(json);
     return VolunteerCreditEntry(
       id: json['_id'] as String? ?? '',
       source: VolunteerCreditSource.job,
-      parentId: json['job'] as String? ?? '',
-      user: VolunteerCreditUser.fromJson(
-        json['user'] as Map<String, dynamic>? ?? const <String, dynamic>{},
-      ),
+      parentId: _readIdValue(json['job']),
+      user: VolunteerCreditUser.fromJson(userJson),
       status: json['status'] as String? ?? 'approved',
       creditHoursGranted: (json['creditHoursGranted'] as num?)?.toInt() ?? 0,
       approvedAt: _parseDate(json['approvedAt'] as String?),
@@ -100,13 +99,12 @@ class VolunteerCreditEntry {
   }
 
   factory VolunteerCreditEntry.fromEventJson(Map<String, dynamic> json) {
+    final userJson = _resolveEventUserJson(json);
     return VolunteerCreditEntry(
       id: json['_id'] as String? ?? '',
       source: VolunteerCreditSource.event,
-      parentId: json['event'] as String? ?? '',
-      user: VolunteerCreditUser.fromJson(
-        json['user'] as Map<String, dynamic>? ?? const <String, dynamic>{},
-      ),
+      parentId: _readIdValue(json['event'] ?? json['eventId']),
+      user: VolunteerCreditUser.fromJson(userJson),
       status: json['status'] as String? ?? 'approved',
       creditHoursGranted: (json['creditHoursGranted'] as num?)?.toInt() ?? 0,
       approvedAt: _parseDate(json['approvedAt'] as String?),
@@ -258,4 +256,61 @@ class GrantCreditHoursResponse {
 DateTime? _parseDate(String? value) {
   if (value == null || value.isEmpty) return null;
   return DateTime.tryParse(value);
+}
+
+Map<String, dynamic> _resolveJobUserJson(Map<String, dynamic> json) {
+  final applicantSnapshot = _asMap(json['applicantSnapshot']);
+  if (applicantSnapshot.isNotEmpty) {
+    return {
+      ...applicantSnapshot,
+      '_id': applicantSnapshot['_id'] ?? _readIdValue(json['user']),
+      'name':
+          applicantSnapshot['name'] ??
+          applicantSnapshot['fullName'] ??
+          json['name'],
+    };
+  }
+
+  final user = _asMap(json['user']);
+  if (user.isNotEmpty) return user;
+
+  return {
+    '_id': _readIdValue(json['user']),
+    'name': json['name'] as String? ?? json['fullName'] as String? ?? 'Unknown',
+    'email': json['email'] as String? ?? '',
+  };
+}
+
+Map<String, dynamic> _resolveEventUserJson(Map<String, dynamic> json) {
+  final user = _asMap(json['user']);
+  if (user.isNotEmpty) return user;
+
+  final userId = _asMap(json['userId']);
+  if (userId.isNotEmpty) return userId;
+
+  return {
+    '_id': _readIdValue(json['user'] ?? json['userId']),
+    'name': json['name'] as String? ?? json['fullName'] as String? ?? 'Unknown',
+    'email': json['email'] as String? ?? '',
+  };
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    return value.map((key, val) => MapEntry(key.toString(), val));
+  }
+  return const <String, dynamic>{};
+}
+
+String _readIdValue(dynamic value) {
+  if (value is String) return value;
+  if (value is Map<String, dynamic>) {
+    return value['_id'] as String? ?? value['id'] as String? ?? '';
+  }
+  if (value is Map) {
+    final normalized = value.map((key, val) => MapEntry(key.toString(), val));
+    return normalized['_id'] as String? ?? normalized['id'] as String? ?? '';
+  }
+  return '';
 }

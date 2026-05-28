@@ -3,10 +3,8 @@ class ApiEndpoints {
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
   // static const String baseUrl = 'http://10.21.6.154:3008/api/v1';
-  // static const String baseUrl =
-  // 'http://192.168.1.96:3008/api/v1'; // android emulator
-
-  static const String baseUrl = 'http://localhost:3008/api/v1'; // college
+  static const String baseUrl = 'http://localhost:3008/api/v1'; //
+  // static const String baseUrl = 'http://localhost:3008/api/v1'; // college
   // static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Auth
@@ -26,7 +24,8 @@ class ApiEndpoints {
   // Commerce
   static String get orgOrders => '$baseUrl/orders/org-orders';
   static String orderDetails(String orderId) => '$baseUrl/orders/$orderId';
-  static String orderStatus(String orderId) => '$baseUrl/orders/$orderId/status';
+  static String orderStatus(String orderId) =>
+      '$baseUrl/orders/$orderId/status';
   static String get orgSalesSummary => '$baseUrl/orders/org-sales/summary';
   static String get orgProductSales => '$baseUrl/orders/org-sales/products';
   static String get products => '$baseUrl/products';

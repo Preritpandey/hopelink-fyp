@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
-import 'package:intl/intl.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../controllers/event_controller.dart';
@@ -184,8 +183,6 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                   Get.to(() => const VolunteerLeaderboardPage()),
             ),
             24.verticalSpace,
-            _buildFeaturedCampaignSpotlight(),
-            28.verticalSpace,
             _buildHorizontalCampaignsSection(),
             28.verticalSpace,
             _buildHorizontalVolunteerJobsSection(),
@@ -224,7 +221,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     title: 'Campaigns',
                     value: '${_campaignController.filteredCampaigns.length}',
                     subtitle:
-                        '${_campaignController.featuredCampaignsCount} featured',
+                        '${_campaignController.activeCampaignsCount} active',
                     icon: Icons.volunteer_activism_rounded,
                     colors: const [Color(0xFF1E8E55), Color(0xFF38C172)],
                   ),
@@ -326,157 +323,6 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeaturedCampaignSpotlight() {
-    return Obx(() {
-      if (_campaignController.filteredCampaigns.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      final featuredCampaign =
-          _campaignController.filteredCampaigns.firstWhereOrNull(
-            (campaign) => campaign.isFeatured,
-          ) ??
-          _campaignController.filteredCampaigns.first;
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: GestureDetector(
-          onTap: () =>
-              Get.toNamed('/campaign-details', arguments: featuredCampaign.id),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF0F172A),
-                  const Color(0xFF14532D),
-                  AppColorToken.primary.color,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColorToken.primary.color.withOpacity(0.18),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        featuredCampaign.isFeatured
-                            ? 'Featured campaign'
-                            : 'Recommended cause',
-                        style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ],
-                ),
-                18.verticalSpace,
-                Text(
-                  featuredCampaign.title,
-                  style: AppTextStyle.h2.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                10.verticalSpace,
-                Text(
-                  featuredCampaign.description,
-                  style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.white.withOpacity(0.82),
-                    height: 1.5,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                18.verticalSpace,
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    _buildSpotlightMetric(
-                      'Raised',
-                      _formatCurrency(featuredCampaign.currentAmount),
-                    ),
-                    _buildSpotlightMetric(
-                      'Goal',
-                      _formatCurrency(featuredCampaign.targetAmount),
-                    ),
-                    _buildSpotlightMetric(
-                      'Time left',
-                      featuredCampaign.daysRemaining > 0
-                          ? '${featuredCampaign.daysRemaining} days'
-                          : 'Ending now',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _buildSpotlightMetric(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppTextStyle.caption.copyWith(
-              color: Colors.white.withOpacity(0.72),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          4.verticalSpace,
-          Text(
-            value,
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
           ),
         ],
       ),
@@ -735,28 +581,5 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         ),
       ),
     );
-  }
-
-  String _buildSyncLabel() {
-    final lastSync = _campaignController.lastSyncTime.value;
-    if (lastSync == null) {
-      return 'Waiting for sync';
-    }
-
-    final difference = DateTime.now().difference(lastSync);
-    if (difference.inMinutes < 1) {
-      return 'Updated just now';
-    }
-    if (difference.inMinutes < 60) {
-      return 'Updated ${difference.inMinutes}m ago';
-    }
-    if (difference.inHours < 24) {
-      return 'Updated ${difference.inHours}h ago';
-    }
-    return 'Updated ${difference.inDays}d ago';
-  }
-
-  String _formatCurrency(double amount) {
-    return 'NPR ${NumberFormat("#,##0", "en_US").format(amount)}';
   }
 }

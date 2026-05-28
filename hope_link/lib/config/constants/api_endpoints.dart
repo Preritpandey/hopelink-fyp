@@ -2,10 +2,11 @@ class ApiEndpoints {
   // static const String baseUrl =
   //     'http://192.168.1.65:3008/api/v1'; // home network
   // static const String baseUrl = 'http://10.22.3.27:3008/api/v1'; // cg2.4.
-  static const String baseUrl = 'http://10.0.2.2:3008/api/v1'; // Android emulator
-  // static const String baseUrl = 'http://192.168.1.127:3008/api/v1';
+  // static const String baseUrl =
+  // 'http://10.0.2.2:3008/api/v1'; // Android emulator
+  // static const String baseUrl = 'http://192.168.1.105:3008/api/v1';
 
-  // static const String baseUrl = 'http://192.168.1.81:3008/api/v1'; // college
+  static const String baseUrl = 'http://172.20.10.2:3008/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Authentication

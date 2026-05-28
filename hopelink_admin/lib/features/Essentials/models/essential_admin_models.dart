@@ -230,21 +230,29 @@ class AdminCommitmentBundle {
   final List<AdminDonationCommitment> commitments;
 
   factory AdminCommitmentBundle.fromJson(Map<String, dynamic> json) {
+    final commitmentsJson = _firstList(json, const [
+      'commitments',
+      'donations',
+      'pledges',
+      'commitmentDonations',
+    ]);
+    final commitments = commitmentsJson
+        .map(AdminDonationCommitment.fromJson)
+        .toList();
+
     return AdminCommitmentBundle(
       request: AdminEssentialRequest.fromJson(
-        (json['request'] as Map?)?.cast<String, dynamic>() ?? const {},
+        _firstMap(json, const [
+          'request',
+          'essentialRequest',
+          'essential',
+        ]),
       ),
       summary: AdminCommitmentSummary.fromJson(
-        (json['summary'] as Map?)?.cast<String, dynamic>() ?? const {},
+        _firstMap(json, const ['summary', 'stats', 'totals']),
+        commitments: commitments,
       ),
-      commitments:
-          ((json['commitments'] as List?) ?? const [])
-              .map(
-                (item) => AdminDonationCommitment.fromJson(
-                  (item as Map).cast<String, dynamic>(),
-                ),
-              )
-              .toList(),
+      commitments: commitments,
     );
   }
 }
@@ -264,13 +272,32 @@ class AdminCommitmentSummary {
   final int verified;
   final int rejected;
 
-  factory AdminCommitmentSummary.fromJson(Map<String, dynamic> json) {
+  factory AdminCommitmentSummary.fromJson(
+    Map<String, dynamic> json, {
+    List<AdminDonationCommitment> commitments = const [],
+  }) {
+    final pledged = _asInt(json['pledged']);
+    final delivered = _asInt(json['delivered']);
+    final verified = _asInt(json['verified']);
+    final rejected = _asInt(json['rejected']);
+    final totalCommitments = _asInt(json['totalCommitments']);
+
     return AdminCommitmentSummary(
-      totalCommitments: _asInt(json['totalCommitments']),
-      pledged: _asInt(json['pledged']),
-      delivered: _asInt(json['delivered']),
-      verified: _asInt(json['verified']),
-      rejected: _asInt(json['rejected']),
+      totalCommitments: totalCommitments > 0
+          ? totalCommitments
+          : commitments.length,
+      pledged: pledged > 0
+          ? pledged
+          : commitments.where((item) => item.status == 'pledged').length,
+      delivered: delivered > 0
+          ? delivered
+          : commitments.where((item) => item.status == 'delivered').length,
+      verified: verified > 0
+          ? verified
+          : commitments.where((item) => item.status == 'verified').length,
+      rejected: rejected > 0
+          ? rejected
+          : commitments.where((item) => item.status == 'rejected').length,
     );
   }
 }
@@ -297,23 +324,35 @@ class AdminDonationCommitment {
   final String proofImage;
 
   factory AdminDonationCommitment.fromJson(Map<String, dynamic> json) {
-    final user = (json['userId'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final user = _firstMap(json, const ['userId', 'user', 'donor']);
+    final items = _firstList(json, const [
+      'itemsDonating',
+      'items',
+      'donatedItems',
+      'commitmentItems',
+    ]);
+
     return AdminDonationCommitment(
-      id: (json['_id'] ?? '').toString(),
-      userName: (user['name'] ?? 'Donor').toString(),
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      userName: (user['name'] ?? user['fullName'] ?? json['userName'] ?? 'Donor')
+          .toString(),
       userEmail: (user['email'] ?? '').toString(),
-      status: (json['status'] ?? '').toString(),
-      deliveryDate: DateTime.tryParse((json['deliveryDate'] ?? '').toString()),
-      items:
-          ((json['itemsDonating'] as List?) ?? const [])
-              .map(
-                (item) => AdminCommittedItem.fromJson(
-                  (item as Map).cast<String, dynamic>(),
-                ),
-              )
-              .toList(),
-      pickupLocationId: (json['selectedPickupLocationId'] ?? '').toString(),
-      proofImage: (json['proofImage'] ?? '').toString(),
+      status: (json['status'] ?? json['commitmentStatus'] ?? 'pledged')
+          .toString(),
+      deliveryDate: DateTime.tryParse(
+        (json['deliveryDate'] ??
+                json['expectedDeliveryDate'] ??
+                json['createdAt'] ??
+                '')
+            .toString(),
+      ),
+      items: items.map(AdminCommittedItem.fromJson).toList(),
+      pickupLocationId:
+          (json['selectedPickupLocationId'] ?? json['pickupLocationId'] ?? '')
+              .toString(),
+      proofImage:
+          (json['proofImage'] ?? json['proofOfDelivery'] ?? json['proof'] ?? '')
+              .toString(),
     );
   }
 }
@@ -328,9 +367,16 @@ class AdminCommittedItem {
   final int quantity;
 
   factory AdminCommittedItem.fromJson(Map<String, dynamic> json) {
+    final item = _firstMap(json, const ['item', 'essentialItem']);
     return AdminCommittedItem(
-      itemName: (json['itemName'] ?? '').toString(),
-      quantity: _asInt(json['quantity']),
+      itemName: (json['itemName'] ??
+              item['itemName'] ??
+              item['name'] ??
+              json['name'] ??
+              json['title'] ??
+              '')
+          .toString(),
+      quantity: _asInt(json['quantity'] ?? json['qty'] ?? json['amount']),
     );
   }
 }
@@ -343,4 +389,34 @@ int _asInt(dynamic value) {
 double _asDouble(dynamic value) {
   if (value is num) return value.toDouble();
   return double.tryParse((value ?? '').toString()) ?? 0;
+}
+
+Map<String, dynamic> _firstMap(
+  Map<String, dynamic> json,
+  List<String> keys,
+) {
+  for (final key in keys) {
+    final value = json[key];
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) {
+      return value.map((k, v) => MapEntry(k.toString(), v));
+    }
+  }
+  return const {};
+}
+
+List<Map<String, dynamic>> _firstList(
+  Map<String, dynamic> json,
+  List<String> keys,
+) {
+  for (final key in keys) {
+    final value = json[key];
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map((item) => item.map((k, v) => MapEntry(k.toString(), v)))
+          .toList();
+    }
+  }
+  return const [];
 }
