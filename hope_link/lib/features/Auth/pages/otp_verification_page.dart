@@ -44,12 +44,12 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.black),
           onPressed: () => Get.back(),
         ),
       ),
@@ -71,7 +71,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 Text(
                   'We\'ve sent a 6-digit verification code to',
                   style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -107,10 +107,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             borderRadius: BorderRadius.circular(8),
             fieldHeight: 56,
             fieldWidth: 45,
-            activeFillColor: Colors.white,
+            activeFillColor: AppColors.white,
             activeColor: AppColorToken.primary.color,
             selectedColor: AppColorToken.primary.color,
-            inactiveColor: Colors.grey[300]!,
+            inactiveColor: AppColors.grey300,
             errorBorderColor: AppColorToken.error.color,
           ),
           animationType: AnimationType.fade,
@@ -148,14 +148,14 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: AppColors.white,
                     strokeWidth: 2,
                   ),
                 )
               : Text(
                   'Verify',
                   style: AppTextStyle.labelLarge.bold.copyWith(
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
         ),
@@ -170,7 +170,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         children: [
           Text(
             'Didn\'t receive the code? ',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           TextButton(
             onPressed: _otpControllerInstance.canResend.value
@@ -188,7 +188,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               style: AppTextStyle.bodySmall.copyWith(
                 color: _otpControllerInstance.canResend.value
                     ? AppColorToken.primary.color
-                    : Colors.grey[400]!,
+                    : AppColors.grey400,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -212,8 +212,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       Get.snackbar(
         'Success',
         'Email verified successfully! Please log in.',
-        backgroundColor: Colors.green[100],
-        colorText: Colors.green[900],
+        backgroundColor: AppColors.green[100],
+        colorText: AppColors.green[900],
         snackPosition: SnackPosition.BOTTOM,
       );
       // Navigate to login page after a short delay
@@ -237,8 +237,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       Get.snackbar(
         'Success',
         'New OTP has been sent to your email',
-        backgroundColor: Colors.green[100],
-        colorText: Colors.green[900],
+        backgroundColor: AppColors.green[100],
+        colorText: AppColors.green[900],
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
@@ -252,3 +252,5 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     }
   }
 }
+
+

@@ -36,7 +36,7 @@ class RegistrationHeader extends StatelessWidget {
         Text(
           'Join our community of volunteers',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
+            color: AppColors.grey600,
             fontSize: 16,
           ),
           textAlign: TextAlign.center,
@@ -45,3 +45,4 @@ class RegistrationHeader extends StatelessWidget {
     );
   }
 }
+

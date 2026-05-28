@@ -38,7 +38,7 @@ class CampaignsListWidget extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: controller.refreshCampaigns,
       color: AppColorToken.primary.color,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       child: ListView.builder(
         scrollDirection: Axis.vertical,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -85,7 +85,7 @@ class CampaignsListWidget extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -95,7 +95,7 @@ class CampaignsListWidget extends StatelessWidget {
                     spreadRadius: 0,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: AppColors.black.withOpacity(0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                     spreadRadius: 0,
@@ -205,13 +205,13 @@ class CampaignsListWidget extends StatelessWidget {
                                 const Icon(
                                   Icons.star_rounded,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Featured',
                                   style: AppTextStyle.bodySmall.copyWith(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
                                   ),
@@ -231,11 +231,11 @@ class CampaignsListWidget extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey[600],
+                              color: AppColors.grey600,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
+                                  color: AppColors.grey.withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -244,7 +244,7 @@ class CampaignsListWidget extends StatelessWidget {
                             child: Text(
                               'Draft',
                               style: AppTextStyle.bodySmall.copyWith(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 12,
                               ),
@@ -261,11 +261,11 @@ class CampaignsListWidget extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
+                            color: AppColors.white.withOpacity(0.95),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: AppColors.black.withOpacity(0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -294,7 +294,7 @@ class CampaignsListWidget extends StatelessWidget {
                           campaign.title,
                           style: AppTextStyle.h5.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: Colors.grey[900],
+                            color: AppColors.grey900,
                             height: 1.3,
                           ),
                           maxLines: 2,
@@ -352,10 +352,10 @@ class CampaignsListWidget extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: AppColors.grey50,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.grey[200]!,
+                              color: AppColors.grey200,
                               width: 1,
                             ),
                           ),
@@ -374,7 +374,7 @@ class CampaignsListWidget extends StatelessWidget {
                                       Text(
                                         'Raised',
                                         style: AppTextStyle.bodySmall.copyWith(
-                                          color: Colors.grey[600],
+                                          color: AppColors.grey600,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -418,7 +418,7 @@ class CampaignsListWidget extends StatelessWidget {
                                     0.0,
                                     1.0,
                                   ),
-                                  backgroundColor: Colors.grey[300],
+                                  backgroundColor: AppColors.grey300,
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     AppColorToken.primary.color,
                                   ),
@@ -434,7 +434,7 @@ class CampaignsListWidget extends StatelessWidget {
                                   Text(
                                     'Goal: ${_formatCurrency(campaign.targetAmount)}',
                                     style: AppTextStyle.bodySmall.copyWith(
-                                      color: Colors.grey[500],
+                                      color: AppColors.grey500,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -445,7 +445,7 @@ class CampaignsListWidget extends StatelessWidget {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.green.withOpacity(0.1),
+                                        color: AppColors.green.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Row(
@@ -453,14 +453,14 @@ class CampaignsListWidget extends StatelessWidget {
                                           Icon(
                                             Icons.check_circle_rounded,
                                             size: 14,
-                                            color: Colors.green[700],
+                                            color: AppColors.green[700],
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
                                             'Funded',
                                             style: AppTextStyle.bodySmall
                                                 .copyWith(
-                                                  color: Colors.green[700],
+                                                  color: AppColors.green[700],
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 11,
                                                 ),
@@ -522,13 +522,13 @@ class CampaignsListWidget extends StatelessWidget {
             'Loading campaigns...',
             style: AppTextStyle.h5.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           8.verticalSpace,
           Text(
             'Finding amazing causes for you',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[500]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey500),
           ),
         ],
       ),
@@ -563,14 +563,14 @@ class CampaignsListWidget extends StatelessWidget {
               'No campaigns found',
               style: AppTextStyle.h5.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             12.verticalSpace,
             Text(
               'Try adjusting your search\nor filters to find campaigns',
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[500],
+                color: AppColors.grey500,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -591,12 +591,16 @@ class CampaignsListWidget extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.refresh_rounded, size: 18, color: Colors.white),
+                    Icon(
+                      Icons.refresh_rounded,
+                      size: 18,
+                      color: AppColors.white,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Try Again',
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

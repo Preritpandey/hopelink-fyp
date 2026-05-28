@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 
 class ProfileTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -22,30 +23,30 @@ class ProfileTextField extends StatelessWidget {
       controller: controller,
       enabled: enabled,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 16, color: Color(0xFF2D3748)),
+      style: const TextStyle(fontSize: 16, color: AppColors.grey700),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+        labelStyle: TextStyle(color: AppColors.grey600, fontSize: 14),
         prefixIcon: icon != null
-            ? Icon(icon, color: Colors.blue[700], size: 20)
+            ? Icon(icon, color: AppColors.blue[700], size: 20)
             : null,
         filled: true,
-        fillColor: enabled ? Colors.grey[50] : Colors.grey[100],
+        fillColor: enabled ? AppColors.grey50 : AppColors.grey100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: AppColors.grey300),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: AppColors.grey300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+          borderSide: BorderSide(color: AppColors.blue[700]!, width: 2),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: AppColors.grey300),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

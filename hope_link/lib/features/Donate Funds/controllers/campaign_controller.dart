@@ -1,10 +1,11 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';      
+import 'package:hope_link/core/theme/app_colors.dart';
 import '../models/campaign_model.dart';
 import '../models/campaign_report_model.dart';
 import '../models/post_interaction_models.dart';
 import '../services/campaign_service.dart';
-
+          
 class CampaignController extends GetxController {
   final CampaignService _service = CampaignService();
 
@@ -63,8 +64,8 @@ class CampaignController extends GetxController {
           'Success',
           'Campaigns updated successfully',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.9),
-          colorText: Colors.white,
+          backgroundColor: AppColors.green.withOpacity(0.9),
+          colorText: AppColors.white,
           duration: const Duration(seconds: 2),
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
@@ -85,12 +86,12 @@ class CampaignController extends GetxController {
         'Offline Mode',
         'Using cached data. Pull to refresh when online.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.orange.withOpacity(0.9),
+        colorText: AppColors.white,
         duration: const Duration(seconds: 3),
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
-        icon: const Icon(Icons.wifi_off_rounded, color: Colors.white),
+        icon: const Icon(Icons.wifi_off_rounded, color: AppColors.white),
       );
 
       applyFilters();
@@ -156,8 +157,8 @@ class CampaignController extends GetxController {
         'Error',
         'Failed to load campaign details',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -232,8 +233,8 @@ class CampaignController extends GetxController {
         'Cache Cleared',
         'All cached data has been removed',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blue.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.blue.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -246,8 +247,8 @@ class CampaignController extends GetxController {
         'Error',
         'Failed to clear cache',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -269,3 +270,6 @@ class CampaignController extends GetxController {
     super.onClose();
   }
 }
+
+
+

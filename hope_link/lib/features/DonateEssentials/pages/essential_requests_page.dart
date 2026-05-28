@@ -28,14 +28,14 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: AppColors.inputFill,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'Donate Essentials',
           style: GoogleFonts.dmSans(
-            color: Colors.black87,
+            color: AppColors.black87,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -96,14 +96,14 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
     const urgencies = ['all', 'high', 'medium', 'low'];
 
     return Container(
-      color: Colors.white,
+      color: AppColors.white,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Browse urgent item requests and pledge what you can deliver.',
-            style: GoogleFonts.dmSans(color: Colors.black54),
+            style: GoogleFonts.dmSans(color: AppColors.black54),
           ),
           const SizedBox(height: 12),
           Obx(
@@ -117,7 +117,8 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
                       child: ChoiceChip(
                         label: Text(category.toUpperCase()),
                         selected: controller.selectedCategory.value == category,
-                        onSelected: (_) => controller.applyFilters(category: category),
+                        onSelected: (_) =>
+                            controller.applyFilters(category: category),
                       ),
                     ),
                   ),
@@ -128,7 +129,8 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
                       child: FilterChip(
                         label: Text('Urgency: ${urgency.toUpperCase()}'),
                         selected: controller.selectedUrgency.value == urgency,
-                        onSelected: (_) => controller.applyFilters(urgency: urgency),
+                        onSelected: (_) =>
+                            controller.applyFilters(urgency: urgency),
                       ),
                     ),
                   ),
@@ -143,10 +145,7 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
 }
 
 class _RequestCard extends StatelessWidget {
-  const _RequestCard({
-    required this.request,
-    required this.onTap,
-  });
+  const _RequestCard({required this.request, required this.onTap});
 
   final EssentialRequest request;
   final VoidCallback onTap;
@@ -155,12 +154,11 @@ class _RequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ratio = request.fulfillmentRatio;
     final formatter = DateFormat('MMM d');
-    final urgencyColor =
-        request.urgencyLevel == 'high'
-            ? Colors.redAccent
-            : request.urgencyLevel == 'medium'
-            ? Colors.orange
-            : Colors.green;
+    final urgencyColor = request.urgencyLevel == 'high'
+        ? AppColors.redAccent
+        : request.urgencyLevel == 'medium'
+        ? AppColors.orange
+        : AppColors.green;
 
     return GestureDetector(
       onTap: onTap,
@@ -169,7 +167,7 @@ class _RequestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
@@ -194,7 +192,10 @@ class _RequestCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: urgencyColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -215,7 +216,7 @@ class _RequestCard extends StatelessWidget {
               request.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.dmSans(color: Colors.black54, height: 1.4),
+              style: GoogleFonts.dmSans(color: AppColors.black54, height: 1.4),
             ),
             const SizedBox(height: 14),
             ClipRRect(
@@ -224,7 +225,7 @@ class _RequestCard extends StatelessWidget {
                 value: ratio,
                 minHeight: 10,
                 color: AppColorToken.primary.color,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: AppColors.grey200,
               ),
             ),
             const SizedBox(height: 10),
@@ -237,7 +238,7 @@ class _RequestCard extends StatelessWidget {
                 const Spacer(),
                 Text(
                   'Ends ${formatter.format(request.expiryDate)}',
-                  style: GoogleFonts.dmSans(color: Colors.black45),
+                  style: GoogleFonts.dmSans(color: AppColors.black54),
                 ),
               ],
             ),
@@ -245,26 +246,25 @@ class _RequestCard extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children:
-                  request.reporting.items
-                      .take(3)
-                      .map(
-                        (item) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Text(
-                            '${item.itemName} (${item.quantityRemaining} ${item.unit} left)',
-                            style: GoogleFonts.dmSans(fontSize: 12),
-                          ),
-                        ),
-                      )
-                      .toList(),
+              children: request.reporting.items
+                  .take(3)
+                  .map(
+                    (item) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey100,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        '${item.itemName} (${item.quantityRemaining} ${item.unit} left)',
+                        style: GoogleFonts.dmSans(fontSize: 12),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ),

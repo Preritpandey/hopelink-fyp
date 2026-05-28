@@ -26,8 +26,8 @@ class CartPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your cart'),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppColors.transparent,
+        foregroundColor: AppColors.black87,
         actions: [
           Obx(
             () => controller.hasItems
@@ -111,7 +111,7 @@ class _SummaryHero extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF1E8E55), Color(0xFF6FCF97)],
+          colors: [AppColors.primaryDark, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -123,10 +123,10 @@ class _SummaryHero extends StatelessWidget {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.16),
+              color: AppColors.white.withOpacity(0.16),
               borderRadius: BorderRadius.circular(18),
             ),
-            child: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
+            child: const Icon(Icons.shopping_bag_outlined, color: AppColors.white),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -136,7 +136,7 @@ class _SummaryHero extends StatelessWidget {
                 Text(
                   '$itemCount items ready',
                   style: AppTextStyle.h3.copyWith(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -144,7 +144,7 @@ class _SummaryHero extends StatelessWidget {
                 Text(
                   'Curated goods supporting real community impact.',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.white.withOpacity(0.88),
+                    color: AppColors.white.withOpacity(0.88),
                   ),
                 ),
               ],
@@ -153,7 +153,7 @@ class _SummaryHero extends StatelessWidget {
           Text(
             subTotal,
             style: AppTextStyle.h3.copyWith(
-              color: Colors.white,
+              color: AppColors.white,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -183,11 +183,11 @@ class _CartItemCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, 12),
           ),
@@ -263,7 +263,7 @@ class _CartItemCard extends StatelessWidget {
           IconButton(
             onPressed: onRemove,
             icon: const Icon(Icons.delete_outline_rounded),
-            color: Colors.redAccent,
+            color: AppColors.redAccent,
           ),
         ],
       ),
@@ -308,7 +308,7 @@ class _CartFooter extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -319,7 +319,7 @@ class _CartFooter extends StatelessWidget {
               children: [
                 Text(
                   'Subtotal',
-                  style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+                  style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
                 ),
                 Text(
                   subTotal,
@@ -370,7 +370,7 @@ class _EmptyCart extends StatelessWidget {
               child: const Icon(
                 Icons.shopping_bag_outlined,
                 size: 44,
-                color: Color(0xFF27AE60),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 20),
@@ -383,7 +383,7 @@ class _EmptyCart extends StatelessWidget {
               'Explore products, add your favorites, and come back when you are ready to checkout.',
               textAlign: TextAlign.center,
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 height: 1.5,
               ),
             ),
@@ -398,3 +398,5 @@ class _EmptyCart extends StatelessWidget {
     );
   }
 }
+
+

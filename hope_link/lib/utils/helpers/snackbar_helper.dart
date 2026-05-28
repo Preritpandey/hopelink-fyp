@@ -1,13 +1,17 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 
 class SnackbarHelper {
   static void showSuccessSnackBar(String title, String message) {
     Get.snackbar(
       title,
       message,
-      backgroundColor: Colors.green.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.green.withOpacity(0.9),
+      colorText: AppColors.white,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(10),
       borderRadius: 8,
@@ -19,8 +23,8 @@ class SnackbarHelper {
     Get.snackbar(
       title,
       message,
-      backgroundColor: Colors.red.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.red.withOpacity(0.9),
+      colorText: AppColors.white,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(10),
       borderRadius: 8,
@@ -32,8 +36,8 @@ class SnackbarHelper {
     Get.snackbar(
       title,
       message,
-      backgroundColor: Colors.blue.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.blue.withOpacity(0.9),
+      colorText: AppColors.white,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(10),
       borderRadius: 8,
@@ -45,8 +49,8 @@ class SnackbarHelper {
     Get.snackbar(
       title,
       message,
-      backgroundColor: Colors.orange.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.orange.withOpacity(0.9),
+      colorText: AppColors.white,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(10),
       borderRadius: 8,
@@ -54,3 +58,6 @@ class SnackbarHelper {
     );
   }
 }
+
+
+

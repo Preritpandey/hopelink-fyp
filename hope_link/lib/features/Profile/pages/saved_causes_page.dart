@@ -25,18 +25,18 @@ class SavedCausesPage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F6),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'Saved Causes',
           style: AppTextStyle.h4.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.grey[900],
+            color: AppColors.grey900,
           ),
         ),
-        iconTheme: IconThemeData(color: Colors.grey[900]),
+        iconTheme: IconThemeData(color: AppColors.grey900),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -94,7 +94,7 @@ class _SavedCauseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.white,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: _openEntry,
@@ -105,7 +105,7 @@ class _SavedCauseTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: AppColors.black.withOpacity(0.04),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -127,7 +127,7 @@ class _SavedCauseTile extends StatelessWidget {
                         Text(
                           'Saved ${DateFormat('MMM d, yyyy').format(entry.savedAt)}',
                           style: AppTextStyle.bodySmall.copyWith(
-                            color: Colors.grey[500],
+                            color: AppColors.grey500,
                           ),
                         ),
                       ],
@@ -145,14 +145,14 @@ class _SavedCauseTile extends StatelessWidget {
                 entry.title,
                 style: AppTextStyle.h4.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Colors.grey[900],
+                  color: AppColors.grey900,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 _subtitle,
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   height: 1.45,
                 ),
                 maxLines: 3,
@@ -175,7 +175,7 @@ class _SavedCauseTile extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 16,
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                   ),
                 ],
               ),
@@ -247,15 +247,15 @@ class _TypeBadge extends StatelessWidget {
 
     switch (postType) {
       case 'campaign':
-        color = const Color(0xFF0E9F6E);
+        color = AppColors.primaryDark;
         label = 'Campaign';
         break;
       case 'event':
-        color = const Color(0xFF2563EB);
+        color = AppColors.blueDark;
         label = 'Event';
         break;
       case 'volunteerJob':
-        color = const Color(0xFFF59E0B);
+        color = AppColors.amber;
         label = 'Volunteer Role';
         break;
       default:
@@ -318,7 +318,7 @@ class _StateMessage extends StatelessWidget {
               title,
               style: AppTextStyle.h4.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
               textAlign: TextAlign.center,
             ),
@@ -326,7 +326,7 @@ class _StateMessage extends StatelessWidget {
             Text(
               subtitle,
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -336,7 +336,7 @@ class _StateMessage extends StatelessWidget {
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColorToken.primary.color,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -353,3 +353,5 @@ class _StateMessage extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 
 class StepHeader extends StatelessWidget {
   final int currentStep;
@@ -23,10 +25,10 @@ class StepHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
-          BoxShadow(offset: Offset(0, 2), blurRadius: 8, color: Colors.black12),
+          BoxShadow(offset: Offset(0, 2), blurRadius: 8, color: AppColors.black12),
         ],
       ),
       child: Row(
@@ -40,13 +42,13 @@ class StepHeader extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
               decoration: BoxDecoration(
-                color: active ? Colors.blue : Colors.grey.shade200,
+                color: active ? AppColors.blue : AppColors.grey200,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 steps[index],
                 style: TextStyle(
-                  color: active ? Colors.white : Colors.black,
+                  color: active ? AppColors.white : AppColors.black,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -57,3 +59,6 @@ class StepHeader extends StatelessWidget {
     );
   }
 }
+
+
+

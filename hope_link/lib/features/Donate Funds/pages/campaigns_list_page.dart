@@ -76,9 +76,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFFF4FBF6),
-              Colors.white,
-              AppColorToken.primary.color.withOpacity(0.04),
+              AppColors.primarySoft,
+              AppColors.white,
+              AppColorToken.primary.color.withValues(alpha: 0.04),
             ],
           ),
         ),
@@ -102,11 +102,11 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: AppColorToken.primary.color.withOpacity(0.06),
+                  color: AppColorToken.primary.color.withValues(alpha: 0.06),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -124,17 +124,17 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                 decoration: InputDecoration(
                   hintText: 'Search campaigns, events, and volunteer roles',
                   hintStyle: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.grey[400],
+                    color: AppColors.grey400,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                   ),
                   suffixIcon: _searchText.value.isNotEmpty
                       ? IconButton(
                           icon: Icon(
                             Icons.clear_rounded,
-                            color: Colors.grey[400],
+                            color: AppColors.grey400,
                           ),
                           onPressed: () {
                             _searchController.clear();
@@ -176,18 +176,18 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildOverviewRail(),
-            18.verticalSpace,
-            CompactLeaderboardPreview(
-              controller: _leaderboardPreviewController,
-              onViewFullLeaderboard: () =>
-                  Get.to(() => const VolunteerLeaderboardPage()),
-            ),
             24.verticalSpace,
             _buildHorizontalCampaignsSection(),
             28.verticalSpace,
             _buildHorizontalVolunteerJobsSection(),
             28.verticalSpace,
             _buildHorizontalEventsSection(),
+            28.verticalSpace,
+            CompactLeaderboardPreview(
+              controller: _leaderboardPreviewController,
+              onViewFullLeaderboard: () =>
+                  Get.to(() => const VolunteerLeaderboardPage()),
+            ),
             32.verticalSpace,
           ],
         ),
@@ -205,7 +205,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
           Text(
             'Browse fundraising, upcoming events, and volunteer roles ',
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               height: 1.45,
             ),
           ),
@@ -223,7 +223,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     subtitle:
                         '${_campaignController.activeCampaignsCount} active',
                     icon: Icons.volunteer_activism_rounded,
-                    colors: const [Color(0xFF1E8E55), Color(0xFF38C172)],
+                    colors: const [AppColors.primaryDark, AppColors.primaryLight],
                     onTap: () => Get.toNamed('/campaigns-all'),
                   ),
                 ),
@@ -234,7 +234,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     value: '${_volunteerJobController.filteredJobs.length}',
                     subtitle: 'Open ways to contribute',
                     icon: Icons.groups_rounded,
-                    colors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+                    colors: const [AppColors.teal, AppColors.tealLight],
                     onTap: () => Get.toNamed('/volunteer-jobs-all'),
                   ),
                 ),
@@ -269,7 +269,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
@@ -285,7 +285,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: colors.first.withOpacity(0.22),
+                color: colors.first.withValues(alpha: 0.22),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -298,10 +298,10 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: AppColors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: Colors.white, size: 18),
+                child: Icon(icon, color: AppColors.white, size: 18),
               ),
               10.verticalSpace,
               Row(
@@ -325,7 +325,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               Text(
                 subtitle,
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+                  color: AppColors.white.withValues(alpha: 0.8),
                   height: 1.15,
                   fontSize: 9,
                 ),
@@ -487,14 +487,14 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                       title,
                       style: AppTextStyle.h4.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.grey[900],
+                        color: AppColors.grey900,
                       ),
                     ),
                     4.verticalSpace,
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                         height: 1.45,
                       ),
                     ),
@@ -511,7 +511,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                       vertical: 9,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColorToken.primary.color.withOpacity(0.08),
+                      color: AppColorToken.primary.color.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -555,9 +555,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         width: double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.grey200),
         ),
         child: Column(
           children: [
@@ -565,7 +565,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColorToken.primary.color.withOpacity(0.08),
+                color: AppColorToken.primary.color.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: AppColorToken.primary.color, size: 30),
@@ -575,14 +575,14 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               title,
               style: AppTextStyle.h5.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             8.verticalSpace,
             Text(
               subtitle,
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 height: 1.45,
               ),
               textAlign: TextAlign.center,
@@ -593,3 +593,5 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     );
   }
 }
+
+

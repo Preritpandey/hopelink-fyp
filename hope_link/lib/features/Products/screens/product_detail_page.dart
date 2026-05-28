@@ -163,7 +163,7 @@ class _NaturalBackdrop extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColors.background,
-              const Color(0xFFF8F5ED),
+              AppColors.background,
               AppColors.accent.withOpacity(0.08),
             ],
           ),
@@ -231,7 +231,7 @@ class _DetailAppBar extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: MediaQuery.sizeOf(context).width * 1.12,
       pinned: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.all(10),
@@ -264,8 +264,8 @@ class _DetailAppBar extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.06),
-                    Colors.black.withOpacity(0.42),
+                    AppColors.black.withOpacity(0.06),
+                    AppColors.black.withOpacity(0.42),
                   ],
                 ),
               ),
@@ -293,7 +293,7 @@ class _SoftIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: AppColors.white.withOpacity(0.92),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider),
         boxShadow: [
@@ -322,12 +322,12 @@ class _HeroInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: AppColors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
+        border: Border.all(color: AppColors.white.withOpacity(0.6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColors.black.withOpacity(0.1),
             blurRadius: 24,
             offset: const Offset(0, 14),
           ),
@@ -591,7 +591,7 @@ class _ColorVariantPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.accent.withOpacity(0.12)
-                      : Colors.white,
+                      : AppColors.white,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: isSelected
@@ -618,7 +618,7 @@ class _ColorVariantPicker extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: swatch,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: AppColors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: swatch.withOpacity(0.35),
@@ -677,12 +677,12 @@ class _ColorVariantPicker extends StatelessWidget {
 
   Color _colorForVariant(String label) {
     final normalized = label.toLowerCase();
-    if (normalized.contains('red')) return const Color(0xFFB5453C);
-    if (normalized.contains('blue')) return const Color(0xFF5A7396);
-    if (normalized.contains('green')) return const Color(0xFF7C9A6D);
-    if (normalized.contains('pink')) return const Color(0xFFD59A9D);
-    if (normalized.contains('cinnamon')) return const Color(0xFFA46745);
-    if (normalized.contains('orange')) return const Color(0xFFD48A54);
+    if (normalized.contains('red')) return AppColors.redDark;
+    if (normalized.contains('blue')) return AppColors.blueDark;
+    if (normalized.contains('green')) return AppColors.accentLight;
+    if (normalized.contains('pink')) return AppColors.redLight;
+    if (normalized.contains('cinnamon')) return AppColors.orangeDark;
+    if (normalized.contains('orange')) return AppColors.orangeLight;
     return AppColors.accent;
   }
 }
@@ -791,7 +791,7 @@ class _ImpactCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.accent.withOpacity(0.14), const Color(0xFFF8F5ED)],
+          colors: [AppColors.accent.withOpacity(0.14), AppColors.background],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.accent.withOpacity(0.22)),
@@ -810,7 +810,7 @@ class _ImpactCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: AppColors.white.withOpacity(0.85),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
@@ -933,7 +933,7 @@ class _StickyAddToCartBar extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.94),
+          color: AppColors.white.withOpacity(0.94),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.divider),
           boxShadow: [
@@ -992,7 +992,7 @@ class _StickyAddToCartBar extends StatelessWidget {
                       fontFamily: 'DM Sans',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -1048,7 +1048,7 @@ class _BentoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: AppColors.white.withOpacity(0.92),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.divider),
         boxShadow: [
@@ -1063,3 +1063,5 @@ class _BentoCard extends StatelessWidget {
     );
   }
 }
+
+

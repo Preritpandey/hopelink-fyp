@@ -66,7 +66,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             child: Container(
               height: cardHeight,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: borderRadius,
                 boxShadow: [
                   BoxShadow(
@@ -142,7 +142,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
                 Text(
                   job.category,
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                     fontSize: isNarrow ? 11 : 12,
                   ),
                   maxLines: 1,
@@ -158,7 +158,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
                 postType: 'volunteerJob',
                 postId: job.id,
                 isSaved: job.isSavedByCurrentUser,
-                backgroundColor: Colors.white.withOpacity(0.88),
+                backgroundColor: AppColors.white.withOpacity(0.88),
               ),
               8.horizontalSpace,
               _buildStatusBadge(isNarrow: isNarrow),
@@ -176,19 +176,19 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     switch (job.jobType.toLowerCase()) {
       case 'remote':
         icon = Icons.laptop_mac_rounded;
-        iconColor = Colors.blue;
+        iconColor = AppColors.blue;
         break;
       case 'onsite':
         icon = Icons.location_on_rounded;
-        iconColor = Colors.orange;
+        iconColor = AppColors.orange;
         break;
       case 'hybrid':
         icon = Icons.home_work_rounded;
-        iconColor = Colors.purple;
+        iconColor = AppColors.purple;
         break;
       default:
         icon = Icons.work_outline_rounded;
-        iconColor = Colors.grey;
+        iconColor = AppColors.grey;
     }
 
     return Container(
@@ -210,18 +210,18 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: isAvailable
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+            ? AppColors.green.withOpacity(0.1)
+            : AppColors.red.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isAvailable ? Colors.green : Colors.red,
+          color: isAvailable ? AppColors.green : AppColors.red,
           width: 1,
         ),
       ),
       child: Text(
         isAvailable ? 'Open' : 'Closed',
         style: AppTextStyle.bodySmall.copyWith(
-          color: isAvailable ? Colors.green : Colors.red,
+          color: isAvailable ? AppColors.green : AppColors.red,
           fontWeight: FontWeight.w600,
           fontSize: isNarrow ? 10 : 11,
         ),
@@ -244,7 +244,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             job.title,
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
               fontSize: isNarrow ? 16 : 17,
             ),
             maxLines: 2,
@@ -256,7 +256,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               fontSize: isNarrow ? 12 : 13,
               height: 1.45,
             ),
@@ -312,13 +312,13 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
               vertical: 5,
             ),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: AppColors.grey200,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               '+${job.requiredSkills.length - 2}',
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[700],
+                color: AppColors.grey700,
                 fontSize: isNarrow ? 10 : 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -334,13 +334,13 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         Icon(
           Icons.people_outline_rounded,
           size: isNarrow ? 15 : 16,
-          color: Colors.grey[600],
+          color: AppColors.grey600,
         ),
         4.horizontalSpace,
         Text(
           '${job.remainingPositions} positions',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[700],
+            color: AppColors.grey700,
             fontWeight: FontWeight.w500,
             fontSize: isNarrow ? 11 : 12,
           ),
@@ -349,13 +349,13 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         Icon(
           Icons.schedule_rounded,
           size: isNarrow ? 15 : 16,
-          color: Colors.grey[600],
+          color: AppColors.grey600,
         ),
         4.horizontalSpace,
         Text(
           '${job.creditHours}h',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[700],
+            color: AppColors.grey700,
             fontWeight: FontWeight.w500,
             fontSize: isNarrow ? 11 : 12,
           ),
@@ -376,7 +376,7 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
         vertical: isNarrow ? 12 : 14,
       ),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.grey50,
         borderRadius: BorderRadius.only(
           bottomLeft: borderRadius.bottomLeft,
           bottomRight: borderRadius.bottomRight,
@@ -407,14 +407,14 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
           Icon(
             Icons.calendar_today_rounded,
             size: isNarrow ? 13 : 14,
-            color: Colors.grey[600],
+            color: AppColors.grey600,
           ),
           4.horizontalSpace,
           Expanded(
             child: Text(
               daysLeft > 0 ? '$daysLeft days left' : 'Deadline passed',
               style: AppTextStyle.bodySmall.copyWith(
-                color: daysLeft > 0 ? Colors.grey[700] : Colors.red,
+                color: daysLeft > 0 ? AppColors.grey700 : AppColors.red,
                 fontWeight: FontWeight.w500,
                 fontSize: isNarrow ? 11 : 12,
               ),
@@ -430,3 +430,5 @@ class HorizontalVolunteerJobCard extends StatelessWidget {
     );
   }
 }
+
+

@@ -67,7 +67,7 @@ class _ProductsPageState extends State<ProductsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F1),
+      backgroundColor: AppColors.primarySoft,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -76,7 +76,7 @@ class _ProductsPageState extends State<ProductsPage>
             return RefreshIndicator(
               onRefresh: _controller.refreshProducts,
               color: AppColorToken.primary.color,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.white,
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
@@ -182,12 +182,12 @@ class _MarketplaceHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.88),
+        color: AppColors.white.withOpacity(0.88),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -213,7 +213,7 @@ class _MarketplaceHeader extends StatelessWidget {
                     Text(
                       'Discover artisan products and everyday essentials',
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                         height: 1.35,
                       ),
                     ),
@@ -296,10 +296,10 @@ class _HeaderIconButton extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAF6),
+                color: AppColors.primarySoft,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: Colors.grey[800], size: 22),
+              child: Icon(icon, color: AppColors.grey800, size: 22),
             ),
             if (badgeLabel != null)
               Positioned(
@@ -311,14 +311,14 @@ class _HeaderIconButton extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.redAccent,
+                    color: AppColors.redAccent,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Colors.white, width: 1.5),
+                    border: Border.all(color: AppColors.white, width: 1.5),
                   ),
                   child: Text(
                     badgeLabel!,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                     ),
@@ -382,9 +382,9 @@ class _MarketplaceSearchBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
             color: AppColorToken.primary.color.withOpacity(0.05),
@@ -400,16 +400,16 @@ class _MarketplaceSearchBar extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Search products, artisans, or causes...',
             hintStyle: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[400],
+              color: AppColors.grey400,
             ),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(left: 8, right: 8),
-              child: Icon(Icons.search_rounded, color: Colors.grey[500]),
+              child: Icon(Icons.search_rounded, color: AppColors.grey500),
             ),
             prefixIconConstraints: const BoxConstraints(minWidth: 40),
             suffixIcon: searchText.value.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.clear_rounded, color: Colors.grey[400]),
+                    icon: Icon(Icons.clear_rounded, color: AppColors.grey400),
                     onPressed: onClear,
                   )
                 : const SizedBox.shrink(),
@@ -461,7 +461,7 @@ class _MarketplaceSummary extends StatelessWidget {
               Text(
                 productCountLabel,
                 style: AppTextStyle.labelLarge.copyWith(
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -470,14 +470,14 @@ class _MarketplaceSummary extends StatelessWidget {
                 productCount,
                 style: AppTextStyle.h4.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: Colors.grey[900],
+                  color: AppColors.grey900,
                 ),
               ),
               4.verticalSpace,
               Text(
                 subtitle,
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   height: 1.4,
                 ),
               ),
@@ -590,7 +590,7 @@ class _LoadingState extends StatelessWidget {
           16.verticalSpace,
           Text(
             'Loading products...',
-            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
           ),
         ],
       ),
@@ -629,7 +629,7 @@ class _ErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[700],
+                color: AppColors.grey700,
                 height: 1.5,
               ),
             ),
@@ -651,7 +651,7 @@ class _ErrorState extends StatelessWidget {
                 'Try Again',
                 style: AppTextStyle.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -690,7 +690,7 @@ class _EmptyState extends StatelessWidget {
               'No products yet',
               style: AppTextStyle.h4.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             8.verticalSpace,
@@ -698,7 +698,7 @@ class _EmptyState extends StatelessWidget {
               'Check back soon. Our artisans are crafting something special.',
               textAlign: TextAlign.center,
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 height: 1.5,
               ),
             ),
@@ -708,3 +708,5 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
+
+

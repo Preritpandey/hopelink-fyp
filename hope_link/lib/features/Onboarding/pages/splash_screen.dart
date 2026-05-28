@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -80,21 +82,21 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Color(0xFFF6F0E6),
+        statusBarColor: AppColors.transparent,
+        systemNavigationBarColor: AppColors.background,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F0E6),
+      backgroundColor: AppColors.background,
       body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF9F4EC), Color(0xFFF6F0E6), Color(0xFFF0E7D9)],
+            colors: [AppColors.background, AppColors.background, AppColors.background],
           ),
         ),
         child: Stack(
@@ -104,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
               right: -30,
               child: _SoftCircle(
                 size: 190,
-                color: const Color(0xFFF2C89B).withValues(alpha: 0.18),
+                color: AppColors.orangeLight.withValues(alpha: 0.18),
               ),
             ),
             Positioned(
@@ -112,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen>
               left: -40,
               child: _SoftCircle(
                 size: 220,
-                color: const Color(0xFF8DBB8F).withValues(alpha: 0.14),
+                color: AppColors.primaryLight.withValues(alpha: 0.14),
               ),
             ),
             Center(
@@ -141,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
                       height: 132,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: AppColors.white.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(36),
                         boxShadow: [
                           BoxShadow(
@@ -165,7 +167,7 @@ class _SplashScreenState extends State<SplashScreen>
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
-                        color: Color(0xFF2F5D50),
+                        color: AppColors.accentDark,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -174,7 +176,7 @@ class _SplashScreenState extends State<SplashScreen>
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF6B786F),
+                        color: AppColors.textSecondary,
                         letterSpacing: 0.2,
                       ),
                       textAlign: TextAlign.center,
@@ -207,3 +209,6 @@ class _SoftCircle extends StatelessWidget {
     );
   }
 }
+
+
+

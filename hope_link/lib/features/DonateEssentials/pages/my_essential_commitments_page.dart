@@ -1,9 +1,12 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/features/DonateEssentials/controllers/donate_essentials_controller.dart';
 import 'package:intl/intl.dart';
 
-import '../controllers/donate_essentials_controller.dart';
 import '../models/essential_models.dart';
 
 class MyEssentialCommitmentsPage extends StatelessWidget {
@@ -16,14 +19,14 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
         : Get.put(DonateEssentialsController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: AppColors.inputFill,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'My Commitments',
           style: GoogleFonts.dmSans(
-            color: Colors.black87,
+            color: AppColors.black87,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -49,7 +52,7 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Text(
@@ -96,7 +99,7 @@ class _CommitmentCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -142,7 +145,7 @@ class _CommitmentCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               commitment.selectedPickupLocation!.address,
-              style: GoogleFonts.dmSans(color: Colors.black54),
+              style: GoogleFonts.dmSans(color: AppColors.black54),
             ),
           ],
           const SizedBox(height: 12),
@@ -152,7 +155,7 @@ class _CommitmentCard extends StatelessWidget {
                 commitment.deliveryDate == null
                     ? 'Delivery date pending'
                     : 'Delivery ${DateFormat('MMM d, yyyy').format(commitment.deliveryDate!)}',
-                style: GoogleFonts.dmSans(color: Colors.black45),
+                style: GoogleFonts.dmSans(color: AppColors.black54),
               ),
               const Spacer(),
               if (commitment.canMarkDelivered)
@@ -225,7 +228,7 @@ class _CommitmentCard extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               height: 3,
-              color: active ? Colors.green : Colors.grey.shade300,
+              color: active ? AppColors.green : AppColors.grey300,
             ),
           );
         }
@@ -240,9 +243,9 @@ class _CommitmentCard extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: active ? Colors.green : Colors.grey.shade300,
+                color: active ? AppColors.green : AppColors.grey300,
               ),
-              child: const Icon(Icons.check, size: 14, color: Colors.white),
+              child: const Icon(Icons.check, size: 14, color: AppColors.white),
             ),
             const SizedBox(height: 6),
             Text(
@@ -255,3 +258,6 @@ class _CommitmentCard extends StatelessWidget {
     );
   }
 }
+
+
+

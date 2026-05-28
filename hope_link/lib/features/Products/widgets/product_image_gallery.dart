@@ -96,7 +96,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   decoration: BoxDecoration(
                     color: isActive
                         ? AppColors.primary
-                        : Colors.white.withOpacity(0.6),
+                        : AppColors.white.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 );
@@ -132,7 +132,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                         border: Border.all(
                           color: isActive
                               ? AppColors.primary
-                              : Colors.transparent,
+                              : AppColors.transparent,
                           width: 2,
                         ),
                       ),
@@ -168,3 +168,5 @@ class _EmptyImage extends StatelessWidget {
     );
   }
 }
+
+

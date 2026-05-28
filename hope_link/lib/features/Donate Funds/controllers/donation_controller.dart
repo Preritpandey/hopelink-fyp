@@ -1,17 +1,18 @@
-import 'dart:async';
-
+import 'dart:async';        
+import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:dio/dio.dart' as dio;
 import 'package:hope_link/config/constants/api_endpoints.dart';
-import 'package:hope_link/config/payment_config.dart';
+import 'package:hope_link/config/payment_config.dart';  
 import 'package:hope_link/core/services/payment_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/features/Donate%20Funds/models/campaign_model.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
-import '../models/campaign_model.dart';
-import 'campaign_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'campaign_controller.dart'; 
+          
 
 enum DonationPaymentMethod { stripe, khalti }
 
@@ -59,8 +60,8 @@ class DonationController extends GetxController {
         'Authentication Required',
         'Please log in to make a donation',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
         duration: const Duration(seconds: 3),
@@ -83,8 +84,8 @@ class DonationController extends GetxController {
           'Invalid Amount',
           'Minimum donation is NPR 100',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
+          backgroundColor: AppColors.red.withOpacity(0.9),
+          colorText: AppColors.white,
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
         );
@@ -102,8 +103,8 @@ class DonationController extends GetxController {
         'Error',
         'Failed to process donation: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -174,8 +175,8 @@ class DonationController extends GetxController {
           'Configuration Error',
           'Khalti is not configured. Please contact support.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
+          backgroundColor: AppColors.red.withOpacity(0.9),
+          colorText: AppColors.white,
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
         );
@@ -188,8 +189,8 @@ class DonationController extends GetxController {
           'Error',
           'Unable to start Khalti payment. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
+          backgroundColor: AppColors.red.withOpacity(0.9),
+          colorText: AppColors.white,
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
         );
@@ -227,8 +228,8 @@ class DonationController extends GetxController {
                 'Payment Pending Review',
                 'Your Khalti payment may have succeeded, but we could not verify it with your current session. Please refresh and check your donation history.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.withOpacity(0.9),
-                colorText: Colors.white,
+                backgroundColor: AppColors.orange.withOpacity(0.9),
+                colorText: AppColors.white,
                 margin: const EdgeInsets.all(16),
                 borderRadius: 12,
                 duration: const Duration(seconds: 5),
@@ -242,8 +243,8 @@ class DonationController extends GetxController {
               'Payment Received',
               'Your payment was successful but we encountered an issue recording the donation. Our team will verify it shortly.',
               snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.orange.withOpacity(0.9),
-              colorText: Colors.white,
+              backgroundColor: AppColors.orange.withOpacity(0.9),
+              colorText: AppColors.white,
               margin: const EdgeInsets.all(16),
               borderRadius: 12,
               duration: const Duration(seconds: 5),
@@ -329,8 +330,8 @@ class DonationController extends GetxController {
         'Authentication Required',
         'Please log in again to continue.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -398,8 +399,8 @@ class DonationController extends GetxController {
       'Khalti Configuration Error',
       'The server Khalti credentials are invalid or do not match the active Khalti environment. Please update the backend Khalti keys and try again.',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.red.withOpacity(0.9),
+      colorText: AppColors.white,
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
       duration: const Duration(seconds: 5),
@@ -413,8 +414,8 @@ class DonationController extends GetxController {
           ? 'Your session has expired. Please log in again.'
           : 'Your session could not be verified for this payment request. Please try again.',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.orange.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: AppColors.orange.withOpacity(0.9),
+      colorText: AppColors.white,
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
       duration: const Duration(seconds: 3),
@@ -478,12 +479,12 @@ class DonationController extends GetxController {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: AppColors.green.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check_circle_rounded,
-                  color: Colors.green,
+                  color: AppColors.green,
                   size: 64,
                 ),
               ),
@@ -498,7 +499,7 @@ class DonationController extends GetxController {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   height: 1.5,
                 ),
               ),
@@ -506,7 +507,7 @@ class DonationController extends GetxController {
               Text(
                 'You will receive a confirmation email shortly.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 14, color: AppColors.grey600),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -518,7 +519,7 @@ class DonationController extends GetxController {
                     Get.back(); // Go back to campaigns list
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6B4CE6),
+                    backgroundColor: AppColors.purple,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -529,7 +530,7 @@ class DonationController extends GetxController {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -568,7 +569,7 @@ class DonationController extends GetxController {
                 Text(
                   'Your Khalti payment was received. We are finalizing your donation in the app.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 14, color: AppColors.grey700),
                 ),
               ],
             ),
@@ -652,3 +653,6 @@ class DonationController extends GetxController {
     super.onClose();
   }
 }
+
+
+

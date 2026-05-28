@@ -120,7 +120,7 @@ class AppOutlinedButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: isEnabled ? onPressed : null,
         style: OutlinedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.transparent,
+          backgroundColor: backgroundColor ?? AppColors.transparent,
           side: BorderSide(
             color: isEnabled ? color : AppColorToken.grey.color,
             width: 1,
@@ -218,3 +218,4 @@ class AppTextButton extends StatelessWidget {
     );
   }
 }
+

@@ -24,12 +24,12 @@ class SearchFilterChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? AppColorToken.primary.color : Colors.white,
+            color: isSelected ? AppColorToken.primary.color : AppColors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected
                   ? AppColorToken.primary.color
-                  : Colors.grey.withOpacity(0.3),
+                  : AppColors.grey.withOpacity(0.3),
             ),
             boxShadow: isSelected
                 ? [
@@ -44,7 +44,7 @@ class SearchFilterChip extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyle.bodySmall.copyWith(
-              color: isSelected ? Colors.white : Colors.grey[700],
+              color: isSelected ? AppColors.white : AppColors.grey700,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
@@ -53,3 +53,5 @@ class SearchFilterChip extends StatelessWidget {
     });
   }
 }
+
+

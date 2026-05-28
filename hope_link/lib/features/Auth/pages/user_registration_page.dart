@@ -75,7 +75,7 @@ class _SignUpPageState extends State<SignUpPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -101,7 +101,7 @@ class _SignUpPageState extends State<SignUpPage>
                         Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
@@ -126,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       'Full Name',
                                       style: AppTextStyle.bodySmall.copyWith(
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.grey[700],
+                                        color: AppColors.grey700,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -153,7 +153,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       'Email',
                                       style: AppTextStyle.bodySmall.copyWith(
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.grey[700],
+                                        color: AppColors.grey700,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -184,7 +184,7 @@ class _SignUpPageState extends State<SignUpPage>
                                       'Password',
                                       style: AppTextStyle.bodySmall.copyWith(
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.grey[700],
+                                        color: AppColors.grey700,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -209,7 +209,7 @@ class _SignUpPageState extends State<SignUpPage>
                                             _obscurePassword.value
                                                 ? Icons.visibility_off_rounded
                                                 : Icons.visibility_rounded,
-                                            color: Colors.grey[600],
+                                            color: AppColors.grey600,
                                           ),
                                           onPressed: () {
                                             _obscurePassword.toggle();
@@ -249,10 +249,10 @@ class _SignUpPageState extends State<SignUpPage>
                             horizontal: 24,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.grey.withOpacity(0.2),
+                              color: AppColors.grey.withOpacity(0.2),
                               width: 1,
                             ),
                           ),
@@ -262,7 +262,7 @@ class _SignUpPageState extends State<SignUpPage>
                               Text(
                                 "Already have an account?",
                                 style: AppTextStyle.bodySmall.copyWith(
-                                  color: Colors.grey[600],
+                                  color: AppColors.grey600,
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -299,3 +299,5 @@ class _SignUpPageState extends State<SignUpPage>
     );
   }
 }
+
+

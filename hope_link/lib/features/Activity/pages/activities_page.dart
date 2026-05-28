@@ -64,7 +64,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -98,11 +98,11 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(13),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: AppColors.black.withOpacity(0.06),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -111,7 +111,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               child: Icon(
                 Icons.arrow_back_ios_new_rounded,
                 size: 18,
-                color: Colors.grey[700],
+                color: AppColors.grey700,
               ),
             ),
           ),
@@ -124,14 +124,14 @@ class _ActivitiesPageState extends State<ActivitiesPage>
                   'My Activities',
                   style: AppTextStyle.h3.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                   ),
                 ),
                 Obx(
                   () => Text(
                     '${_controller.totalCount.value} total activities',
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.grey[500],
+                      color: AppColors.grey500,
                     ),
                   ),
                 ),
@@ -184,7 +184,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -200,12 +200,12 @@ class _ActivitiesPageState extends State<ActivitiesPage>
             decoration: InputDecoration(
               hintText: 'Search your activities...',
               hintStyle: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[400],
+                color: AppColors.grey400,
               ),
-              prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400]),
+              prefixIcon: Icon(Icons.search_rounded, color: AppColors.grey400),
               suffixIcon: _controller.searchText.value.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear_rounded, color: Colors.grey[400]),
+                      icon: Icon(Icons.clear_rounded, color: AppColors.grey400),
                       onPressed: () {
                         _searchController.clear();
                         _controller.search('');
@@ -270,12 +270,12 @@ class _ActivitiesPageState extends State<ActivitiesPage>
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColorToken.primary.color : Colors.white,
+            color: isSelected ? AppColorToken.primary.color : AppColors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected
                   ? AppColorToken.primary.color
-                  : Colors.grey.withOpacity(0.3),
+                  : AppColors.grey.withOpacity(0.3),
             ),
             boxShadow: isSelected
                 ? [
@@ -293,13 +293,13 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               Icon(
                 icon,
                 size: 14,
-                color: isSelected ? Colors.white : Colors.grey[600],
+                color: isSelected ? AppColors.white : AppColors.grey600,
               ),
               const SizedBox(width: 5),
               Text(
                 label,
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: isSelected ? Colors.white : Colors.grey[700],
+                  color: isSelected ? AppColors.white : AppColors.grey700,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -380,7 +380,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
             'Recent Activity',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           const Spacer(),
@@ -446,13 +446,13 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.08),
+                color: AppColors.red.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.wifi_off_rounded,
                 size: 36,
-                color: Colors.redAccent,
+                color: AppColors.redAccent,
               ),
             ),
             const SizedBox(height: 20),
@@ -460,13 +460,13 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               'Oops!',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               _controller.errorMessage.value,
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[500]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
@@ -496,7 +496,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
                 child: Text(
                   'Try Again',
                   style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -533,7 +533,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               'No Activities Yet',
               style: AppTextStyle.h4.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
+                color: AppColors.grey800,
               ),
             ),
             const SizedBox(height: 8),
@@ -541,7 +541,7 @@ class _ActivitiesPageState extends State<ActivitiesPage>
               _controller.searchText.value.isNotEmpty
                   ? 'No results for "${_controller.searchText.value}"'
                   : 'Start donating, attending events,\nor volunteering to see your activity here.',
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[500]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -585,19 +585,19 @@ class _SkeletonCardState extends State<_SkeletonCard>
       animation: _shimmer,
       builder: (_, __) {
         final shimmerColor = Color.lerp(
-          Colors.grey[200]!,
-          Colors.grey[100]!,
+          AppColors.grey200,
+          AppColors.grey100,
           _shimmer.value,
         )!;
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: AppColors.black.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -653,3 +653,5 @@ class _SkeletonCardState extends State<_SkeletonCard>
     );
   }
 }
+
+

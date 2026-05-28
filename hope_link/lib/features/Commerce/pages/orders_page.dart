@@ -25,9 +25,9 @@ class OrdersPage extends StatelessWidget {
       backgroundColor: const Color(0xFFF5FAF7),
       appBar: AppBar(
         title: const Text('My orders'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
+        foregroundColor: AppColors.black87,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -93,11 +93,11 @@ class _OrderCard extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: AppColors.black.withOpacity(0.04),
               blurRadius: 18,
               offset: const Offset(0, 10),
             ),
@@ -113,8 +113,8 @@ class _OrderCard extends StatelessWidget {
                 _StatusPill(
                   label: order.paymentStatus,
                   color: order.paymentStatus == 'paid'
-                      ? const Color(0xFF27AE60)
-                      : Colors.orange,
+                      ? AppColors.primary
+                      : AppColors.orange,
                 ),
               ],
             ),
@@ -130,7 +130,7 @@ class _OrderCard extends StatelessWidget {
               order.organizationName.isNotEmpty
                   ? order.organizationName
                   : 'HopeLink marketplace',
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             ),
             const SizedBox(height: 14),
             Row(
@@ -188,14 +188,16 @@ class _StatusPill extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'delivered':
-        return const Color(0xFF27AE60);
+        return AppColors.primary;
       case 'confirmed':
       case 'shipped':
-        return const Color(0xFF2D9CDB);
+        return AppColors.blue;
       case 'cancelled':
-        return Colors.redAccent;
+        return AppColors.redAccent;
       default:
-        return Colors.orange;
+        return AppColors.orange;
     }
   }
 }
+
+

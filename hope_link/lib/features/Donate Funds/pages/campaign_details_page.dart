@@ -257,8 +257,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         'Report unavailable',
         'No report file is available for this campaign yet.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.orange.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -271,8 +271,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         'Invalid report link',
         'The report link could not be opened.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -289,8 +289,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
         'Open failed',
         'Could not open the campaign report.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.9),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.9),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
@@ -325,7 +325,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               end: Alignment.bottomRight,
               colors: [
                 AppColorToken.primary.color.withOpacity(0.05),
-                Colors.white,
+                AppColors.white,
                 AppColorToken.primary.color.withOpacity(0.03),
               ],
             ),
@@ -349,7 +349,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -393,7 +393,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       expandedHeight: 0,
       floating: true,
       pinned: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: IconButton(
         icon: Icon(
@@ -426,7 +426,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               'Share functionality coming soon',
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: AppColorToken.primary.color.withOpacity(0.9),
-              colorText: Colors.white,
+              colorText: AppColors.white,
               margin: const EdgeInsets.all(16),
               borderRadius: 12,
             );
@@ -441,8 +441,8 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     if (campaign!.images.isEmpty) {
       return Container(
         height: 300,
-        color: Colors.grey[200],
-        child: Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
+        color: AppColors.grey200,
+        child: Icon(Icons.image_outlined, size: 80, color: AppColors.grey400),
       );
     }
 
@@ -462,11 +462,11 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: Colors.grey[200],
+                      color: AppColors.grey200,
                       child: Icon(
                         Icons.image_outlined,
                         size: 80,
-                        color: Colors.grey[400],
+                        color: AppColors.grey400,
                       ),
                     );
                   },
@@ -490,7 +490,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   decoration: BoxDecoration(
                     color: _selectedImageIndex.value == index
                         ? AppColorToken.primary.color
-                        : Colors.grey[300],
+                        : AppColors.grey300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -518,9 +518,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   ),
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
+                    color: AppColors.amber.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.amber),
+                    border: Border.all(color: AppColors.amber),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -528,13 +528,13 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                       const Icon(
                         Icons.star_rounded,
                         size: 16,
-                        color: Colors.amber,
+                        color: AppColors.amber,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Featured',
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.amber[800],
+                          color: AppColors.amber[800],
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -548,19 +548,19 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                 ),
                 decoration: BoxDecoration(
                   color: campaign!.isActive
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.1),
+                      ? AppColors.green.withOpacity(0.1)
+                      : AppColors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: campaign!.isActive ? Colors.green : Colors.grey,
+                    color: campaign!.isActive ? AppColors.green : AppColors.grey,
                   ),
                 ),
                 child: Text(
                   campaign!.status.toUpperCase(),
                   style: AppTextStyle.bodySmall.copyWith(
                     color: campaign!.isActive
-                        ? Colors.green[700]
-                        : Colors.grey[700],
+                        ? AppColors.green[700]
+                        : AppColors.grey700,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -572,7 +572,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             campaign!.title,
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           12.verticalSpace,
@@ -603,7 +603,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                       Text(
                         'Organized by',
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[500],
+                          color: AppColors.grey500,
                         ),
                       ),
                       2.verticalSpace,
@@ -638,7 +638,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -667,7 +667,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   Text(
                     'raised of ${_formatCurrency(campaign!.targetAmount)}',
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                     ),
                   ),
                 ],
@@ -691,7 +691,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                     Text(
                       'funded',
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -704,7 +704,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: campaign!.progress / 100,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.grey200,
               valueColor: AlwaysStoppedAnimation<Color>(
                 AppColorToken.primary.color,
               ),
@@ -720,7 +720,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                 '$daysLeft days',
                 'left',
               ),
-              Container(width: 1, height: 40, color: Colors.grey[200]),
+              Container(width: 1, height: 40, color: AppColors.grey200),
               _buildStatItem(
                 Icons.date_range_rounded,
                 _formatDate(campaign!.endDate),
@@ -745,13 +745,13 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               value,
               style: AppTextStyle.bodyMedium.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: AppColors.grey800,
               ),
             ),
             2.verticalSpace,
             Text(
               label,
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[500]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey500),
             ),
           ],
         ),
@@ -765,7 +765,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       child: Obx(
         () => Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -799,7 +799,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
           decoration: BoxDecoration(
             color: isSelected
                 ? AppColorToken.primary.color
-                : Colors.transparent,
+                : AppColors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
@@ -807,7 +807,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             textAlign: TextAlign.center,
             style: AppTextStyle.bodyMedium.copyWith(
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              color: isSelected ? Colors.white : Colors.grey[600],
+              color: isSelected ? AppColors.white : AppColors.grey600,
             ),
           ),
         ),
@@ -837,7 +837,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -854,14 +854,14 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             'About this campaign',
             style: AppTextStyle.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           16.verticalSpace,
           Text(
             campaign!.description,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[700],
+              color: AppColors.grey700,
               height: 1.6,
             ),
           ),
@@ -918,7 +918,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.grey50,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: AppColorToken.primary.color.withOpacity(0.12),
@@ -949,14 +949,14 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                       'Photo evidence',
                       style: AppTextStyle.bodyMedium.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[900],
+                        color: AppColors.grey900,
                       ),
                     ),
                     4.verticalSpace,
                     Text(
                       'Photos shared by the organization to show how campaign funds were used.',
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -968,9 +968,9 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: AppColors.grey200),
             ),
             child: Row(
               children: [
@@ -984,7 +984,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   child: Text(
                     'Show photo evidence (${campaign!.evidencePhotos.length})',
                     style: AppTextStyle.bodyMedium.copyWith(
-                      color: Colors.grey[800],
+                      color: AppColors.grey800,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1019,11 +1019,11 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                               return Container(
                                 width: 168,
                                 height: 132,
-                                color: Colors.grey[200],
+                                color: AppColors.grey200,
                                 alignment: Alignment.center,
                                 child: Icon(
                                   Icons.broken_image_rounded,
-                                  color: Colors.grey[400],
+                                  color: AppColors.grey400,
                                 ),
                               );
                             },
@@ -1034,13 +1034,13 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.45),
+                                color: AppColors.black.withOpacity(0.45),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: const Icon(
                                 Icons.open_in_full_rounded,
                                 size: 16,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                           ),
@@ -1053,13 +1053,13 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.45),
+                                color: AppColors.black.withOpacity(0.45),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
                                 'Evidence ${index + 1}',
                                 style: AppTextStyle.bodySmall.copyWith(
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1083,7 +1083,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       return Container(
         padding: const EdgeInsets.all(48),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -1091,12 +1091,12 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             Icon(
               Icons.notifications_none_rounded,
               size: 64,
-              color: Colors.grey[300],
+              color: AppColors.grey300,
             ),
             16.verticalSpace,
             Text(
               'No updates yet',
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
             ),
           ],
         ),
@@ -1112,7 +1112,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
           ),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -1148,14 +1148,14 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                           update.title,
                           style: AppTextStyle.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[900],
+                            color: AppColors.grey900,
                           ),
                         ),
                         4.verticalSpace,
                         Text(
                           _formatDate(update.date),
                           style: AppTextStyle.bodySmall.copyWith(
-                            color: Colors.grey[500],
+                            color: AppColors.grey500,
                           ),
                         ),
                       ],
@@ -1167,7 +1167,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               Text(
                 update.description,
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   height: 1.5,
                 ),
               ),
@@ -1183,16 +1183,16 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
       return Container(
         padding: const EdgeInsets.all(48),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           children: [
-            Icon(Icons.help_outline_rounded, size: 64, color: Colors.grey[300]),
+            Icon(Icons.help_outline_rounded, size: 64, color: AppColors.grey300),
             16.verticalSpace,
             Text(
               'No FAQs yet',
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
             ),
           ],
         ),
@@ -1210,7 +1210,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
               bottom: entry.key < campaign!.faqs.length - 1 ? 12 : 0,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -1223,7 +1223,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
             child: Theme(
               data: Theme.of(
                 context,
-              ).copyWith(dividerColor: Colors.transparent),
+              ).copyWith(dividerColor: AppColors.transparent),
               child: ExpansionTile(
                 tilePadding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -1233,7 +1233,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                   faq.question,
                   style: AppTextStyle.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppColors.grey800,
                   ),
                 ),
                 trailing: Icon(
@@ -1251,7 +1251,7 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
                     child: Text(
                       faq.answer,
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                         height: 1.5,
                       ),
                     ),
@@ -1269,10 +1269,10 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -1294,3 +1294,5 @@ class _CampaignDetailsPageState extends State<CampaignDetailsPage>
     );
   }
 }
+
+

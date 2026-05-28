@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 import '../services/profile_service.dart';
 
 class ProfileCVController extends GetxController {
@@ -26,11 +27,12 @@ class ProfileCVController extends GetxController {
         'Error',
         'Failed to upload CV: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
-        colorText: Colors.white,
-        backgroundColor: Colors.red,
+        colorText: AppColors.white,
+        backgroundColor: AppColors.red,
       );
     } finally {
       uploading.value = false;
     }
   }
 }
+

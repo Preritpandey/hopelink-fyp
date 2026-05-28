@@ -5,8 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
-import 'package:hope_link/core/widgets/app_button.dart';
-import 'package:hope_link/core/widgets/app_text_field.dart';
 import 'package:hope_link/features/Profile/controllers/profile_controller.dart';
 import 'package:hope_link/features/Profile/controllers/profile_image_controller.dart';
 import 'package:hope_link/features/Profile/controllers/profile_cv_controller.dart';
@@ -88,7 +86,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     Get.put(ProfileCVController(widget.token));
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.grey50,
       appBar: AppBar(
       
         backgroundColor: AppColorToken.primary.color,
@@ -96,13 +94,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: AppColors.white,
           ),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'Edit Profile',
-          style: AppTextStyle.h4.bold.copyWith(color: Colors.white),
+          style: AppTextStyle.h4.bold.copyWith(color: AppColors.white),
         ),
         actions: [
           Obx(
@@ -111,7 +109,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               child: Text(
                 'Save',
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -164,16 +162,16 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
+                    border: Border.all(color: AppColors.white, width: 4),
                   ),
                   child: CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: AppColors.grey200,
                     backgroundImage: user?.profileImage.isNotEmpty ?? false
                         ? NetworkImage(user!.profileImage)
                         : null,
                     child: user?.profileImage.isEmpty ?? true
-                        ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                        ? Icon(Icons.person, size: 60, color: AppColors.grey400)
                         : null,
                   ),
                 ),
@@ -186,7 +184,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       ? Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             shape: BoxShape.circle,
                           ),
                           child: SizedBox(
@@ -205,11 +203,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                             decoration: BoxDecoration(
                               color: AppColorToken.primary.color,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
+                              border: Border.all(color: AppColors.white, width: 3),
                             ),
                             child: const Icon(
                               Icons.camera_alt_rounded,
-                              color: Colors.white,
+                              color: AppColors.white,
                               size: 20,
                             ),
                           ),
@@ -222,7 +220,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           Text(
             'Tap to change profile photo',
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.white.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -235,11 +233,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -291,11 +289,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -344,11 +342,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -387,11 +385,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -414,7 +412,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           const SizedBox(height: 8),
           Text(
             'Select causes you care about',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -440,12 +438,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColorToken.primary.color
-                        : Colors.grey[100],
+                        : AppColors.grey100,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
                           ? AppColorToken.primary.color
-                          : Colors.grey[300]!,
+                          : AppColors.grey300,
                     ),
                   ),
                   child: Row(
@@ -456,14 +454,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                           padding: EdgeInsets.only(right: 6),
                           child: Icon(
                             Icons.check,
-                            color: Colors.white,
+                            color: AppColors.white,
                             size: 16,
                           ),
                         ),
                       Text(
                         interest,
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: isSelected ? Colors.white : Colors.grey[700],
+                          color: isSelected ? AppColors.white : AppColors.grey700,
                           fontWeight: isSelected
                               ? FontWeight.w600
                               : FontWeight.normal,
@@ -489,11 +487,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -544,7 +542,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           label,
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -555,16 +553,16 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           validator: validator,
           decoration: InputDecoration(
             hintText: hintText ?? label,
-            prefixIcon: Icon(icon, color: Colors.grey[400]),
+            prefixIcon: Icon(icon, color: AppColors.grey400),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: AppColors.grey50,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: AppColors.grey200),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: AppColors.grey200),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -575,7 +573,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: const BorderSide(color: AppColors.red),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -595,23 +593,23 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           'Gender',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedGender,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.wc_rounded, color: Colors.grey[400]),
+            prefixIcon: Icon(Icons.wc_rounded, color: AppColors.grey400),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: AppColors.grey50,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: AppColors.grey200),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: AppColors.grey200),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -651,12 +649,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: AppColors.grey50,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasDocument
                 ? AppColorToken.primary.color.withValues(alpha: 0.3)
-                : Colors.grey[200]!,
+                : AppColors.grey200,
             width: hasDocument ? 2 : 1,
           ),
         ),
@@ -667,14 +665,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               decoration: BoxDecoration(
                 color: hasDocument
                     ? AppColorToken.primary.color.withValues(alpha: 0.1)
-                    : Colors.grey[200],
+                    : AppColors.grey200,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 color: hasDocument
                     ? AppColorToken.primary.color
-                    : Colors.grey[400],
+                    : AppColors.grey400,
               ),
             ),
             const SizedBox(width: 16),
@@ -699,8 +697,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       color: isUploading
                           ? AppColorToken.primary.color
                           : hasDocument
-                          ? Colors.green[700]
-                          : Colors.grey[600],
+                          ? AppColors.green[700]
+                          : AppColors.grey600,
                     ),
                   ),
                 ],
@@ -718,7 +716,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             else if (hasDocument)
               Icon(
                 Icons.check_circle_rounded,
-                color: Colors.green[600],
+                color: AppColors.green[600],
                 size: 24,
               )
             else
@@ -785,3 +783,5 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     Get.back();
   }
 }
+
+

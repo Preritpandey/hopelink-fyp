@@ -109,17 +109,17 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       expandedHeight: 0,
       floating: true,
       pinned: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: IconButton(
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: AppColors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -151,11 +151,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: AppColors.black.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -182,8 +182,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColorToken.primary.color.withOpacity(0.3),
-              AppColorToken.primary.color.withOpacity(0.1),
+              AppColorToken.primary.color.withValues(alpha: 0.3),
+              AppColorToken.primary.color.withValues(alpha: 0.1),
             ],
           ),
         ),
@@ -191,7 +191,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           child: Icon(
             Icons.event_rounded,
             size: 80,
-            color: AppColorToken.primary.color.withOpacity(0.5),
+            color: AppColorToken.primary.color.withValues(alpha: 0.5),
           ),
         ),
       );
@@ -211,12 +211,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: Colors.grey[200],
+                    color: AppColors.grey200,
                     child: Center(
                       child: Icon(
                         Icons.broken_image_rounded,
                         size: 60,
-                        color: Colors.grey[400],
+                        color: AppColors.grey400,
                       ),
                     ),
                   );
@@ -238,7 +238,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: AppColors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -251,8 +251,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: _currentImageIndex.value == index
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.4),
+                              ? AppColors.white
+                              : AppColors.white.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -270,12 +270,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.amber.shade400, Colors.orange.shade400],
+                  colors: [AppColors.amber, AppColors.orange],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.5),
+                    color: AppColors.amber.withValues(alpha: 0.5),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -284,12 +284,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_rounded, size: 16, color: Colors.white),
+                  const Icon(Icons.star_rounded, size: 16, color: AppColors.white),
                   4.horizontalSpace,
                   Text(
                     'Featured',
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -311,7 +311,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColorToken.primary.color.withOpacity(0.1),
+              color: AppColorToken.primary.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -344,8 +344,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 Icons.public_rounded,
                 _event.status.toUpperCase(),
                 color: _event.status == 'published'
-                    ? Colors.green
-                    : Colors.orange,
+                    ? AppColors.green
+                    : AppColors.orange,
               ),
             ],
           ),
@@ -364,7 +364,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: (color ?? AppColorToken.primary.color).withOpacity(0.1),
+        color: (color ?? AppColorToken.primary.color).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -394,12 +394,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColorToken.primary.color.withOpacity(0.1),
-            AppColorToken.primary.color.withOpacity(0.05),
+            AppColorToken.primary.color.withValues(alpha: 0.1),
+            AppColorToken.primary.color.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColorToken.primary.color.withOpacity(0.2)),
+        border: Border.all(color: AppColorToken.primary.color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -411,13 +411,13 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 _event.volunteersCount.toString(),
                 Icons.people_rounded,
               ),
-              Container(width: 1, height: 40, color: Colors.grey[300]),
+              Container(width: 1, height: 40, color: AppColors.grey300),
               _buildStatItem(
                 'Max Capacity',
                 _event.maxVolunteers.toString(),
                 Icons.groups_rounded,
               ),
-              Container(width: 1, height: 40, color: Colors.grey[300]),
+              Container(width: 1, height: 40, color: AppColors.grey300),
               _buildStatItem(
                 'Spots Left',
                 _event.spotsLeft.toString(),
@@ -431,10 +431,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             child: LinearProgressIndicator(
               value: _event.progressPercentage / 100,
               minHeight: 10,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.grey200,
               valueColor: AlwaysStoppedAnimation<Color>(
                 _event.progressPercentage >= 90
-                    ? Colors.orange
+                    ? AppColors.orange
                     : AppColorToken.primary.color,
               ),
             ),
@@ -469,7 +469,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           Text(
             label,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               fontSize: 11,
             ),
             textAlign: TextAlign.center,
@@ -495,7 +495,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           Text(
             _event.description,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[700],
+              color: AppColors.grey700,
               height: 1.6,
             ),
           ),
@@ -520,16 +520,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: AppColors.grey300),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColorToken.primary.color.withOpacity(0.1),
+                    color: AppColorToken.primary.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -553,7 +553,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       Text(
                         '${_event.location.city}, ${_event.location.state}',
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.grey600,
                         ),
                       ),
                     ],
@@ -606,9 +606,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.grey300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,7 +617,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           8.verticalSpace,
           Text(
             label,
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           4.verticalSpace,
           Text(
@@ -626,7 +626,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ),
           Text(
             DateFormat('yyyy, hh:mm a').format(date),
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
         ],
       ),
@@ -661,10 +661,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColorToken.primary.color.withOpacity(0.1),
+                  color: AppColorToken.primary.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppColorToken.primary.color.withOpacity(0.3),
+                    color: AppColorToken.primary.color.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
@@ -702,16 +702,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.grey300),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 30,
                     backgroundColor:
-                        AppColorToken.primary.color.withOpacity(0.1),
+                        AppColorToken.primary.color.withValues(alpha: 0.1),
                     child: Text(
                       _event.organizer.organizationName.isNotEmpty
                           ? _event.organizer.organizationName[0].toUpperCase()
@@ -742,7 +742,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               ? _event.organizer.officialEmail
                               : 'contact@organizer.com',
                           style: AppTextStyle.bodySmall.copyWith(
-                            color: Colors.grey[600],
+                            color: AppColors.grey600,
                           ),
                         ),
                       ],
@@ -761,10 +761,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -792,20 +792,20 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             onPressed: canEnroll ? _enrollInEvent : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColorToken.primary.color,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               elevation: 0,
-              disabledBackgroundColor: Colors.grey[300],
+              disabledBackgroundColor: AppColors.grey300,
             ),
             child: isBusy
                 ? const SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppColors.white,
                       strokeWidth: 2,
                     ),
                   )
@@ -818,7 +818,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         buttonLabel,
                         style: AppTextStyle.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     ],
@@ -833,3 +833,5 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     await _controller.enrollInEvent(_event.id);
   }
 }
+
+

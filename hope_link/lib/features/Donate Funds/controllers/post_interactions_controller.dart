@@ -70,8 +70,8 @@ class PostInteractionsController extends GetxController {
         'Action unavailable',
         error.toString().replaceFirst('Exception: ', ''),
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.92),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.92),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
       );
@@ -98,8 +98,8 @@ class PostInteractionsController extends GetxController {
         'Comment failed',
         error.toString().replaceFirst('Exception: ', ''),
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.92),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.92),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
       );
@@ -120,7 +120,7 @@ class PostInteractionsController extends GetxController {
         'Your comment was deleted successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColorToken.primary.color.withOpacity(0.92),
-        colorText: Colors.white,
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
       );
@@ -129,8 +129,8 @@ class PostInteractionsController extends GetxController {
         'Delete failed',
         error.toString().replaceFirst('Exception: ', ''),
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.92),
-        colorText: Colors.white,
+        backgroundColor: AppColors.red.withOpacity(0.92),
+        colorText: AppColors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 14,
       );
@@ -143,3 +143,5 @@ class PostInteractionsController extends GetxController {
     super.onClose();
   }
 }
+
+

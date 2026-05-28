@@ -30,8 +30,8 @@ class CheckoutPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Checkout'),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppColors.transparent,
+        foregroundColor: AppColors.black87,
       ),
       body: Form(
         key: checkoutController.formKey,
@@ -180,7 +180,7 @@ class CheckoutPage extends StatelessWidget {
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : const Icon(Icons.payments_outlined),
@@ -210,11 +210,11 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -268,3 +268,5 @@ class _InputField extends StatelessWidget {
     );
   }
 }
+
+

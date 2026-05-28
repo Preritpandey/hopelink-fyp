@@ -53,9 +53,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -72,7 +72,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withValues(alpha: 0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withValues(alpha: 0.03),
             ],
           ),
@@ -137,7 +137,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
         Text(
           'No worries, we\'ll send you reset instructions',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
+            color: AppColors.grey600,
             fontSize: 16,
           ),
           textAlign: TextAlign.center,
@@ -150,7 +150,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -172,7 +172,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
             const SizedBox(height: 8),
             Text(
               'Enter your email address and we\'ll send you an OTP',
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             ),
             const SizedBox(height: 24),
             _buildEmailField(),
@@ -192,7 +192,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
           'Email',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -231,9 +231,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+        border: Border.all(color: AppColors.grey.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -304,3 +304,5 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     }
   }
 }
+
+

@@ -27,15 +27,15 @@ class InterestChips extends StatelessWidget {
             interest,
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.black : Colors.grey[700],
+              color: isSelected ? AppColors.black : AppColors.grey700,
             ),
           ),
           selected: isSelected,
-          backgroundColor: Colors.grey[100],
+          backgroundColor: AppColors.grey100,
           selectedColor: AppColorToken.primary.color,
-          checkmarkColor: Colors.white,
+          checkmarkColor: AppColors.white,
           side: BorderSide(
-            color: isSelected ? AppColorToken.primary.color : Colors.grey[300]!,
+            color: isSelected ? AppColorToken.primary.color : AppColors.grey300,
             width: 1.5,
           ),
           shape: RoundedRectangleBorder(
@@ -90,3 +90,5 @@ class InterestChips extends StatelessWidget {
 //     );
 //   }
 // }
+
+

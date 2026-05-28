@@ -30,7 +30,7 @@ class ActivityStatsHeader extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: AppColors.black.withOpacity(0.06),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -142,3 +142,5 @@ class _StatItem extends StatelessWidget {
     );
   }
 }
+
+

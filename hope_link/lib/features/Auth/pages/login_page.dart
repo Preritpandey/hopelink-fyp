@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withValues(alpha: 0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withValues(alpha: 0.03),
             ],
           ),
@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage>
         Text(
           'Continue making a difference',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
+            color: AppColors.grey600,
             fontSize: 16,
           ),
           textAlign: TextAlign.center,
@@ -143,7 +143,7 @@ class _LoginPageState extends State<LoginPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -162,7 +162,7 @@ class _LoginPageState extends State<LoginPage>
             const SizedBox(height: 8),
             Text(
               'Enter your credentials to continue',
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             ),
             const SizedBox(height: 24),
             _buildEmailField(),
@@ -203,7 +203,7 @@ class _LoginPageState extends State<LoginPage>
           'Email',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -231,7 +231,7 @@ class _LoginPageState extends State<LoginPage>
           'Password',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -253,7 +253,7 @@ class _LoginPageState extends State<LoginPage>
                 _obscurePassword.value
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: Colors.grey[600],
+                color: AppColors.grey600,
               ),
               onPressed: () {
                 _obscurePassword.toggle();
@@ -282,16 +282,16 @@ class _LoginPageState extends State<LoginPage>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+        border: Border.all(color: AppColors.grey.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             "Don't have an account?",
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           const SizedBox(width: 4),
           TextButton(
@@ -346,3 +346,5 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 }
+
+

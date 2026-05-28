@@ -101,7 +101,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -166,17 +166,17 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(Icons.arrow_back_rounded, color: Colors.grey[800]),
+              child: Icon(Icons.arrow_back_rounded, color: AppColors.grey800),
             ),
           ),
           16.horizontalSpace,
@@ -185,7 +185,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
               'Job Details',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
           ),
@@ -206,17 +206,17 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(Icons.share_rounded, color: Colors.grey[800]),
+              child: Icon(Icons.share_rounded, color: AppColors.grey800),
             ),
           ),
         ],
@@ -242,7 +242,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             job.title,
             style: AppTextStyle.h2.copyWith(
               fontWeight: FontWeight.w800,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
               height: 1.2,
             ),
           ),
@@ -282,7 +282,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                       Text(
                         job.category,
                         style: AppTextStyle.bodyMedium.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.grey600,
                         ),
                       ),
                     ],
@@ -310,22 +310,22 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
     switch (job.jobType.toLowerCase()) {
       case 'remote':
         icon = Icons.laptop_mac_rounded;
-        color = Colors.blue;
+        color = AppColors.blue;
         label = 'Remote';
         break;
       case 'onsite':
         icon = Icons.location_on_rounded;
-        color = Colors.orange;
+        color = AppColors.orange;
         label = 'On-site';
         break;
       case 'hybrid':
         icon = Icons.home_work_rounded;
-        color = Colors.purple;
+        color = AppColors.purple;
         label = 'Hybrid';
         break;
       default:
         icon = Icons.work_outline_rounded;
-        color = Colors.grey;
+        color = AppColors.grey;
         label = job.jobType;
     }
 
@@ -355,7 +355,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
 
   Widget _buildStatusChip() {
     final bool isAvailable = job.isOpen && job.hasPositionsAvailable;
-    final color = isAvailable ? Colors.green : Colors.red;
+    final color = isAvailable ? AppColors.green : AppColors.red;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -391,7 +391,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -411,13 +411,13 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                 AppColorToken.primary.color,
               ),
             ),
-            Container(width: 1, height: 40, color: Colors.grey[200]),
+            Container(width: 1, height: 40, color: AppColors.grey200),
             Expanded(
               child: _buildInfoItem(
                 Icons.schedule_rounded,
                 'Credit Hours',
                 '${job.creditHours}h',
-                Colors.orange,
+                AppColors.orange,
               ),
             ),
           ],
@@ -440,13 +440,13 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
           value,
           style: AppTextStyle.h3.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.grey[900],
+            color: AppColors.grey900,
           ),
         ),
         4.verticalSpace,
         Text(
           label,
-          style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
         ),
       ],
     );
@@ -462,14 +462,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             'Description',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           12.verticalSpace,
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -482,7 +482,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             child: Text(
               job.description,
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[700],
+                color: AppColors.grey700,
                 height: 1.6,
               ),
             ),
@@ -502,14 +502,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             'Required Skills',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           12.verticalSpace,
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -577,14 +577,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             'Location',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           12.verticalSpace,
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -617,14 +617,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                         job.location.address,
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[900],
+                          color: AppColors.grey900,
                         ),
                       ),
                       4.verticalSpace,
                       Text(
                         '${job.location.city}, ${job.location.state}',
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.grey600,
                         ),
                       ),
                     ],
@@ -648,14 +648,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             'Benefits',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
           ),
           12.verticalSpace,
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -673,14 +673,14 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                   job.certificateProvided
                       ? 'Certificate of completion provided'
                       : 'No certificate provided',
-                  job.certificateProvided ? Colors.green : Colors.grey,
+                  job.certificateProvided ? AppColors.green : AppColors.grey,
                 ),
                 16.verticalSpace,
                 _buildBenefitItem(
                   Icons.access_time_rounded,
                   'Credit Hours',
                   '${job.creditHours} volunteer hours credited',
-                  Colors.blue,
+                  AppColors.blue,
                 ),
               ],
             ),
@@ -715,13 +715,13 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                 title,
                 style: AppTextStyle.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[900],
+                  color: AppColors.grey900,
                 ),
               ),
               4.verticalSpace,
               Text(
                 description,
-                style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+                style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
               ),
             ],
           ),
@@ -746,22 +746,22 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                     AppColorToken.primary.color.withOpacity(0.05),
                   ]
                 : [
-                    Colors.orange.withOpacity(0.1),
-                    Colors.orange.withOpacity(0.05),
+                    AppColors.orange.withOpacity(0.1),
+                    AppColors.orange.withOpacity(0.05),
                   ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: daysLeft > 7
                 ? AppColorToken.primary.color.withOpacity(0.2)
-                : Colors.orange.withOpacity(0.3),
+                : AppColors.orange.withOpacity(0.3),
           ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.calendar_today_rounded,
-              color: daysLeft > 7 ? AppColorToken.primary.color : Colors.orange,
+              color: daysLeft > 7 ? AppColorToken.primary.color : AppColors.orange,
               size: 24,
             ),
             16.horizontalSpace,
@@ -772,7 +772,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                   Text(
                     'Application Deadline',
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -781,7 +781,7 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
                     dateFormat.format(job.applicationDeadline),
                     style: AppTextStyle.bodyLarge.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Colors.grey[900],
+                      color: AppColors.grey900,
                     ),
                   ),
                 ],
@@ -790,13 +790,13 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: daysLeft > 7 ? Colors.green : Colors.orange,
+                color: daysLeft > 7 ? AppColors.green : AppColors.orange,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 daysLeft > 0 ? '$daysLeft days left' : 'Expired',
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -807,3 +807,5 @@ class _VolunteerJobDetailsPageState extends State<VolunteerJobDetailsPage>
     );
   }
 }
+
+

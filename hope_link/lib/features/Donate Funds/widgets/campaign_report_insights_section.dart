@@ -48,7 +48,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.grey50,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: AppColorToken.primary.color.withOpacity(0.12),
@@ -79,14 +79,14 @@ class CampaignReportInsightsSection extends StatelessWidget {
                       'Donation report',
                       style: AppTextStyle.bodyMedium.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[900],
+                        color: AppColors.grey900,
                       ),
                     ),
                     4.verticalSpace,
                     Text(
                       'See the approved report file for this campaign.',
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -113,7 +113,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                   child: Text(
                     'Loading campaign report...',
                     style: AppTextStyle.bodyMedium.copyWith(
-                      color: Colors.grey[700],
+                      color: AppColors.grey700,
                     ),
                   ),
                 ),
@@ -127,7 +127,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                   campaignReport!.reportFile.originalName,
                   style: AppTextStyle.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppColors.grey800,
                   ),
                 ),
                 12.verticalSpace,
@@ -164,15 +164,15 @@ class CampaignReportInsightsSection extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.grey200),
               ),
               child: Text(
                 reportMessage ??
                     'Campaign report has not been uploaded or approved yet.',
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   height: 1.5,
                 ),
               ),
@@ -196,8 +196,8 @@ class CampaignReportInsightsSection extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFFF4FBF6),
-              Colors.white,
+              AppColors.primarySoft,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.06),
             ],
           ),
@@ -239,14 +239,14 @@ class CampaignReportInsightsSection extends StatelessWidget {
                         'AI summary',
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[900],
+                          color: AppColors.grey900,
                         ),
                       ),
                       4.verticalSpace,
                       Text(
                         'A quick, readable overview generated from the approved campaign report.',
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.grey600,
                           height: 1.45,
                         ),
                       ),
@@ -274,7 +274,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                     child: Text(
                       'Generating an easy-to-read summary...',
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[700],
+                        color: AppColors.grey700,
                       ),
                     ),
                   ),
@@ -288,13 +288,13 @@ class CampaignReportInsightsSection extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.88),
+                      color: AppColors.white.withOpacity(0.88),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       summary.summary,
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[800],
+                        color: AppColors.grey800,
                         height: 1.7,
                       ),
                     ),
@@ -321,7 +321,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.88),
+                      color: AppColors.white.withOpacity(0.88),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -330,7 +330,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
                               'AI summary is not available for this report yet.')
                           : 'Generate a quick AI summary from the approved report when you want a short overview.',
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[700],
+                        color: AppColors.grey700,
                         height: 1.5,
                       ),
                     ),
@@ -359,9 +359,9 @@ class CampaignReportInsightsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -372,7 +372,7 @@ class CampaignReportInsightsSection extends StatelessWidget {
             child: Text(
               label,
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[700],
+                color: AppColors.grey700,
                 fontWeight: FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
@@ -383,3 +383,5 @@ class CampaignReportInsightsSection extends StatelessWidget {
     );
   }
 }
+
+

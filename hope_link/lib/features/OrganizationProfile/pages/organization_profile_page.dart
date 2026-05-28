@@ -43,7 +43,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FBF7),
+      backgroundColor: AppColors.primarySoft,
       body: SafeArea(
         child: Obx(() {
           final profile = controller.profile.value;
@@ -109,7 +109,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
               'Organization Profile',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
           ),
@@ -126,7 +126,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1E8E55), Color(0xFF6FCF97)],
+          colors: [AppColors.primaryDark, AppColors.primaryLight],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
@@ -151,7 +151,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
                     Text(
                       profile.name,
                       style: AppTextStyle.h2.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -160,7 +160,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
                       Text(
                         profile.location,
                         style: AppTextStyle.bodyMedium.copyWith(
-                          color: Colors.white.withOpacity(0.9),
+                          color: AppColors.white.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -174,7 +174,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
             Text(
               profile.description,
               style: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.white.withOpacity(0.95),
+                color: AppColors.white.withOpacity(0.95),
                 height: 1.5,
               ),
             ),
@@ -220,14 +220,14 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
       width: 76,
       height: 76,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
+        color: AppColors.white.withOpacity(0.18),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : 'O',
           style: AppTextStyle.h1.copyWith(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -239,7 +239,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.14),
+        color: AppColors.white.withOpacity(0.14),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -247,7 +247,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
           Text(
             value.toString(),
             style: AppTextStyle.h3.copyWith(
-              color: Colors.white,
+              color: AppColors.white,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -255,7 +255,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
           Text(
             label,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.white.withOpacity(0.92),
+              color: AppColors.white.withOpacity(0.92),
             ),
           ),
         ],
@@ -269,11 +269,11 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.black.withOpacity(0.05),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -295,7 +295,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
                       Text(
                         DateFormat('MMM dd, yyyy').format(post.createdAt),
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: Colors.grey[500],
+                          color: AppColors.grey500,
                         ),
                       ),
                     ],
@@ -305,7 +305,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
                     post.title,
                     style: AppTextStyle.h4.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: Colors.grey[900],
+                      color: AppColors.grey900,
                     ),
                   ),
                   if (post.description.isNotEmpty) ...[
@@ -315,7 +315,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[700],
+                        color: AppColors.grey700,
                         height: 1.5,
                       ),
                     ),
@@ -360,9 +360,9 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
 
   Widget _buildTypeBadge(String type) {
     final data = switch (type) {
-      'campaign' => (Colors.green.shade50, Colors.green.shade700, 'Campaign'),
-      'event' => (Colors.orange.shade50, Colors.orange.shade700, 'Event'),
-      _ => (Colors.blue.shade50, Colors.blue.shade700, 'Volunteer'),
+      'campaign' => (AppColors.primarySoft, AppColors.greenDark, 'Campaign'),
+      'event' => (AppColors.orange.shade50, AppColors.orangeDark, 'Event'),
+      _ => (AppColors.blueLight, AppColors.blueDark, 'Volunteer'),
     };
 
     return Container(
@@ -394,14 +394,14 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded, size: 72, color: Colors.grey[400]),
+            Icon(Icons.error_outline_rounded, size: 72, color: AppColors.grey400),
             16.verticalSpace,
             Text(
               controller.errorMessage.value.isEmpty
                   ? 'Something went wrong'
                   : controller.errorMessage.value,
               textAlign: TextAlign.center,
-              style: AppTextStyle.bodyLarge.copyWith(color: Colors.grey[700]),
+              style: AppTextStyle.bodyLarge.copyWith(color: AppColors.grey700),
             ),
             20.verticalSpace,
             ElevatedButton(
@@ -418,18 +418,18 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
         children: [
-          Icon(Icons.forum_outlined, size: 62, color: Colors.grey[350]),
+          Icon(Icons.forum_outlined, size: 62, color: AppColors.grey[350]),
           12.verticalSpace,
           Text(
             'No posts yet',
             style: AppTextStyle.h4.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.grey[800],
+              color: AppColors.grey800,
             ),
           ),
           8.verticalSpace,
@@ -437,7 +437,7 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
             'This organization profile is ready, but it has not published any campaigns, events, or volunteer jobs yet.',
             textAlign: TextAlign.center,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               height: 1.5,
             ),
           ),
@@ -473,3 +473,5 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
     return '';
   }
 }
+
+

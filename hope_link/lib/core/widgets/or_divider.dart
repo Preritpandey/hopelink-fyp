@@ -16,7 +16,7 @@ class OrDivider extends StatelessWidget {
             endIndent: 10,
           ),
         ),
-        const Text("Or sign up with", style: TextStyle(color: Colors.grey)),
+        const Text("Or sign up with", style: TextStyle(color: AppColors.grey)),
         Expanded(
           child: Divider(
             thickness: 1,
@@ -29,3 +29,4 @@ class OrDivider extends StatelessWidget {
     );
   }
 }
+

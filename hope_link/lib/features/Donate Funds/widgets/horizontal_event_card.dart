@@ -29,7 +29,7 @@ class HorizontalEventCard extends StatelessWidget {
         width: 280,
         margin: EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -93,12 +93,12 @@ class HorizontalEventCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.amber.shade400, Colors.orange.shade400],
+                  colors: [AppColors.amber, AppColors.orange],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.5),
+                    color: AppColors.amber.withOpacity(0.5),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -107,7 +107,7 @@ class HorizontalEventCard extends StatelessWidget {
               child: const Icon(
                 Icons.star_rounded,
                 size: 16,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
           ),
@@ -126,13 +126,13 @@ class HorizontalEventCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: AppColors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               event.category.toUpperCase(),
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.white,
+                color: AppColors.white,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
                 letterSpacing: 0.5,
@@ -146,13 +146,13 @@ class HorizontalEventCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: AppColors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               daysLeft > 0 ? '$daysLeft days left' : 'Today',
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.white,
+                color: AppColors.white,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -194,7 +194,7 @@ class HorizontalEventCard extends StatelessWidget {
             event.title,
             style: AppTextStyle.h5.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -240,13 +240,13 @@ class HorizontalEventCard extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
+        Icon(icon, size: 14, color: AppColors.grey600),
         6.horizontalSpace,
         Expanded(
           child: Text(
             text,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               fontSize: 11,
             ),
             maxLines: 1,
@@ -277,7 +277,7 @@ class HorizontalEventCard extends StatelessWidget {
             Text(
               '${event.spotsLeft} spots left',
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 fontWeight: FontWeight.w500,
                 fontSize: 10,
               ),
@@ -290,9 +290,9 @@ class HorizontalEventCard extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 6,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: AppColors.grey200,
             valueColor: AlwaysStoppedAnimation<Color>(
-              progress >= 0.9 ? Colors.orange : AppColorToken.primary.color,
+              progress >= 0.9 ? AppColors.orange : AppColorToken.primary.color,
             ),
           ),
         ),
@@ -300,3 +300,5 @@ class HorizontalEventCard extends StatelessWidget {
     );
   }
 }
+
+

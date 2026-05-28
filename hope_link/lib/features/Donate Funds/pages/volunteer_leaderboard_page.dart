@@ -39,15 +39,15 @@ class _VolunteerLeaderboardPageState extends State<VolunteerLeaderboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAF8),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         title: Text(
           'Volunteer Leaderboard',
           style: AppTextStyle.h4.copyWith(
-            color: Colors.grey[900],
+            color: AppColors.grey900,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -97,7 +97,7 @@ class _VolunteerLeaderboardPageState extends State<VolunteerLeaderboardPage> {
                 Text(
                   _controller.errorMessage.value,
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.red[400],
+                    color: AppColors.red[400],
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -157,7 +157,7 @@ class _SummaryCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF163A2A), Color(0xFF249B5A)],
+          colors: [AppColors.accentDark, AppColors.primaryDark],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -170,7 +170,7 @@ class _SummaryCard extends StatelessWidget {
                 Text(
                   'Community impact leaders',
                   style: AppTextStyle.h4.copyWith(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -178,7 +178,7 @@ class _SummaryCard extends StatelessWidget {
                 Text(
                   'Ranked by volunteer credit hours, with points shown as a secondary score.',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.white.withOpacity(0.82),
+                    color: AppColors.white.withOpacity(0.82),
                     height: 1.4,
                   ),
                 ),
@@ -189,7 +189,7 @@ class _SummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: AppColors.white.withOpacity(0.12),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
@@ -198,7 +198,7 @@ class _SummaryCard extends StatelessWidget {
                 Text(
                   'Volunteers',
                   style: AppTextStyle.caption.copyWith(
-                    color: Colors.white.withOpacity(0.82),
+                    color: AppColors.white.withOpacity(0.82),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -206,7 +206,7 @@ class _SummaryCard extends StatelessWidget {
                 Text(
                   '${pagination?.totalUsers ?? controller.entries.length}',
                   style: AppTextStyle.h3.copyWith(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -230,9 +230,9 @@ class _FullLeaderboardTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE4ECE7)),
+        border: Border.all(color: AppColors.primarySoft),
       ),
       child: Row(
         children: [
@@ -262,7 +262,7 @@ class _FullLeaderboardTile extends StatelessWidget {
                 Text(
                   entry.name,
                   style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                     fontWeight: FontWeight.w800,
                   ),
                   maxLines: 1,
@@ -273,7 +273,7 @@ class _FullLeaderboardTile extends StatelessWidget {
                   Text(
                     entry.email,
                     style: AppTextStyle.caption.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
@@ -298,7 +298,7 @@ class _FullLeaderboardTile extends StatelessWidget {
               Text(
                 '${entry.totalPoints} pts',
                 style: AppTextStyle.caption.copyWith(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -333,12 +333,12 @@ class _FullPageMessage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: Colors.grey[500]),
+            Icon(icon, size: 40, color: AppColors.grey500),
             14.verticalSpace,
             Text(
               title,
               style: AppTextStyle.h4.copyWith(
-                color: Colors.grey[900],
+                color: AppColors.grey900,
                 fontWeight: FontWeight.w800,
               ),
               textAlign: TextAlign.center,
@@ -347,7 +347,7 @@ class _FullPageMessage extends StatelessWidget {
             Text(
               subtitle,
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 height: 1.45,
               ),
               textAlign: TextAlign.center,
@@ -416,3 +416,5 @@ class _Avatar extends StatelessWidget {
     );
   }
 }
+
+

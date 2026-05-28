@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/features/DonateEssentials/controllers/donate_essentials_controller.dart';
+import 'package:hope_link/features/DonateEssentials/models/essential_models.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../controllers/donate_essentials_controller.dart';
-import '../models/essential_models.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class EssentialRequestDetailPage extends StatelessWidget {
   const EssentialRequestDetailPage({super.key});
@@ -18,14 +18,14 @@ class EssentialRequestDetailPage extends StatelessWidget {
         ? Get.find<DonateEssentialsController>()
         : Get.put(DonateEssentialsController());
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FC),
+      backgroundColor: AppColors.inputFill,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'Request Details',
           style: GoogleFonts.dmSans(
-            color: Colors.black87,
+            color: AppColors.black87,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -91,10 +91,8 @@ class EssentialRequestDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF0E8F75),
-            request.isUrgent
-                ? const Color(0xFFE36B5B)
-                : const Color(0xFF1E5AA8),
+            AppColors.teal,
+            request.isUrgent ? AppColors.redDark : AppColors.blueDark,
           ],
         ),
         borderRadius: BorderRadius.circular(28),
@@ -110,7 +108,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
                   style: GoogleFonts.dmSans(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -120,13 +118,13 @@ class EssentialRequestDetailPage extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.16),
+                  color: AppColors.white.withOpacity(0.16),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   request.urgencyLevel.toUpperCase(),
                   style: GoogleFonts.dmSans(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -137,7 +135,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
           Text(
             request.description,
             style: GoogleFonts.dmSans(
-              color: Colors.white.withOpacity(0.88),
+              color: AppColors.white.withOpacity(0.88),
               height: 1.5,
             ),
           ),
@@ -159,11 +157,11 @@ class EssentialRequestDetailPage extends StatelessWidget {
                     errorBuilder: (_, __, ___) => Container(
                       width: 180,
                       height: 124,
-                      color: Colors.white12,
+                      color: AppColors.white,
                       alignment: Alignment.center,
                       child: const Icon(
                         Icons.broken_image_outlined,
-                        color: Colors.white70,
+                        color: AppColors.white70,
                       ),
                     ),
                   ),
@@ -197,7 +195,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.14),
+          color: AppColors.white.withOpacity(0.14),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
@@ -205,13 +203,13 @@ class EssentialRequestDetailPage extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.dmSans(color: Colors.white70, fontSize: 12),
+              style: GoogleFonts.dmSans(color: AppColors.white70, fontSize: 12),
             ),
             const SizedBox(height: 4),
             Text(
               value,
               style: GoogleFonts.dmSans(
-                color: Colors.white,
+                color: AppColors.white,
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
               ),
@@ -259,7 +257,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
                       ),
                       Text(
                         '${item.quantityFulfilled}/${item.quantityRequired} ${item.unit}',
-                        style: GoogleFonts.dmSans(color: Colors.black54),
+                        style: GoogleFonts.dmSans(color: AppColors.black54),
                       ),
                     ],
                   ),
@@ -269,14 +267,14 @@ class EssentialRequestDetailPage extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: ratio,
                       minHeight: 9,
-                      backgroundColor: Colors.grey.shade200,
+                      backgroundColor: AppColors.grey200,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     '${item.quantityRemaining} ${item.unit} still needed',
                     style: GoogleFonts.dmSans(
-                      color: Colors.black45,
+                      color: AppColors.black,
                       fontSize: 12,
                     ),
                   ),
@@ -309,7 +307,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: AppColors.grey50,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -336,12 +334,12 @@ class EssentialRequestDetailPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     '${location.contactPerson} | ${location.contactPhone}',
-                    style: GoogleFonts.dmSans(color: Colors.black54),
+                    style: GoogleFonts.dmSans(color: AppColors.black54),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     location.availableTimeSlots,
-                    style: GoogleFonts.dmSans(color: Colors.black45),
+                    style: GoogleFonts.dmSans(color: AppColors.black54),
                   ),
                   const SizedBox(height: 10),
                   _MapPreview(
@@ -369,10 +367,13 @@ class EssentialRequestDetailPage extends StatelessWidget {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: Colors.amber.shade100,
+              color: AppColors.amberLight,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: Colors.orange),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppColors.orange,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -387,7 +388,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
             DateFormat('MMM d').format(request.expiryDate),
             style: GoogleFonts.dmSans(
               fontWeight: FontWeight.w700,
-              color: Colors.black45,
+              color: AppColors.black54,
             ),
           ),
         ],
@@ -396,7 +397,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
   }
 
   BoxDecoration _cardDecoration() => BoxDecoration(
-    color: Colors.white,
+    color: AppColors.white,
     borderRadius: BorderRadius.circular(24),
     boxShadow: const [
       BoxShadow(
@@ -434,10 +435,7 @@ class _MapPreview extends StatelessWidget {
       child: SizedBox(
         height: height,
         child: FlutterMap(
-          options: MapOptions(
-            initialCenter: point,
-            initialZoom: 14,
-          ),
+          options: MapOptions(initialCenter: point, initialZoom: 14),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -451,7 +449,7 @@ class _MapPreview extends StatelessWidget {
                   height: 46,
                   child: const Icon(
                     Icons.location_on_rounded,
-                    color: Color(0xFFE36B5B),
+                    color: AppColors.redDark,
                     size: 34,
                   ),
                 ),

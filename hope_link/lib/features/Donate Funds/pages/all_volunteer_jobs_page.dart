@@ -44,16 +44,16 @@ class _AllVolunteerJobsPageState extends State<AllVolunteerJobsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'Volunteer Opportunities',
           style: AppTextStyle.h4.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.grey[900],
+            color: AppColors.grey900,
           ),
         ),
-        iconTheme: IconThemeData(color: Colors.grey[900]),
+        iconTheme: IconThemeData(color: AppColors.grey900),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -62,7 +62,7 @@ class _AllVolunteerJobsPageState extends State<AllVolunteerJobsPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -77,7 +77,7 @@ class _AllVolunteerJobsPageState extends State<AllVolunteerJobsPage>
             return Center(
               child: Text(
                 'No volunteer opportunities found',
-                style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
               ),
             );
           }
@@ -101,3 +101,5 @@ class _AllVolunteerJobsPageState extends State<AllVolunteerJobsPage>
     );
   }
 }
+
+

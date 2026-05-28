@@ -48,9 +48,9 @@ class _AllEventsPageState extends State<AllEventsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: AppColors.inputFill,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         centerTitle: false,
         title: Column(
@@ -60,26 +60,26 @@ class _AllEventsPageState extends State<AllEventsPage>
               'Events',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             4.verticalSpace,
             Text(
               'Join upcoming community moments',
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[500],
+                color: AppColors.grey500,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ],
         ),
-        iconTheme: IconThemeData(color: Colors.grey[900]),
+        iconTheme: IconThemeData(color: AppColors.grey900),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Container(
-              color: Colors.white,
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Column(
                 children: [
@@ -92,11 +92,11 @@ class _AllEventsPageState extends State<AllEventsPage>
                     decoration: InputDecoration(
                       hintText: 'Search events...',
                       hintStyle: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[400],
+                        color: AppColors.grey400,
                       ),
                       prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: Colors.grey[400],
+                        color: AppColors.grey400,
                         size: 24,
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
@@ -108,7 +108,7 @@ class _AllEventsPageState extends State<AllEventsPage>
                               },
                               child: Icon(
                                 Icons.close_rounded,
-                                color: Colors.grey[400],
+                                color: AppColors.grey400,
                                 size: 24,
                               ),
                             )
@@ -116,14 +116,14 @@ class _AllEventsPageState extends State<AllEventsPage>
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: Colors.grey[200]!,
+                          color: AppColors.grey200,
                           width: 1.5,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: Colors.grey[200]!,
+                          color: AppColors.grey200,
                           width: 1.5,
                         ),
                       ),
@@ -135,7 +135,7 @@ class _AllEventsPageState extends State<AllEventsPage>
                         ),
                       ),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor: AppColors.grey50,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -168,22 +168,22 @@ class _AllEventsPageState extends State<AllEventsPage>
                                   filter['value'] as String,
                                 );
                               },
-                              backgroundColor: Colors.grey[100],
+                              backgroundColor: AppColors.grey100,
                               selectedColor: AppColorToken.primary.color,
                               labelStyle: AppTextStyle.bodySmall.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color:
                                     _eventController.selectedFilter.value ==
                                         filter['value']
-                                    ? Colors.white
-                                    : Colors.grey[700],
+                                    ? AppColors.white
+                                    : AppColors.grey700,
                               ),
                               side: BorderSide(
                                 color:
                                     _eventController.selectedFilter.value ==
                                         filter['value']
                                     ? AppColorToken.primary.color
-                                    : Colors.transparent,
+                                    : AppColors.transparent,
                               ),
                             ),
                           ),
@@ -194,7 +194,7 @@ class _AllEventsPageState extends State<AllEventsPage>
                 ],
               ),
             ),
-            Container(height: 1, color: Colors.grey[200]),
+            Container(height: 1, color: AppColors.grey200),
             Expanded(
               child: EventsListWidget(
                 controller: _eventController,
@@ -207,3 +207,5 @@ class _AllEventsPageState extends State<AllEventsPage>
     );
   }
 }
+
+

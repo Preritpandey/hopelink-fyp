@@ -24,19 +24,18 @@ class CompactLeaderboardPreview extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFE5EFE8)),
+          color: const Color(0xFFEAF0FF),
+          borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: AppColorToken.primary.color.withOpacity(0.08),
-              blurRadius: 24,
+              color: AppColors.primaryDark.withValues(alpha: 0.08),
+              blurRadius: 26,
               offset: const Offset(0, 10),
             ),
           ],
         ),
         child: Obx(() {
-          final items = controller.entries;
+          final items = controller.entries.take(2).toList();
           final isInitialLoading =
               controller.isLoading.value && !controller.hasLoaded.value;
           final hasError = controller.errorMessage.value.isNotEmpty;
@@ -51,46 +50,47 @@ class CompactLeaderboardPreview extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Top Volunteers',
+                          'Community Heroes',
                           style: AppTextStyle.h4.copyWith(
-                            color: Colors.grey[900],
+                            color: AppColors.grey900,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         4.verticalSpace,
                         Text(
-                          'A quick look at this week\'s leaders.',
+                          'Top volunteers of the week',
                           style: AppTextStyle.bodySmall.copyWith(
-                            color: Colors.grey[600],
+                            color: AppColors.grey700,
                             height: 1.35,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  12.horizontalSpace,
-                  TextButton(
-                    onPressed: onViewFullLeaderboard,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColorToken.primary.color,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
-                      ),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      minimumSize: Size.zero,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.22),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      'View Full',
-                      style: AppTextStyle.bodySmall.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: const Icon(
+                      Icons.emoji_events_rounded,
+                      color: AppColors.white,
+                      size: 20,
                     ),
                   ),
                 ],
               ),
-              14.verticalSpace,
-              if (isInitialLoading) _LeaderboardLoadingState(),
+              16.verticalSpace,
+              if (isInitialLoading) const _LeaderboardLoadingState(),
               if (!isInitialLoading && hasError)
                 _LeaderboardMessageState(
                   icon: Icons.signal_wifi_connected_no_internet_4_rounded,
@@ -100,18 +100,17 @@ class CompactLeaderboardPreview extends StatelessWidget {
                   onPressed: controller.refreshLeaderboard,
                 ),
               if (!isInitialLoading && !hasError && items.isEmpty)
-                _LeaderboardMessageState(
+                const _LeaderboardMessageState(
                   icon: Icons.emoji_events_outlined,
                   title: 'No leaders yet',
-                  subtitle: 'Volunteer rankings will appear once credits start rolling in.',
+                  subtitle:
+                      'Volunteer rankings will appear once credits start rolling in.',
                 ),
               if (!isInitialLoading && !hasError && items.isNotEmpty) ...[
-                ...items.take(3).map(_LeaderboardTile.new),
-                10.verticalSpace,
-                _FooterRow(
-                  totalUsers: controller.pagination.value?.totalUsers ?? items.length,
-                  onViewFullLeaderboard: onViewFullLeaderboard,
-                ),
+                ...items.map(_LeaderboardTile.new),
+                14.verticalSpace,
+
+                _FooterButton(onViewFullLeaderboard: onViewFullLeaderboard),
               ],
             ],
           );
@@ -129,23 +128,29 @@ class _LeaderboardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FBF9),
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE6EFE9)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black12,
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 30,
-              height: 30,
+              width: 34,
+              height: 34,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: _rankBackground(entry.rank),
-                borderRadius: BorderRadius.circular(10),
+                shape: BoxShape.circle,
               ),
               child: Text(
                 '#${entry.rank}',
@@ -157,34 +162,49 @@ class _LeaderboardTile extends StatelessWidget {
             ),
             10.horizontalSpace,
             _Avatar(imageUrl: entry.profileImage, name: entry.name),
-            10.horizontalSpace,
+            12.horizontalSpace,
             Expanded(
-              child: Text(
-                entry.name,
-                style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[900],
-                  fontWeight: FontWeight.w700,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    entry.name,
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      color: AppColors.grey900,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  2.verticalSpace,
+                  Text(
+                    'Community volunteer',
+                    style: AppTextStyle.caption.copyWith(
+                      color: AppColors.grey600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
             10.horizontalSpace,
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   '${entry.totalCreditHours} hrs',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColorToken.primary.color,
+                    color: AppColors.primaryDark,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 2.verticalSpace,
                 Text(
-                  '${entry.totalPoints} pts',
+                  '${entry.totalPoints} points',
                   style: AppTextStyle.caption.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -199,100 +219,85 @@ class _LeaderboardTile extends StatelessWidget {
   Color _rankBackground(int rank) {
     switch (rank) {
       case 1:
-        return const Color(0xFFFFF4CC);
+        return AppColors.warningLight;
       case 2:
-        return const Color(0xFFEEF2F7);
+        return AppColors.inputFill;
       case 3:
-        return const Color(0xFFFCE7D7);
+        return AppColors.amberLight;
       default:
-        return AppColorToken.primary.color.withOpacity(0.1);
+        return AppColors.primarySoft;
     }
   }
 
   Color _rankForeground(int rank) {
     switch (rank) {
       case 1:
-        return const Color(0xFFB7791F);
+        return AppColors.warning;
       case 2:
-        return const Color(0xFF475569);
+        return AppColors.grey600;
       case 3:
-        return const Color(0xFFC05621);
+        return AppColors.orangeDark;
       default:
-        return AppColorToken.primary.color;
+        return AppColors.primaryDark;
     }
   }
 }
 
-class _FooterRow extends StatelessWidget {
-  const _FooterRow({
-    required this.totalUsers,
-    required this.onViewFullLeaderboard,
-  });
+class _FooterButton extends StatelessWidget {
+  const _FooterButton({required this.onViewFullLeaderboard});
 
-  final int totalUsers;
   final VoidCallback onViewFullLeaderboard;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColorToken.primary.color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            '$totalUsers volunteers ranked',
-            style: AppTextStyle.caption.copyWith(
-              color: AppColorToken.primary.color,
-              fontWeight: FontWeight.w700,
-            ),
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onViewFullLeaderboard,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Show More',
+                style: AppTextStyle.bodyMedium.copyWith(
+                  color: AppColors.black,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              8.horizontalSpace,
+              const Icon(
+                Icons.arrow_forward_rounded,
+                size: 18,
+                color: AppColors.black,
+              ),
+            ],
           ),
         ),
-        const Spacer(),
-        InkWell(
-          onTap: onViewFullLeaderboard,
-          borderRadius: BorderRadius.circular(999),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Show More',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                4.horizontalSpace,
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: Colors.grey[800],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
 class _LeaderboardLoadingState extends StatelessWidget {
+  const _LeaderboardLoadingState();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(
-        3,
+        2,
         (index) => Padding(
-          padding: EdgeInsets.only(bottom: index == 2 ? 0 : 10),
+          padding: EdgeInsets.only(bottom: index == 1 ? 0 : 12),
           child: Container(
-            height: 56,
+            height: 76,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F7F6),
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(18),
             ),
           ),
@@ -323,18 +328,17 @@ class _LeaderboardMessageState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FBF9),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE6EFE9)),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 28, color: Colors.grey[500]),
+          Icon(icon, size: 28, color: AppColors.grey500),
           10.verticalSpace,
           Text(
             title,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[900],
+              color: AppColors.grey900,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -342,7 +346,7 @@ class _LeaderboardMessageState extends StatelessWidget {
           Text(
             subtitle,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               height: 1.4,
             ),
             textAlign: TextAlign.center,
@@ -374,36 +378,39 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          imageUrl,
-          width: 38,
-          height: 38,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallback(),
-        ),
-      );
+    final fallback = _fallback();
+    if (imageUrl.isEmpty) {
+      return fallback;
     }
 
-    return _fallback();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: Image.network(
+        imageUrl,
+        width: 42,
+        height: 42,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => fallback,
+      ),
+    );
   }
 
   Widget _fallback() {
-    final initial = name.trim().isEmpty ? '?' : name.trim().substring(0, 1).toUpperCase();
+    final initial = name.trim().isEmpty
+        ? '?'
+        : name.trim().substring(0, 1).toUpperCase();
     return Container(
-      width: 38,
-      height: 38,
+      width: 42,
+      height: 42,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColorToken.primary.color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.primary.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
       ),
       child: Text(
         initial,
         style: AppTextStyle.bodyMedium.copyWith(
-          color: AppColorToken.primary.color,
+          color: AppColors.primaryDark,
           fontWeight: FontWeight.w800,
         ),
       ),

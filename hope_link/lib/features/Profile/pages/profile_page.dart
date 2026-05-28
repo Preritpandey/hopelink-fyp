@@ -118,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               Text(user.name, style: const TextStyle(fontSize: 18)),
-              Text(user.email, style: const TextStyle(color: Colors.grey)),
+              Text(user.email, style: const TextStyle(color: AppColors.grey)),
 
               // const SectionTitle("Contact"),
               ProfileTextField(
@@ -184,9 +184,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: user.cv.isEmpty
-                            ? Colors.grey[300]
+                            ? AppColors.grey300
                             : AppColorToken.primary.color,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -206,8 +206,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     Obx(
                       () => OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue[700],
-                          side: BorderSide(color: Colors.blue[700]!),
+                          foregroundColor: AppColors.blue[700],
+                          side: BorderSide(color: AppColors.blue[700]!),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -219,7 +219,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.blue[700],
+                                  color: AppColors.blue[700],
                                 ),
                               )
                             : const Icon(Icons.upload_file, size: 20),
@@ -333,7 +333,7 @@ class _LogoutButtonState extends State<_LogoutButton>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Error logging out. Please try again.'),
-            backgroundColor: Colors.red[400],
+            backgroundColor: AppColors.red[400],
           ),
         );
       }
@@ -361,33 +361,33 @@ class _LogoutButtonState extends State<_LogoutButton>
               height: 56,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.red[400]!, Colors.red[600]!],
+                  colors: [AppColors.red[400]!, AppColors.red[600]!],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.red[400]!.withOpacity(0.3),
+                    color: AppColors.red[400]!.withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
                 ],
               ),
               child: Material(
-                color: Colors.transparent,
+                color: AppColors.transparent,
                 child: InkWell(
                   onTap: _onPressed,
                   borderRadius: BorderRadius.circular(16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout_rounded, color: Colors.white, size: 20),
+                      Icon(Icons.logout_rounded, color: AppColors.white, size: 20),
                       const SizedBox(width: 10),
                       const Text(
                         "Logout",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
@@ -483,14 +483,14 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.white,
             elevation: 0,
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
-                  colors: [Colors.white, const Color(0xFFF5F5F5)],
+                  colors: [AppColors.white, const Color(0xFFF5F5F5)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -505,13 +505,13 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Colors.red[100]!, Colors.orange[100]!],
+                        colors: [AppColors.red[100]!, AppColors.orange[100]!],
                       ),
                     ),
                     child: Icon(
                       Icons.logout_rounded,
                       size: 40,
-                      color: Colors.red[600],
+                      color: AppColors.red[600],
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -522,7 +522,7 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      color: AppColors.black87,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -534,7 +534,7 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                       height: 1.5,
                       letterSpacing: 0.2,
                     ),
@@ -632,12 +632,12 @@ class _AnimatedButtonState extends State<AnimatedButton>
               gradient: widget.isPrimary
                   ? AppGradients.primaryGradient
                   : LinearGradient(
-                      colors: [Colors.grey[300]!, Colors.grey[400]!],
+                      colors: [AppColors.grey300, AppColors.grey400],
                     ),
               boxShadow: [
                 BoxShadow(
                   color:
-                      (widget.isPrimary ? Colors.red[400] : Colors.grey[400])!
+                      (widget.isPrimary ? AppColors.red[400] : AppColors.grey400)!
                           .withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -645,7 +645,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
               ],
             ),
             child: Material(
-              color: Colors.transparent,
+              color: AppColors.transparent,
               child: InkWell(
                 onTap: widget.onPressed,
                 borderRadius: BorderRadius.circular(12),
@@ -655,7 +655,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: widget.isPrimary ? Colors.white : Colors.black87,
+                      color: widget.isPrimary ? AppColors.white : AppColors.black87,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -668,3 +668,5 @@ class _AnimatedButtonState extends State<AnimatedButton>
     );
   }
 }
+
+

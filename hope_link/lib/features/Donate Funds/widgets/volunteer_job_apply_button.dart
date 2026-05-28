@@ -15,10 +15,10 @@ class VolunteerJobApplyButton extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -55,7 +55,7 @@ class VolunteerJobApplyButton extends StatelessWidget {
                     AppColorToken.primary.color.withOpacity(0.8),
                   ],
                 )
-              : LinearGradient(colors: [Colors.grey[300]!, Colors.grey[300]!]),
+              : LinearGradient(colors: [AppColors.grey300, AppColors.grey300]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: canApply
               ? [
@@ -72,14 +72,14 @@ class VolunteerJobApplyButton extends StatelessWidget {
           children: [
             Icon(
               canApply ? Icons.send_rounded : Icons.lock_rounded,
-              color: Colors.white,
+              color: AppColors.white,
               size: 22,
             ),
             const SizedBox(width: 12),
             Text(
               _getButtonText(),
               style: AppTextStyle.h4.copyWith(
-                color: Colors.white,
+                color: AppColors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -101,3 +101,5 @@ class VolunteerJobApplyButton extends StatelessWidget {
     }
   }
 }
+
+

@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 
 class FullScreenImageView extends StatelessWidget {
   final String imageUrl;
@@ -13,10 +15,10 @@ class FullScreenImageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.black,
+        iconTheme: const IconThemeData(color: AppColors.white),
         elevation: 0,
       ),
       body: Center(
@@ -38,3 +40,5 @@ class FullScreenImageView extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,3 +1,5 @@
+
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/config/payment_config.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 
 class PaymentService {
@@ -180,7 +183,7 @@ class PaymentService {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 14, color: AppColors.grey700),
                 ),
               ],
             ),
@@ -211,3 +214,6 @@ class PaymentService {
     }
   }
 }
+
+
+

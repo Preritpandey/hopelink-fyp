@@ -61,9 +61,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
@@ -78,7 +78,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withValues(alpha: 0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withValues(alpha: 0.03),
             ],
           ),
@@ -143,7 +143,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
         Text(
           'Enter the OTP sent to',
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[600],
+            color: AppColors.grey600,
             fontSize: 14,
           ),
           textAlign: TextAlign.center,
@@ -166,7 +166,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -188,7 +188,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
             const SizedBox(height: 8),
             Text(
               'Your new password must be different from previous passwords',
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             ),
             const SizedBox(height: 24),
             _buildOTPField(),
@@ -212,7 +212,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
           'OTP Code',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -247,7 +247,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
           'New Password',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -272,7 +272,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
                 _obscureNewPassword.value
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: Colors.grey[600],
+                color: AppColors.grey600,
               ),
               onPressed: () {
                 _obscureNewPassword.toggle();
@@ -292,7 +292,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
           'Confirm Password',
           style: AppTextStyle.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         const SizedBox(height: 8),
@@ -317,7 +317,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
                 _obscureConfirmPassword.value
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: Colors.grey[600],
+                color: AppColors.grey600,
               ),
               onPressed: () {
                 _obscureConfirmPassword.toggle();
@@ -347,10 +347,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.2),
+          color: AppColors.grey.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -359,7 +359,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
         children: [
           Text(
             "Didn't receive the code?",
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           const SizedBox(width: 4),
           TextButton(
@@ -450,3 +450,4 @@ class _ResetPasswordPageState extends State<ResetPasswordPage>
     }
   }
 }
+

@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: AppColors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -145,9 +145,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           selectedItemColor: AppColorToken.primary.color,
-          unselectedItemColor: Colors.grey[400],
+          unselectedItemColor: AppColors.grey400,
           selectedFontSize: 12,
           unselectedFontSize: 12,
           showUnselectedLabels: true,
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColorToken.primary.color.withValues(alpha: 0.1)
-              : Colors.transparent,
+              : AppColors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(isSelected ? selectedIcon : unselectedIcon, size: 26),
@@ -242,7 +242,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 const Text(
                                   'Make a Difference',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontSize: 32,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 Text(
                                   'Together we can change lives',
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.9),
+                                    color: AppColors.white.withValues(alpha: 0.9),
                                     fontSize: 16,
                                   ),
                                 ),
@@ -293,9 +293,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.18),
+          color: AppColors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.25)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Text(
               'Points',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: AppColors.white.withValues(alpha: 0.9),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -315,14 +315,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
             else
               Text(
                 '${credits?.totalPoints ?? 0}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -338,11 +338,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.explore, size: 80, color: Colors.grey[300]),
+          Icon(Icons.explore, size: 80, color: AppColors.grey300),
           const SizedBox(height: 16),
           Text(
             'Explore Page',
-            style: TextStyle(fontSize: 24, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 24, color: AppColors.grey600),
           ),
         ],
       ),
@@ -354,14 +354,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.favorite, size: 80, color: Colors.grey[300]),
+          Icon(Icons.favorite, size: 80, color: AppColors.grey300),
           const SizedBox(height: 16),
           Text(
             'Activity Page',
-            style: TextStyle(fontSize: 24, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 24, color: AppColors.grey600),
           ),
         ],
       ),
     );
   }
 }
+
+

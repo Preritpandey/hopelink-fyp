@@ -1,13 +1,15 @@
+
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/features/DonateEssentials/models/essential_models.dart';
+import 'package:hope_link/features/DonateEssentials/services/donate_essentials_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 
-import '../models/essential_models.dart';
-import '../services/donate_essentials_service.dart';
+import '../../../core/theme/app_colors.dart';
 
 class DonateEssentialsController extends GetxController {
   DonateEssentialsController({DonateEssentialsService? service})
@@ -213,13 +215,13 @@ class DonateEssentialsController extends GetxController {
   Color statusColor(String status) {
     switch (status) {
       case 'verified':
-        return Colors.green;
+        return AppColors.green;
       case 'delivered':
-        return Colors.blue;
+        return AppColors.blue;
       case 'rejected':
-        return Colors.redAccent;
+        return AppColors.redAccent;
       default:
-        return Colors.orange;
+        return AppColors.orange;
     }
   }
 
@@ -265,3 +267,6 @@ class DonateEssentialsController extends GetxController {
     super.onClose();
   }
 }
+
+
+

@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 
 class FormSection extends StatelessWidget {
   final String title;
@@ -12,13 +14,13 @@ class FormSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 25),
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             offset: Offset(0, 4),
             blurRadius: 14,
-            color: Colors.black12,
+            color: AppColors.black12,
           ),
         ],
       ),
@@ -36,3 +38,5 @@ class FormSection extends StatelessWidget {
     );
   }
 }
+
+

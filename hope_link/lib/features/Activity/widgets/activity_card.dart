@@ -49,7 +49,7 @@ class ActivityCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -58,7 +58,7 @@ class ActivityCard extends StatelessWidget {
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -109,7 +109,7 @@ class ActivityCard extends StatelessWidget {
                                   activity.metadata.displayTitle,
                                   style: AppTextStyle.bodyMedium.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.grey[900],
+                                    color: AppColors.grey900,
                                     height: 1.3,
                                   ),
                                   maxLines: 2,
@@ -184,14 +184,14 @@ class ActivityCard extends StatelessWidget {
       case 'approved':
       case 'completed':
       case 'success':
-        return (Colors.green.withOpacity(0.12), Colors.green[700]!);
+        return (AppColors.green.withOpacity(0.12), AppColors.green[700]!);
       case 'rejected':
       case 'failed':
       case 'cancelled':
-        return (Colors.red.withOpacity(0.12), Colors.red[700]!);
+        return (AppColors.red.withOpacity(0.12), AppColors.red[700]!);
       case 'pending':
       default:
-        return (Colors.orange.withOpacity(0.12), Colors.orange[800]!);
+        return (AppColors.orange.withOpacity(0.12), AppColors.orange[800]!);
     }
   }
 
@@ -213,7 +213,7 @@ class ActivityCard extends StatelessWidget {
             _metaItem(
               Icons.attach_money_rounded,
               'NPR ${NumberFormat('#,##0').format(amount)}',
-              Colors.green[700]!,
+              AppColors.green[700]!,
             ),
           );
         }
@@ -223,7 +223,7 @@ class ActivityCard extends StatelessWidget {
             _metaItem(
               Icons.credit_card_rounded,
               _capitalize(method),
-              Colors.grey[600]!,
+              AppColors.grey600,
             ),
           );
         }
@@ -233,7 +233,7 @@ class ActivityCard extends StatelessWidget {
             _metaItem(
               anon ? Icons.visibility_off_rounded : Icons.visibility_rounded,
               anon ? 'Anonymous' : 'Public',
-              Colors.grey[600]!,
+              AppColors.grey600,
             ),
           );
         }
@@ -279,17 +279,17 @@ class ActivityCard extends StatelessWidget {
   Widget _buildFooter() {
     return Row(
       children: [
-        Icon(Icons.schedule_rounded, size: 13, color: Colors.grey[400]),
+        Icon(Icons.schedule_rounded, size: 13, color: AppColors.grey400),
         const SizedBox(width: 4),
         Text(
           _formatDate(activity.createdAt),
           style: AppTextStyle.bodySmall.copyWith(
-            color: Colors.grey[400],
+            color: AppColors.grey400,
             fontSize: 11,
           ),
         ),
         const Spacer(),
-        Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey[300]),
+        Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.grey300),
       ],
     );
   }
@@ -337,13 +337,13 @@ class _ActivityConfig {
         );
       case 'event_registration':
         return _ActivityConfig(
-          color: const Color(0xFF7C3AED),
+          color: AppColors.purple,
           icon: Icons.event_available_rounded,
           label: 'EVENT REGISTRATION',
         );
       case 'volunteer_job_enrollment':
         return _ActivityConfig(
-          color: const Color(0xFFEA580C),
+          color: AppColors.orange,
           icon: Icons.volunteer_activism_rounded,
           label: 'VOLUNTEER JOB',
         );
@@ -356,3 +356,5 @@ class _ActivityConfig {
     }
   }
 }
+
+

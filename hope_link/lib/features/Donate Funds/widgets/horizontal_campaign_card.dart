@@ -38,7 +38,7 @@ class HorizontalCampaignCard extends StatelessWidget {
         height: cardHeight,
         margin: EdgeInsets.only(left: index == 0 ? 24 : 12, right: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -108,9 +108,9 @@ class HorizontalCampaignCard extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.08),
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.45),
+                  AppColors.black.withOpacity(0.08),
+                  AppColors.transparent,
+                  AppColors.black.withOpacity(0.45),
                 ],
               ),
             ),
@@ -123,11 +123,11 @@ class HorizontalCampaignCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: AppColors.amber,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.4),
+                    color: AppColors.amber.withOpacity(0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -136,7 +136,7 @@ class HorizontalCampaignCard extends StatelessWidget {
               child: const Icon(
                 Icons.bookmark_rounded,
                 size: 16,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
           ),
@@ -176,7 +176,7 @@ class HorizontalCampaignCard extends StatelessWidget {
           ],
         ),
       ),
-      child: Icon(Icons.image_outlined, size: 48, color: Colors.grey[400]),
+      child: Icon(Icons.image_outlined, size: 48, color: AppColors.grey400),
     );
   }
 
@@ -219,7 +219,7 @@ class HorizontalCampaignCard extends StatelessWidget {
             campaign.title,
             style: AppTextStyle.h5.copyWith(
               fontWeight: FontWeight.w800,
-              color: Colors.grey[900],
+              color: AppColors.grey900,
               height: 1.25,
               fontSize: isCompact ? 13 : 14,
             ),
@@ -230,7 +230,7 @@ class HorizontalCampaignCard extends StatelessWidget {
           Text(
             campaign.description,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               height: 1.45,
               fontSize: isCompact ? 11 : 12,
             ),
@@ -290,7 +290,7 @@ class HorizontalCampaignCard extends StatelessWidget {
                     ? 'Closed'
                     : '${campaign.progress.toStringAsFixed(0)}%',
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: campaign.hasEnded ? Colors.red[400] : Colors.grey[700],
+                  color: campaign.hasEnded ? AppColors.red[400] : AppColors.grey700,
                   fontWeight: FontWeight.w700,
                   fontSize: compact ? 11 : 12,
                 ),
@@ -302,7 +302,7 @@ class HorizontalCampaignCard extends StatelessWidget {
           Text(
             'of ${_formatCurrency(campaign.targetAmount)} funded',
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[500],
+              color: AppColors.grey500,
               fontSize: compact ? 10 : 11,
             ),
           ),
@@ -311,7 +311,7 @@ class HorizontalCampaignCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: (campaign.progress / 100).clamp(0.0, 1.0),
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.grey200,
               valueColor: AlwaysStoppedAnimation<Color>(
                 AppColorToken.primary.color,
               ),
@@ -332,18 +332,18 @@ class HorizontalCampaignCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.62),
+        color: AppColors.black.withOpacity(0.62),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: Colors.white),
+          Icon(icon, size: 13, color: AppColors.white),
           4.horizontalSpace,
           Text(
             label,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.white,
+              color: AppColors.white,
               fontWeight: FontWeight.w600,
               fontSize: 11,
             ),
@@ -367,7 +367,7 @@ class HorizontalCampaignCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: highlight
             ? AppColorToken.primary.color.withOpacity(0.1)
-            : Colors.grey.shade100,
+            : AppColors.grey100,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -376,13 +376,13 @@ class HorizontalCampaignCard extends StatelessWidget {
           Icon(
             icon,
             size: compact ? 12 : 14,
-            color: highlight ? AppColorToken.primary.color : Colors.grey[700],
+            color: highlight ? AppColorToken.primary.color : AppColors.grey700,
           ),
           6.horizontalSpace,
           Text(
             label,
             style: AppTextStyle.caption.copyWith(
-              color: highlight ? AppColorToken.primary.color : Colors.grey[700],
+              color: highlight ? AppColorToken.primary.color : AppColors.grey700,
               fontWeight: FontWeight.w700,
               fontSize: compact ? 9 : 10,
             ),
@@ -439,3 +439,5 @@ class HorizontalCampaignCard extends StatelessWidget {
     );
   }
 }
+
+

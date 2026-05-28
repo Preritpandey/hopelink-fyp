@@ -70,7 +70,7 @@ class ProfileViewPage extends StatelessWidget {
         : Get.put(VolunteerCreditController(token));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F6),
+      backgroundColor: AppColors.primarySoft,
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(
@@ -128,144 +128,142 @@ class ProfileViewPage extends StatelessWidget {
       if (user.status.isNotEmpty) user.status.toUpperCase(),
     ];
 
-    return Container(
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          Container(
-            width: double.infinity,
-            height: 138,
-            decoration: BoxDecoration(
-              color: AppColorToken.primary.color,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
+      children: [
+        Container(
+          width: double.infinity,
+          height: 138,
+          decoration: BoxDecoration(
+            color: AppColorToken.primary.color,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: -18,
+                top: 18,
+                child: Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.black.withValues(alpha: 0.05),
+                  ),
+                ),
               ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: -18,
-                  top: 18,
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black.withValues(alpha: 0.05),
-                    ),
+              Positioned(
+                right: -22,
+                top: -26,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.white.withValues(alpha: 0.08),
                   ),
                 ),
-                Positioned(
-                  right: -22,
-                  top: -26,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.08),
-                    ),
-                  ),
+              ),
+              Positioned(
+                top: 22,
+                left: 12,
+                child: _heroCircleButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () {
+                    if (Navigator.of(context).canPop()) {
+                      Get.back();
+                    }
+                  },
                 ),
-                Positioned(
-                  top: 22,
-                  left: 12,
-                  child: _heroCircleButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: () {
-                      if (Navigator.of(context).canPop()) {
-                        Get.back();
-                      }
-                    },
-                  ),
+              ),
+              Positioned(
+                top: 22,
+                right: 12,
+                child: _heroCircleButton(
+                  icon: Icons.edit_rounded,
+                  onTap: () {
+                    Get.to(
+                      () => ProfileEditPage(token: token),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
                 ),
-                Positioned(
-                  top: 22,
-                  right: 12,
-                  child: _heroCircleButton(
-                    icon: Icons.edit_rounded,
-                    onTap: () {
-                      Get.to(
-                        () => ProfileEditPage(token: token),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            margin: const EdgeInsets.fromLTRB(14, 86, 14, 0),
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          margin: const EdgeInsets.fromLTRB(14, 86, 14, 0),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildProfileAvatar(user),
+              const SizedBox(height: 14),
+              Text(
+                user.name,
+                style: AppTextStyle.h2.bold.copyWith(
+                  fontSize: 22,
+                  color: AppColors.grey900,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                _buildProfileAvatar(user),
-                const SizedBox(height: 14),
+                textAlign: TextAlign.center,
+              ),
+              if (bioText.isNotEmpty) ...[
+                const SizedBox(height: 4),
                 Text(
-                  user.name,
-                  style: AppTextStyle.h2.bold.copyWith(
-                    fontSize: 22,
-                    color: const Color(0xFF18211E),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                if (bioText.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    bioText,
-                    style: AppTextStyle.bodySmall.copyWith(
-                      color: const Color(0xFF16A46D),
-                      height: 1.35,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Text(
-                  user.email,
+                  bioText,
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: const Color(0xFF8B95A5),
-                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryDark,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (tags.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: tags
-                        .take(2)
-                        .map(
-                          (tag) => _buildMetaChip(tag, _chipColorForTag(tag)),
-                        )
-                        .toList(),
-                  ),
-                ],
               ],
-            ),
+              const SizedBox(height: 6),
+              Text(
+                user.email,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.grey400,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (tags.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: tags
+                      .take(2)
+                      .map(
+                        (tag) => _buildMetaChip(tag, _chipColorForTag(tag)),
+                      )
+                      .toList(),
+                ),
+              ],
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -284,7 +282,7 @@ class ProfileViewPage extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 4),
+            border: Border.all(color: AppColors.white, width: 4),
             boxShadow: [
               BoxShadow(
                 color: AppColorToken.black.color.withValues(alpha: 0.4),
@@ -295,12 +293,12 @@ class ProfileViewPage extends StatelessWidget {
           ),
           child: CircleAvatar(
             radius: 42,
-            backgroundColor: const Color(0xFFE9EFEC),
+            backgroundColor: AppColors.primarySoft,
             backgroundImage: user.profileImage.isNotEmpty
                 ? NetworkImage(user.profileImage)
                 : null,
             child: user.profileImage.isEmpty
-                ? Icon(Icons.person, size: 44, color: Colors.grey[400])
+                ? Icon(Icons.person, size: 44, color: AppColors.grey400)
                 : null,
           ),
         ),
@@ -321,13 +319,13 @@ class ProfileViewPage extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDDF9EC),
+                  color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.bolt_rounded,
                   size: 18,
-                  color: Color(0xFF10B981),
+                  color: AppColors.primaryLight,
                 ),
               ),
               const SizedBox(width: 10),
@@ -335,7 +333,7 @@ class ProfileViewPage extends StatelessWidget {
                 'Quick Actions',
                 style: AppTextStyle.h4.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF18211E),
+                  color: AppColors.grey900,
                 ),
               ),
             ],
@@ -346,7 +344,7 @@ class ProfileViewPage extends StatelessWidget {
             child: Text(
               'Fast access to your core profile features.',
               style: AppTextStyle.bodySmall.copyWith(
-                color: const Color(0xFF98A2B3),
+                color: AppColors.grey500,
                 height: 1.35,
               ),
             ),
@@ -356,7 +354,7 @@ class ProfileViewPage extends StatelessWidget {
             icon: Icons.edit_square,
             title: 'Edit Profile',
             subtitle: 'Update personal details and your appearance.',
-            accent: const Color(0xFF10B981),
+            accent: AppColors.primaryLight,
             onTap: () => Get.to(
               () => ProfileEditPage(token: token),
               transition: Transition.rightToLeft,
@@ -367,7 +365,7 @@ class ProfileViewPage extends StatelessWidget {
             icon: Icons.shield_outlined,
             title: 'My Pledges',
             subtitle: 'Review active donation commitments.',
-            accent: const Color(0xFF10B981),
+            accent: AppColors.primaryLight,
             onTap: () => Get.toNamed('/essential-commitments'),
           ),
           const SizedBox(height: 10),
@@ -377,7 +375,7 @@ class ProfileViewPage extends StatelessWidget {
             subtitle: user.cv.isNotEmpty
                 ? 'Check the CV attached to your profile.'
                 : 'Attach your CV to strengthen your profile.',
-            accent: const Color(0xFF5B8DEF),
+            accent: AppColors.blue,
             onTap: () => user.cv.isNotEmpty
                 ? _openCv(user.cv)
                 : _showComingSoon('Resume management'),
@@ -387,7 +385,7 @@ class ProfileViewPage extends StatelessWidget {
             icon: Icons.verified_user_outlined,
             title: 'Certificates',
             subtitle: 'View badges and proof of impact.',
-            accent: const Color(0xFFF5A623),
+            accent: AppColors.amber,
             onTap: () => _showComingSoon('Certificates'),
           ),
         ],
@@ -417,13 +415,13 @@ class ProfileViewPage extends StatelessWidget {
             : hasError
             ? Text(
                 creditController.errorMessage.value,
-                style: AppTextStyle.bodyMedium.copyWith(color: Colors.red[400]),
+                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.red[400]),
               )
             : credits == null
             ? Text(
                 'Impact data will appear here once credits are available.',
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                 ),
               )
             : Column(
@@ -541,7 +539,7 @@ class ProfileViewPage extends StatelessWidget {
       child: user.interest.isEmpty
           ? Text(
               'No interests added yet. This area can become a strong discovery signal once you start curating it.',
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
             )
           : Wrap(
               spacing: 8,
@@ -577,7 +575,7 @@ class ProfileViewPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6FAF8),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -594,7 +592,7 @@ class ProfileViewPage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[700]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey700),
           ),
         ],
       ),
@@ -604,13 +602,13 @@ class ProfileViewPage extends StatelessWidget {
   Widget _detailTile(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: AppColors.grey600),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[700],
+              color: AppColors.grey700,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -634,9 +632,9 @@ class ProfileViewPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FBF9),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,7 +646,7 @@ class ProfileViewPage extends StatelessWidget {
                   item.description.isNotEmpty ? item.description : item.source,
                   style: AppTextStyle.bodyMedium.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A2320),
+                    color: AppColors.grey800,
                   ),
                 ),
               ),
@@ -674,12 +672,12 @@ class ProfileViewPage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Source: ${item.sourceModel}',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           const SizedBox(height: 4),
           Text(
             'Applied: ${item.isApplied ? 'Yes' : 'No'} | $formattedDate',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
         ],
       ),
@@ -694,7 +692,7 @@ class ProfileViewPage extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFFF6FAF8),
+            color: AppColors.primarySoft,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 18, color: AppColorToken.primary.color),
@@ -707,7 +705,7 @@ class ProfileViewPage extends StatelessWidget {
               Text(
                 label,
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -733,7 +731,7 @@ class ProfileViewPage extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -750,7 +748,7 @@ class ProfileViewPage extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.82),
+                  color: AppColors.white.withValues(alpha: 0.82),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: accent.withValues(alpha: 0.12)),
                 ),
@@ -765,14 +763,14 @@ class ProfileViewPage extends StatelessWidget {
                       title,
                       style: AppTextStyle.bodyMedium.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A2320),
+                        color: AppColors.grey800,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: const Color(0xFF8B95A5),
+                        color: AppColors.grey400,
                         height: 1.35,
                       ),
                     ),
@@ -797,7 +795,7 @@ class ProfileViewPage extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
@@ -805,10 +803,10 @@ class ProfileViewPage extends StatelessWidget {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.16),
+            color: AppColors.white.withValues(alpha: 0.16),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: Colors.white, size: 18),
+          child: Icon(icon, color: AppColors.white, size: 18),
         ),
       ),
     );
@@ -821,14 +819,14 @@ class ProfileViewPage extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF7FAF8),
+            color: AppColors.primarySoft,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -857,7 +855,7 @@ class ProfileViewPage extends StatelessWidget {
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                         height: 1.4,
                       ),
                     ),
@@ -867,7 +865,7 @@ class ProfileViewPage extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
-                color: Colors.grey[500],
+                color: AppColors.grey500,
               ),
             ],
           ),
@@ -903,11 +901,11 @@ class ProfileViewPage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -943,7 +941,7 @@ class ProfileViewPage extends StatelessWidget {
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                         height: 1.4,
                       ),
                     ),
@@ -1018,9 +1016,9 @@ class ProfileViewPage extends StatelessWidget {
 
   Color _chipColorForTag(String label) {
     final normalized = label.toLowerCase();
-    if (normalized == 'active') return const Color(0xFF0E9F6E);
-    if (normalized == 'inactive') return const Color(0xFFF59E0B);
-    if (normalized == 'blocked') return const Color(0xFFDC2626);
+    if (normalized == 'active') return AppColors.primaryDark;
+    if (normalized == 'inactive') return AppColors.amber;
+    if (normalized == 'blocked') return AppColors.red;
     return AppColorToken.primary.color;
   }
 }
@@ -1087,7 +1085,7 @@ class _LogoutButtonState extends State<_LogoutButton>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Error logging out. Please try again.'),
-            backgroundColor: Colors.red[400],
+            backgroundColor: AppColors.red[400],
           ),
         );
       }
@@ -1125,19 +1123,19 @@ class _LogoutButtonState extends State<_LogoutButton>
                 ],
               ),
               child: Material(
-                color: Colors.transparent,
+                color: AppColors.transparent,
                 child: InkWell(
                   onTap: _onPressed,
                   borderRadius: BorderRadius.circular(18),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.logout_rounded, color: Colors.white, size: 20),
+                      Icon(Icons.logout_rounded, color: AppColors.white, size: 20),
                       SizedBox(width: 10),
                       Text(
                         'Logout',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.3,
@@ -1233,14 +1231,14 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.white,
             elevation: 0,
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
-                  colors: [Colors.white, const Color(0xFFF5F5F5)],
+                  colors: [AppColors.white, const Color(0xFFF5F5F5)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -1254,13 +1252,13 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Colors.red[100]!, Colors.orange[100]!],
+                        colors: [AppColors.red[100]!, AppColors.orange[100]!],
                       ),
                     ),
                     child: Icon(
                       Icons.logout_rounded,
                       size: 40,
-                      color: Colors.red[600],
+                      color: AppColors.red[600],
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -1269,7 +1267,7 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      color: AppColors.black87,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -1279,7 +1277,7 @@ class _LogoutConfirmationDialogState extends State<_LogoutConfirmationDialog>
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                       height: 1.5,
                       letterSpacing: 0.2,
                     ),
@@ -1375,12 +1373,12 @@ class _AnimatedButtonState extends State<AnimatedButton>
               gradient: widget.isPrimary
                   ? AppGradients.primaryGradient
                   : LinearGradient(
-                      colors: [Colors.grey[300]!, Colors.grey[400]!],
+                      colors: [AppColors.grey300, AppColors.grey400],
                     ),
               boxShadow: [
                 BoxShadow(
                   color:
-                      (widget.isPrimary ? Colors.red[400] : Colors.grey[400])!
+                      (widget.isPrimary ? AppColors.red[400] : AppColors.grey400)!
                           .withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -1388,7 +1386,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
               ],
             ),
             child: Material(
-              color: Colors.transparent,
+              color: AppColors.transparent,
               child: InkWell(
                 onTap: widget.onPressed,
                 borderRadius: BorderRadius.circular(12),
@@ -1398,7 +1396,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: widget.isPrimary ? Colors.white : Colors.black87,
+                      color: widget.isPrimary ? AppColors.white : AppColors.black87,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -1411,3 +1409,5 @@ class _AnimatedButtonState extends State<AnimatedButton>
     );
   }
 }
+
+

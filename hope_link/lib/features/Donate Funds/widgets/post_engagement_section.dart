@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:hope_link/core/extensions/num_extension.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/core/theme/app_text_styles.dart';
 
-import '../../../core/extensions/num_extension.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../controllers/post_interactions_controller.dart';
 import '../models/post_interaction_models.dart';
 import 'post_interaction_summary.dart';
@@ -28,11 +29,11 @@ class PostEngagementSection extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.10),
+            color: accentColor.withValues(alpha: 0.10),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -46,7 +47,7 @@ class PostEngagementSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.10),
+                  color: accentColor.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(Icons.forum_rounded, color: accentColor),
@@ -60,14 +61,14 @@ class PostEngagementSection extends StatelessWidget {
                       title,
                       style: AppTextStyle.bodyLarge.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.grey[900],
+                        color: AppColors.grey900,
                       ),
                     ),
                     4.verticalSpace,
                     Text(
                       subtitle,
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.grey600,
                       ),
                     ),
                   ],
@@ -102,9 +103,9 @@ class PostEngagementSection extends StatelessWidget {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: AppColors.grey50,
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.grey200),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +119,7 @@ class PostEngagementSection extends StatelessWidget {
                           child: Text(
                             '${controller.interaction.value.commentsCount} comments',
                             style: AppTextStyle.bodyMedium.copyWith(
-                              color: Colors.grey[800],
+                              color: AppColors.grey800,
                               fontWeight: FontWeight.w700,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -143,9 +144,9 @@ class PostEngagementSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: AppColors.grey50,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: AppColors.grey200),
             ),
             child: Row(
               children: [
@@ -157,7 +158,7 @@ class PostEngagementSection extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: 'Write something thoughtful...',
                       hintStyle: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[500],
+                        color: AppColors.grey500,
                       ),
                       border: InputBorder.none,
                     ),
@@ -174,7 +175,7 @@ class PostEngagementSection extends StatelessWidget {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: controller.isSubmittingComment.value
-                            ? accentColor.withOpacity(0.5)
+                            ? accentColor.withValues(alpha: 0.5)
                             : accentColor,
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -184,12 +185,12 @@ class PostEngagementSection extends StatelessWidget {
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             )
                           : const Icon(
                               Icons.send_rounded,
-                              color: Colors.white,
+                              color: AppColors.white,
                               size: 18,
                             ),
                     ),
@@ -274,7 +275,7 @@ class _ActionPill extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: active ? accentColor : accentColor.withOpacity(0.08),
+          color: active ? accentColor : accentColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Row(
@@ -286,18 +287,18 @@ class _ActionPill extends StatelessWidget {
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: active ? Colors.white : accentColor,
+                  color: active ? AppColors.white : accentColor,
                 ),
               )
             else
-              Icon(icon, color: active ? Colors.white : accentColor),
+              Icon(icon, color: active ? AppColors.white : accentColor),
             10.horizontalSpace,
             Flexible(
               child: Text(
                 '$label - $count',
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyle.bodyMedium.copyWith(
-                  color: active ? Colors.white : Colors.grey[800],
+                  color: active ? AppColors.white : AppColors.grey800,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -326,16 +327,16 @@ class _CommentTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.grey50,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: accentColor.withOpacity(0.14),
+            backgroundColor: accentColor.withValues(alpha: 0.14),
             backgroundImage:
                 comment.user.profileImage != null &&
                     comment.user.profileImage!.isNotEmpty &&
@@ -368,14 +369,14 @@ class _CommentTile extends StatelessWidget {
                         comment.user.name,
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.grey[900],
+                          color: AppColors.grey900,
                         ),
                       ),
                     ),
                     Text(
                       formatter.format(comment.createdAt),
                       style: AppTextStyle.bodySmall.copyWith(
-                        color: Colors.grey[500],
+                        color: AppColors.grey500,
                         fontSize: 11,
                       ),
                     ),
@@ -385,7 +386,7 @@ class _CommentTile extends StatelessWidget {
                 Text(
                   comment.text,
                   style: AppTextStyle.bodyMedium.copyWith(
-                    color: Colors.grey[700],
+                    color: AppColors.grey700,
                     height: 1.5,
                   ),
                 ),
@@ -398,7 +399,7 @@ class _CommentTile extends StatelessWidget {
               onTap: onDelete,
               child: Icon(
                 Icons.delete_outline_rounded,
-                color: Colors.red[400],
+                color: AppColors.red[400],
                 size: 20,
               ),
             ),
@@ -426,18 +427,18 @@ class _EmptyCommentState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.grey50,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 34, color: Colors.grey[400]),
+          Icon(icon, size: 34, color: AppColors.grey400),
           12.verticalSpace,
           Text(
             title,
             style: AppTextStyle.bodyMedium.copyWith(
-              color: Colors.grey[800],
+              color: AppColors.grey800,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -446,7 +447,7 @@ class _EmptyCommentState extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.grey600,
               height: 1.5,
             ),
           ),

@@ -1,10 +1,12 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/features/DonateEssentials/controllers/donate_essentials_controller.dart';
+import 'package:hope_link/features/DonateEssentials/models/essential_models.dart';
 import 'package:intl/intl.dart';
-
-import '../controllers/donate_essentials_controller.dart';
-import '../models/essential_models.dart';
 
 class CommitEssentialDonationPage extends StatelessWidget {
   const CommitEssentialDonationPage({super.key});
@@ -15,14 +17,14 @@ class CommitEssentialDonationPage extends StatelessWidget {
         ? Get.find<DonateEssentialsController>()
         : Get.put(DonateEssentialsController());
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.inputFill,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
           'Commit Donation',
           style: GoogleFonts.dmSans(
-            color: Colors.black87,
+            color: AppColors.black87,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -206,7 +208,7 @@ class CommitEssentialDonationPage extends StatelessWidget {
                     }
                   },
             child: controller.isSubmittingCommitment.value
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const CircularProgressIndicator(color: AppColors.white)
                 : const Text('Submit Commitment'),
           ),
         ),
@@ -218,7 +220,7 @@ class CommitEssentialDonationPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -235,3 +237,6 @@ class CommitEssentialDonationPage extends StatelessWidget {
     );
   }
 }
+
+
+

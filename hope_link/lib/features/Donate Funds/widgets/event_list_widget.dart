@@ -73,11 +73,11 @@ class EventsListWidget extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: AppColors.black.withOpacity(0.06),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -134,12 +134,12 @@ class EventsListWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.amber.shade400, Colors.orange.shade400],
+                  colors: [AppColors.amber, AppColors.orange],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.5),
+                    color: AppColors.amber.withOpacity(0.5),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -148,12 +148,12 @@ class EventsListWidget extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_rounded, size: 16, color: Colors.white),
+                  const Icon(Icons.star_rounded, size: 16, color: AppColors.white),
                   4.horizontalSpace,
                   Text(
                     'Featured',
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -168,13 +168,13 @@ class EventsListWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: AppColors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               event.category.toUpperCase(),
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.white,
+                color: AppColors.white,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
                 letterSpacing: 0.5,
@@ -253,14 +253,14 @@ class EventsListWidget extends StatelessWidget {
                     Text(
                       'View Details',
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     6.horizontalSpace,
                     const Icon(
                       Icons.arrow_forward_rounded,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 18,
                     ),
                   ],
@@ -276,12 +276,12 @@ class EventsListWidget extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icon, size: 16, color: AppColors.grey600),
         8.horizontalSpace,
         Expanded(
           child: Text(
             text,
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -309,7 +309,7 @@ class EventsListWidget extends StatelessWidget {
             Text(
               '${event.spotsLeft} spots left',
               style: AppTextStyle.bodySmall.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -321,9 +321,9 @@ class EventsListWidget extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: AppColors.grey200,
             valueColor: AlwaysStoppedAnimation<Color>(
-              progress >= 0.9 ? Colors.orange : AppColorToken.primary.color,
+              progress >= 0.9 ? AppColors.orange : AppColorToken.primary.color,
             ),
           ),
         ),
@@ -358,7 +358,7 @@ class EventsListWidget extends StatelessWidget {
                 Text(
                   'Organized by',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                     fontSize: 10,
                   ),
                 ),
@@ -389,7 +389,7 @@ class EventsListWidget extends StatelessWidget {
           16.verticalSpace,
           Text(
             'Loading events...',
-            style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
           ),
         ],
       ),
@@ -406,12 +406,12 @@ class EventsListWidget extends StatelessWidget {
             Icon(
               Icons.error_outline_rounded,
               size: 80,
-              color: Colors.grey[400],
+              color: AppColors.grey400,
             ),
             16.verticalSpace,
             Text(
               controller.errorMessage.value,
-              style: AppTextStyle.bodyLarge.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodyLarge.copyWith(color: AppColors.grey600),
               textAlign: TextAlign.center,
             ),
             24.verticalSpace,
@@ -421,7 +421,7 @@ class EventsListWidget extends StatelessWidget {
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColorToken.primary.color,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 12,
@@ -444,19 +444,19 @@ class EventsListWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy_rounded, size: 80, color: Colors.grey[400]),
+            Icon(Icons.event_busy_rounded, size: 80, color: AppColors.grey400),
             16.verticalSpace,
             Text(
               'No events found',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: AppColors.grey700,
               ),
             ),
             8.verticalSpace,
             Text(
               'Try adjusting your search or filters',
-              style: AppTextStyle.bodyMedium.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodyMedium.copyWith(color: AppColors.grey600),
               textAlign: TextAlign.center,
             ),
           ],
@@ -465,3 +465,5 @@ class EventsListWidget extends StatelessWidget {
     );
   }
 }
+
+

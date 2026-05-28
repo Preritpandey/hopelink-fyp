@@ -16,7 +16,7 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.white,
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       elevation: 0,
@@ -25,10 +25,10 @@ class ProductCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: AppColors.grey200),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: AppColors.black.withOpacity(0.04),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -56,7 +56,7 @@ class ProductCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.grey[900],
+                          color: AppColors.grey900,
                           height: 1.25,
                         ),
                       ),
@@ -91,7 +91,7 @@ class ProductCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyle.bodySmall.copyWith(
-                                color: Colors.grey[600],
+                                color: AppColors.grey600,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -140,8 +140,8 @@ class _ProductImage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.18),
+                  AppColors.transparent,
+                  AppColors.black.withOpacity(0.18),
                 ],
               ),
             ),
@@ -179,11 +179,11 @@ class _FloatingBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: AppColors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: AppColors.black.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -261,13 +261,13 @@ class _RatingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.star_rounded, size: 14, color: Colors.amber[700]),
+        Icon(Icons.star_rounded, size: 14, color: AppColors.amber[700]),
         2.horizontalSpace,
         Text(
           rating.toStringAsFixed(1),
           style: AppTextStyle.labelSmall.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.grey[700],
+            color: AppColors.grey700,
           ),
         ),
         if (reviewCount > 0) ...[
@@ -275,7 +275,7 @@ class _RatingRow extends StatelessWidget {
           Text(
             '($reviewCount)',
             style: AppTextStyle.labelSmall.copyWith(
-              color: Colors.grey[500],
+              color: AppColors.grey500,
             ),
           ),
         ],
@@ -283,3 +283,5 @@ class _RatingRow extends StatelessWidget {
     );
   }
 }
+
+

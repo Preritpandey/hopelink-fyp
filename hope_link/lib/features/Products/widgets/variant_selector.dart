@@ -82,7 +82,7 @@ class VariantSelector extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: isSelected
-                            ? Colors.white
+                            ? AppColors.white
                             : outOfStock
                             ? AppColors.textMuted
                             : AppColors.textPrimary,
@@ -100,7 +100,7 @@ class VariantSelector extends StatelessWidget {
                         fontFamily: 'DM Sans',
                         fontSize: 11,
                         color: isSelected
-                            ? Colors.white.withOpacity(0.85)
+                            ? AppColors.white.withOpacity(0.85)
                             : outOfStock
                             ? AppColors.textMuted
                             : AppColors.primary,
@@ -117,3 +117,5 @@ class VariantSelector extends StatelessWidget {
     );
   }
 }
+
+

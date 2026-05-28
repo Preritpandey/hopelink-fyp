@@ -52,11 +52,11 @@ class SaveCauseButton extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: backgroundColor ?? Colors.white.withOpacity(0.9),
+            color: backgroundColor ?? AppColors.white.withOpacity(0.9),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: AppColors.black.withOpacity(0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -79,7 +79,7 @@ class SaveCauseButton extends StatelessWidget {
                     size: 20,
                     color: isSaved
                         ? (activeColor ?? AppColorToken.primary.color)
-                        : (inactiveColor ?? Colors.grey[700]),
+                        : (inactiveColor ?? AppColors.grey700),
                   ),
           ),
         ),
@@ -87,3 +87,5 @@ class SaveCauseButton extends StatelessWidget {
     });
   }
 }
+
+

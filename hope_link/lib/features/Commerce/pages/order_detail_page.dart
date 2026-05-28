@@ -29,9 +29,9 @@ class OrderDetailPage extends StatelessWidget {
           backgroundColor: const Color(0xFFF6FBF7),
           appBar: AppBar(
             title: const Text('Order details'),
-            backgroundColor: Colors.transparent,
+            backgroundColor: AppColors.transparent,
             elevation: 0,
-            foregroundColor: Colors.black87,
+            foregroundColor: AppColors.black87,
           ),
           body: snapshot.connectionState == ConnectionState.waiting
               ? const Center(child: CircularProgressIndicator())
@@ -111,7 +111,7 @@ class OrderDetailPage extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+              style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
             ),
           ),
           Expanded(
@@ -139,11 +139,11 @@ class _TimelineCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -170,13 +170,13 @@ class _TimelineCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: active
                           ? AppColorToken.primary.color
-                          : Colors.grey.shade300,
+                          : AppColors.grey300,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       active ? Icons.check : Icons.circle,
                       size: active ? 16 : 10,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -184,7 +184,7 @@ class _TimelineCard extends StatelessWidget {
                     step.toUpperCase(),
                     style: AppTextStyle.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: active ? Colors.black87 : Colors.grey[500],
+                      color: active ? AppColors.black87 : AppColors.grey500,
                     ),
                   ),
                 ],
@@ -216,11 +216,11 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -240,3 +240,5 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+
+

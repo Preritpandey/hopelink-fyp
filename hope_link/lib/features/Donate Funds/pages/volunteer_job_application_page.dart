@@ -75,9 +75,9 @@ class _VolunteerJobApplicationPageState
         Get.snackbar(
           'Resume Required',
           'Please upload your resume in PDF format',
-          backgroundColor: Colors.red.withOpacity(0.1),
-          colorText: Colors.red,
-          icon: const Icon(Icons.error_outline, color: Colors.red),
+          backgroundColor: AppColors.red.withOpacity(0.1),
+          colorText: AppColors.red,
+          icon: const Icon(Icons.error_outline, color: AppColors.red),
         );
         return;
       }
@@ -95,9 +95,9 @@ class _VolunteerJobApplicationPageState
         Get.snackbar(
           'Success!',
           'Your application has been submitted successfully',
-          backgroundColor: Colors.green.withOpacity(0.1),
-          colorText: Colors.green,
-          icon: const Icon(Icons.check_circle, color: Colors.green),
+          backgroundColor: AppColors.green.withOpacity(0.1),
+          colorText: AppColors.green,
+          icon: const Icon(Icons.check_circle, color: AppColors.green),
           duration: const Duration(seconds: 3),
         );
       }
@@ -114,7 +114,7 @@ class _VolunteerJobApplicationPageState
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -169,17 +169,17 @@ class _VolunteerJobApplicationPageState
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(Icons.arrow_back_rounded, color: Colors.grey[800]),
+              child: Icon(Icons.arrow_back_rounded, color: AppColors.grey800),
             ),
           ),
           16.horizontalSpace,
@@ -188,7 +188,7 @@ class _VolunteerJobApplicationPageState
               'Apply for Position',
               style: AppTextStyle.h3.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
           ),
@@ -233,7 +233,7 @@ class _VolunteerJobApplicationPageState
                   job.title,
                   style: AppTextStyle.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                   ),
                 ),
                 4.verticalSpace,
@@ -268,13 +268,13 @@ class _VolunteerJobApplicationPageState
               'Why should we hire you?',
               style: AppTextStyle.bodyLarge.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             Text(
               ' *',
               style: AppTextStyle.bodyLarge.copyWith(
-                color: Colors.red,
+                color: AppColors.red,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -283,7 +283,7 @@ class _VolunteerJobApplicationPageState
         12.verticalSpace,
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -299,14 +299,14 @@ class _VolunteerJobApplicationPageState
             decoration: InputDecoration(
               hintText: 'Tell us why you\'re the perfect fit for this role...',
               hintStyle: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[400],
+                color: AppColors.grey400,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               contentPadding: const EdgeInsets.all(16),
             ),
             validator: (value) {
@@ -330,19 +330,19 @@ class _VolunteerJobApplicationPageState
       children: [
         Row(
           children: [
-            Icon(Icons.star_rounded, color: Colors.orange, size: 20),
+            Icon(Icons.star_rounded, color: AppColors.orange, size: 20),
             8.horizontalSpace,
             Text(
               'Your Skills',
               style: AppTextStyle.bodyLarge.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             Text(
               ' *',
               style: AppTextStyle.bodyLarge.copyWith(
-                color: Colors.red,
+                color: AppColors.red,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -351,12 +351,12 @@ class _VolunteerJobApplicationPageState
         8.verticalSpace,
         Text(
           'Separate skills with commas',
-          style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
         ),
         12.verticalSpace,
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -371,14 +371,14 @@ class _VolunteerJobApplicationPageState
             decoration: InputDecoration(
               hintText: 'e.g., Teaching, Communication, First Aid',
               hintStyle: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[400],
+                color: AppColors.grey400,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               contentPadding: const EdgeInsets.all(16),
             ),
             validator: (value) {
@@ -399,19 +399,19 @@ class _VolunteerJobApplicationPageState
       children: [
         Row(
           children: [
-            Icon(Icons.work_history_rounded, color: Colors.blue, size: 20),
+            Icon(Icons.work_history_rounded, color: AppColors.blue, size: 20),
             8.horizontalSpace,
             Text(
               'Experience',
               style: AppTextStyle.bodyLarge.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             Text(
               ' *',
               style: AppTextStyle.bodyLarge.copyWith(
-                color: Colors.red,
+                color: AppColors.red,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -420,7 +420,7 @@ class _VolunteerJobApplicationPageState
         12.verticalSpace,
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -436,14 +436,14 @@ class _VolunteerJobApplicationPageState
             decoration: InputDecoration(
               hintText: 'Describe your relevant experience...',
               hintStyle: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[400],
+                color: AppColors.grey400,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               contentPadding: const EdgeInsets.all(16),
             ),
             validator: (value) {
@@ -467,19 +467,19 @@ class _VolunteerJobApplicationPageState
         children: [
           Row(
             children: [
-              Icon(Icons.description_rounded, color: Colors.purple, size: 20),
+              Icon(Icons.description_rounded, color: AppColors.purple, size: 20),
               8.horizontalSpace,
               Text(
                 'Resume',
                 style: AppTextStyle.bodyLarge.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[900],
+                  color: AppColors.grey900,
                 ),
               ),
               Text(
                 ' *',
                 style: AppTextStyle.bodyLarge.copyWith(
-                  color: Colors.red,
+                  color: AppColors.red,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -488,7 +488,7 @@ class _VolunteerJobApplicationPageState
           8.verticalSpace,
           Text(
             'Upload your resume in PDF format',
-            style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+            style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
           ),
           12.verticalSpace,
           GestureDetector(
@@ -496,12 +496,12 @@ class _VolunteerJobApplicationPageState
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: hasResume
                       ? AppColorToken.primary.color
-                      : Colors.grey[300]!,
+                      : AppColors.grey300,
                   width: 2,
                   strokeAlign: BorderSide.strokeAlignInside,
                 ),
@@ -541,13 +541,13 @@ class _VolunteerJobApplicationPageState
           'Click to upload resume',
           style: AppTextStyle.bodyLarge.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[900],
+            color: AppColors.grey900,
           ),
         ),
         4.verticalSpace,
         Text(
           'PDF format only',
-          style: AppTextStyle.bodySmall.copyWith(color: Colors.grey[600]),
+          style: AppTextStyle.bodySmall.copyWith(color: AppColors.grey600),
         ),
       ],
     );
@@ -559,12 +559,12 @@ class _VolunteerJobApplicationPageState
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: AppColors.red.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
             Icons.picture_as_pdf_rounded,
-            color: Colors.red,
+            color: AppColors.red,
             size: 32,
           ),
         ),
@@ -577,7 +577,7 @@ class _VolunteerJobApplicationPageState
                 _controller.resumeFile.value!.path.split('/').last,
                 style: AppTextStyle.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[900],
+                  color: AppColors.grey900,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -595,7 +595,7 @@ class _VolunteerJobApplicationPageState
         IconButton(
           onPressed: () => _controller.removeResume(),
           icon: const Icon(Icons.close_rounded),
-          color: Colors.grey[600],
+          color: AppColors.grey600,
         ),
       ],
     );
@@ -614,7 +614,7 @@ class _VolunteerJobApplicationPageState
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isLoading
-                  ? [Colors.grey[400]!, Colors.grey[400]!]
+                  ? [AppColors.grey400, AppColors.grey400]
                   : [
                       AppColorToken.primary.color,
                       AppColorToken.primary.color.withOpacity(0.8),
@@ -638,7 +638,7 @@ class _VolunteerJobApplicationPageState
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                     ),
                   ),
                 )
@@ -647,14 +647,14 @@ class _VolunteerJobApplicationPageState
                   children: [
                     const Icon(
                       Icons.send_rounded,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 22,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       'Submit Application',
                       style: AppTextStyle.h4.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -665,3 +665,5 @@ class _VolunteerJobApplicationPageState
     });
   }
 }
+
+

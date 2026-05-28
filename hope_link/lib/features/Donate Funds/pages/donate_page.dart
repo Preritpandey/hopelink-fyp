@@ -74,7 +74,7 @@ class _DonatePageState extends State<DonatePage>
             end: Alignment.bottomRight,
             colors: [
               AppColorToken.primary.color.withOpacity(0.05),
-              Colors.white,
+              AppColors.white,
               AppColorToken.primary.color.withOpacity(0.03),
             ],
           ),
@@ -122,11 +122,11 @@ class _DonatePageState extends State<DonatePage>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: AppColors.black.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -148,14 +148,14 @@ class _DonatePageState extends State<DonatePage>
                   'Make a Donation',
                   style: AppTextStyle.h3.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                   ),
                 ),
                 4.verticalSpace,
                 Text(
                   'Every contribution makes a difference',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                   ),
                 ),
               ],
@@ -170,7 +170,7 @@ class _DonatePageState extends State<DonatePage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -194,10 +194,10 @@ class _DonatePageState extends State<DonatePage>
                       return Container(
                         width: 80,
                         height: 80,
-                        color: Colors.grey[200],
+                        color: AppColors.grey200,
                         child: Icon(
                           Icons.image_outlined,
-                          color: Colors.grey[400],
+                          color: AppColors.grey400,
                         ),
                       );
                     },
@@ -205,8 +205,8 @@ class _DonatePageState extends State<DonatePage>
                 : Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey[200],
-                    child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                    color: AppColors.grey200,
+                    child: Icon(Icons.image_outlined, color: AppColors.grey400),
                   ),
           ),
           16.horizontalSpace,
@@ -218,7 +218,7 @@ class _DonatePageState extends State<DonatePage>
                   campaign.title,
                   style: AppTextStyle.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -227,7 +227,7 @@ class _DonatePageState extends State<DonatePage>
                 Text(
                   campaign.organization.organizationName,
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                   ),
                 ),
                 8.verticalSpace,
@@ -235,7 +235,7 @@ class _DonatePageState extends State<DonatePage>
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: campaign.progress / 100,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: AppColors.grey200,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       AppColorToken.primary.color,
                     ),
@@ -267,7 +267,7 @@ class _DonatePageState extends State<DonatePage>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -284,7 +284,7 @@ class _DonatePageState extends State<DonatePage>
                   'Select Amount',
                   style: AppTextStyle.h3.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[900],
+                    color: AppColors.grey900,
                   ),
                 ),
                 16.verticalSpace,
@@ -300,7 +300,7 @@ class _DonatePageState extends State<DonatePage>
                 Text(
                   'Or enter custom amount',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -326,7 +326,7 @@ class _DonatePageState extends State<DonatePage>
                     child: Text(
                       'NPR',
                       style: AppTextStyle.bodyMedium.copyWith(
-                        color: Colors.grey[700],
+                        color: AppColors.grey700,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -336,7 +336,7 @@ class _DonatePageState extends State<DonatePage>
                 Text(
                   'Payment Method',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -401,12 +401,12 @@ class _DonatePageState extends State<DonatePage>
         decoration: BoxDecoration(
           color: isSelected
               ? AppColorToken.primary.color.withOpacity(0.1)
-              : Colors.grey[50],
+              : AppColors.grey50,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColorToken.primary.color
-                : Colors.grey.withOpacity(0.2),
+                : AppColors.grey.withOpacity(0.2),
             width: 1.5,
           ),
           boxShadow: [
@@ -425,13 +425,13 @@ class _DonatePageState extends State<DonatePage>
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColorToken.primary.color
-                    : Colors.white,
+                    : AppColors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 20,
-                color: isSelected ? Colors.white : AppColorToken.primary.color,
+                color: isSelected ? AppColors.white : AppColorToken.primary.color,
               ),
             ),
             12.horizontalSpace,
@@ -444,14 +444,14 @@ class _DonatePageState extends State<DonatePage>
                     style: AppTextStyle.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                       color:
-                          isSelected ? Colors.grey[900] : Colors.grey[700],
+                          isSelected ? AppColors.grey900 : AppColors.grey700,
                     ),
                   ),
                   2.verticalSpace,
                   Text(
                     subtitle,
                     style: AppTextStyle.bodySmall.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                     ),
                   ),
                 ],
@@ -492,7 +492,7 @@ class _DonatePageState extends State<DonatePage>
               child: Text(
                 message,
                 style: AppTextStyle.bodySmall.copyWith(
-                  color: Colors.grey[700],
+                  color: AppColors.grey700,
                   height: 1.5,
                 ),
               ),
@@ -514,12 +514,12 @@ class _DonatePageState extends State<DonatePage>
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColorToken.primary.color : Colors.grey[100],
+          color: isSelected ? AppColorToken.primary.color : AppColors.grey100,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColorToken.primary.color
-                : Colors.grey.withOpacity(0.3),
+                : AppColors.grey.withOpacity(0.3),
             width: 2,
           ),
           boxShadow: isSelected
@@ -535,7 +535,7 @@ class _DonatePageState extends State<DonatePage>
         child: Text(
           _formatCurrency(amount.toDouble()),
           style: AppTextStyle.bodyMedium.copyWith(
-            color: isSelected ? Colors.white : Colors.grey[700],
+            color: isSelected ? AppColors.white : AppColors.grey700,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
           ),
         ),
@@ -547,10 +547,10 @@ class _DonatePageState extends State<DonatePage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -574,7 +574,7 @@ class _DonatePageState extends State<DonatePage>
                       Text(
                         'Amount to Pay',
                         style: AppTextStyle.bodyLarge.copyWith(
-                          color: Colors.grey[700],
+                          color: AppColors.grey700,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -612,8 +612,8 @@ class _DonatePageState extends State<DonatePage>
                             'Invalid Amount',
                             'Please select or enter a donation amount',
                             snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withOpacity(0.9),
-                            colorText: Colors.white,
+                            backgroundColor: AppColors.red.withOpacity(0.9),
+                            colorText: AppColors.white,
                             margin: const EdgeInsets.all(16),
                             borderRadius: 12,
                           );
@@ -633,3 +633,5 @@ class _DonatePageState extends State<DonatePage>
     );
   }
 }
+
+

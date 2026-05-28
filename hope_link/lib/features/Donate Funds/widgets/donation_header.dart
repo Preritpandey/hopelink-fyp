@@ -56,7 +56,7 @@ class DonationHeader extends StatelessWidget {
                     //   () => Text(
                     //     '${campaignController.filteredCampaigns.length} active campaigns',
                     //     style: AppTextStyle.bodySmall.copyWith(
-                    //       color: Colors.grey[600],
+                    //       color: AppColors.grey600,
                     //     ),
                     //   ),
                     // ),
@@ -143,7 +143,7 @@ class DonationHeader extends StatelessWidget {
   //           Text(
   //             'Points',
   //             style: AppTextStyle.bodySmall.copyWith(
-  //               color: Colors.grey[700],
+  //               color: AppColors.grey700,
   //               fontWeight: FontWeight.w600,
   //             ),
   //           ),
@@ -175,19 +175,19 @@ class DonationHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
+        color: AppColors.orange.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+        border: Border.all(color: AppColors.orange.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.wifi_off_rounded, size: 16, color: Colors.orange[700]),
+          Icon(Icons.wifi_off_rounded, size: 16, color: AppColors.orange[700]),
           const SizedBox(width: 4),
           Text(
             'Offline',
             style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.orange[700],
+              color: AppColors.orange[700],
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -211,3 +211,5 @@ class DonationHeader extends StatelessWidget {
     }
   }
 }
+
+

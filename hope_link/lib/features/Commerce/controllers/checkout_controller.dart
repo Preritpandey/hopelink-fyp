@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 import 'package:hope_link/config/payment_config.dart';
 import 'package:hope_link/core/services/payment_service.dart';
 import 'package:hope_link/features/Commerce/controllers/cart_controller.dart';
 import 'package:hope_link/features/Commerce/controllers/orders_controller.dart';
 import 'package:hope_link/features/Commerce/models/order_models.dart';
 import 'package:hope_link/features/Commerce/services/commerce_service.dart';
-import 'package:hope_link/utils/helpers/snackbar_helper.dart';
 
+import 'package:hope_link/core/theme/app_colors.dart';
+import 'package:hope_link/utils/helpers/snackbar_helper.dart';
+import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';    
 class CheckoutController extends GetxController {
   CheckoutController({
     CommerceService? commerceService,
@@ -155,7 +156,7 @@ class CheckoutController extends GetxController {
       Container(
         padding: const EdgeInsets.fromLTRB(24, 18, 24, 28),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -165,12 +166,12 @@ class CheckoutController extends GetxController {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: const Color(0xFF27AE60).withOpacity(0.12),
+                color: AppColors.primary.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.check_circle_rounded,
-                color: Color(0xFF27AE60),
+                color: AppColors.primary,
                 size: 36,
               ),
             ),
@@ -188,7 +189,7 @@ class CheckoutController extends GetxController {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade700,
+                color: AppColors.grey700,
                 height: 1.5,
               ),
             ),
@@ -223,3 +224,6 @@ class CheckoutController extends GetxController {
     super.onClose();
   }
 }
+
+
+
