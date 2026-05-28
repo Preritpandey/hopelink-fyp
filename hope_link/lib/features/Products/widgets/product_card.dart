@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
@@ -16,41 +17,39 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
       elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailPage(product: product),
-          ),
-        ),
+        onTap: () => Get.to(() => ProductDetailPage(product: product)),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
-                color: AppColorToken.primary.color.withOpacity(0.08),
+                color: Colors.black.withOpacity(0.04),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
-          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(flex: 6, child: _ProductCardImage(product: product)),
+              Expanded(
+                flex: 6,
+                child: _ProductImage(product: product),
+              ),
               Expanded(
                 flex: 5,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _OrgBadge(orgName: product.org.organizationName),
+                      8.verticalSpace,
                       Text(
                         product.name,
                         maxLines: 2,
@@ -58,23 +57,24 @@ class ProductCard extends StatelessWidget {
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: Colors.grey[900],
-                          height: 1.2,
+                          height: 1.25,
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            product.priceDisplay,
-                            style: AppTextStyle.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColorToken.primary.color,
-                            ),
-                          ),
-                          if (product.ratingAverage > 0)
-                            _RatingChip(rating: product.ratingAverage),
-                        ],
+                      6.verticalSpace,
+                      Text(
+                        product.priceDisplay,
+                        style: AppTextStyle.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColorToken.primary.color,
+                        ),
                       ),
+                      6.verticalSpace,
+                      if (product.ratingAverage > 0)
+                        _RatingRow(
+                          rating: product.ratingAverage,
+                          reviewCount: product.ratingCount,
+                        ),
+                      6.verticalSpace,
                       Row(
                         children: [
                           Icon(
@@ -85,7 +85,9 @@ class ProductCard extends StatelessWidget {
                           4.horizontalSpace,
                           Expanded(
                             child: Text(
-                              product.beneficiaryDescription,
+                              product.beneficiaryDescription.isNotEmpty
+                                  ? product.beneficiaryDescription
+                                  : 'Small-batch craft with community impact.',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyle.bodySmall.copyWith(
@@ -108,24 +110,29 @@ class ProductCard extends StatelessWidget {
   }
 }
 
-class _ProductCardImage extends StatelessWidget {
+class _ProductImage extends StatelessWidget {
   final ProductModel product;
-  const _ProductCardImage({required this.product});
+
+  const _ProductImage({required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        product.coverImage != null
-            ? CachedNetworkImage(
-                imageUrl: product.coverImage!,
-                fit: BoxFit.cover,
-                placeholder: (_, __) =>
-                    Container(color: AppColorToken.lightGrey.color),
-                errorWidget: (_, __, ___) => _ImageFallback(product: product),
-              )
-            : _ImageFallback(product: product),
+        Hero(
+          tag: 'product-${product.id}',
+          child: product.coverImage != null
+              ? CachedNetworkImage(
+                  imageUrl: product.coverImage!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(
+                    color: AppColorToken.lightGrey.color,
+                  ),
+                  errorWidget: (_, __, ___) => _ImageFallback(product: product),
+                )
+              : _ImageFallback(product: product),
+        ),
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -133,8 +140,8 @@ class _ProductCardImage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.0),
-                  Colors.black.withOpacity(0.25),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.18),
                 ],
               ),
             ),
@@ -144,47 +151,71 @@ class _ProductCardImage extends StatelessWidget {
           Positioned(
             top: 10,
             right: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Text(
-                '${product.displayVariants.length} options',
-                style: AppTextStyle.labelSmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColorToken.primary.color,
-                ),
-              ),
+            child: _FloatingBadge(
+              label: '${product.displayVariants.length} options',
             ),
           ),
+        Positioned(
+          left: 10,
+          bottom: 10,
+          child: _FloatingBadge(
+            label: product.category.isNotEmpty
+                ? product.category.toUpperCase()
+                : 'PRODUCT',
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _FloatingBadge extends StatelessWidget {
+  final String label;
+
+  const _FloatingBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: AppTextStyle.labelSmall.copyWith(
+          fontWeight: FontWeight.w800,
+          color: AppColorToken.primary.color,
+          letterSpacing: 0.2,
+        ),
+      ),
     );
   }
 }
 
 class _ImageFallback extends StatelessWidget {
   final ProductModel product;
+
   const _ImageFallback({required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColorToken.lightGrey.color,
+      color: const Color(0xFFF2F4EF),
       child: Center(
         child: Text(
           product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
           style: AppTextStyle.h2.copyWith(
-            color: AppColorToken.primary.color.withOpacity(0.4),
-            fontWeight: FontWeight.w700,
+            color: AppColorToken.primary.color.withOpacity(0.35),
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -194,6 +225,7 @@ class _ImageFallback extends StatelessWidget {
 
 class _OrgBadge extends StatelessWidget {
   final String orgName;
+
   const _OrgBadge({required this.orgName});
 
   @override
@@ -201,38 +233,52 @@ class _OrgBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColorToken.primary.color.withOpacity(0.1),
+        color: AppColorToken.primary.color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        orgName,
+        orgName.isNotEmpty ? orgName : 'Community Partner',
         style: AppTextStyle.labelSmall.copyWith(
           fontWeight: FontWeight.w700,
           color: AppColorToken.primary.color,
-          letterSpacing: 0.2,
+          letterSpacing: 0.1,
         ),
       ),
     );
   }
 }
 
-class _RatingChip extends StatelessWidget {
+class _RatingRow extends StatelessWidget {
   final double rating;
-  const _RatingChip({required this.rating});
+  final int reviewCount;
+
+  const _RatingRow({
+    required this.rating,
+    required this.reviewCount,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.star_rounded, size: 12, color: Colors.amber[600]),
+        Icon(Icons.star_rounded, size: 14, color: Colors.amber[700]),
         2.horizontalSpace,
         Text(
           rating.toStringAsFixed(1),
           style: AppTextStyle.labelSmall.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: Colors.grey[700],
           ),
         ),
+        if (reviewCount > 0) ...[
+          4.horizontalSpace,
+          Text(
+            '($reviewCount)',
+            style: AppTextStyle.labelSmall.copyWith(
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
       ],
     );
   }

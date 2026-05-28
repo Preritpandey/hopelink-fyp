@@ -224,6 +224,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                         '${_campaignController.activeCampaignsCount} active',
                     icon: Icons.volunteer_activism_rounded,
                     colors: const [Color(0xFF1E8E55), Color(0xFF38C172)],
+                    onTap: () => Get.toNamed('/campaigns-all'),
                   ),
                 ),
                 12.horizontalSpace,
@@ -234,6 +235,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     subtitle: 'Open ways to contribute',
                     icon: Icons.groups_rounded,
                     colors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+                    onTap: () => Get.toNamed('/volunteer-jobs-all'),
                   ),
                 ),
                 12.horizontalSpace,
@@ -247,6 +249,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                       Color.fromARGB(255, 80, 91, 102),
                       Color.fromARGB(255, 81, 189, 90),
                     ],
+                    onTap: () => Get.toNamed('/events-all'),
                   ),
                 ),
               ],
@@ -263,68 +266,75 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     required String subtitle,
     required IconData icon,
     required List<Color> colors,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      width: 188,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: colors,
-        ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: colors.first.withOpacity(0.22),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          width: 188,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: colors,
             ),
-            child: Icon(icon, color: Colors.white, size: 18),
-          ),
-          10.verticalSpace,
-          Row(
-            children: [
-              Text(
-                title,
-                style: AppTextStyle.h4.withColor(AppColorToken.white),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: colors.first.withOpacity(0.22),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-              10.horizontalSpace,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: Colors.white, size: 18),
+              ),
+              10.verticalSpace,
+              Row(
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyle.h4.withColor(AppColorToken.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  10.horizontalSpace,
+                  Text(
+                    value,
+                    style: AppTextStyle.h3.bold.withColor(AppColorToken.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              1.verticalSpace,
               Text(
-                value,
-                style: AppTextStyle.h3.bold.withColor(AppColorToken.white),
+                subtitle,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: Colors.white.withOpacity(0.8),
+                  height: 1.15,
+                  fontSize: 9,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-
-          1.verticalSpace,
-          Text(
-            subtitle,
-            style: AppTextStyle.bodySmall.copyWith(
-              color: Colors.white.withOpacity(0.8),
-              height: 1.15,
-              fontSize: 9,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }

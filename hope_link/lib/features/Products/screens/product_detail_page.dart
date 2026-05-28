@@ -31,10 +31,7 @@ class ProductDetailPage extends StatelessWidget {
             slivers: [
               _DetailAppBar(product: product, content: content),
               SliverToBoxAdapter(
-                child: _DetailBody(
-                  controller: controller,
-                  content: content,
-                ),
+                child: _DetailBody(controller: controller, content: content),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 112)),
             ],
@@ -81,7 +78,8 @@ class _ProductContent {
     final lowerCombined =
         '${product.name} ${product.description} ${product.category}'
             .toLowerCase();
-    final scarfLike = lowerCombined.contains('scarf') ||
+    final scarfLike =
+        lowerCombined.contains('scarf') ||
         lowerCombined.contains('wool') ||
         lowerCombined.contains('leno') ||
         lowerCombined.contains('woven');
@@ -107,8 +105,8 @@ class _ProductContent {
     final impactDescription = product.beneficiaryDescription.trim().isNotEmpty
         ? product.beneficiaryDescription.trim()
         : scarfLike
-            ? 'Every purchase helps support elderly weavers with sustainable income, preserving traditional weaving skills and dignified community livelihoods.'
-            : 'Each purchase supports artisan communities through income-generating craft work and locally rooted production.';
+        ? 'Every purchase helps support elderly weavers with sustainable income, preserving traditional weaving skills and dignified community livelihoods.'
+        : 'Each purchase supports artisan communities through income-generating craft work and locally rooted production.';
 
     final craftsmanshipTags = scarfLike
         ? const ['Handwoven', 'Natural fibers', 'Artisan made']
@@ -256,7 +254,10 @@ class _DetailAppBar extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            ProductImageGallery(images: product.images),
+            Hero(
+              tag: 'product-${product.id}',
+              child: ProductImageGallery(images: product.images),
+            ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -384,10 +385,7 @@ class _DetailBody extends StatelessWidget {
   final ProductController controller;
   final _ProductContent content;
 
-  const _DetailBody({
-    required this.controller,
-    required this.content,
-  });
+  const _DetailBody({required this.controller, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -418,13 +416,9 @@ class _DetailBody extends StatelessWidget {
               ),
             ),
           if (activeVariants.length > 1) const SizedBox(height: 18),
-          _BentoCard(
-            child: _StorySection(content: content),
-          ),
+          _BentoCard(child: _StorySection(content: content)),
           const SizedBox(height: 18),
-          _BentoCard(
-            child: _SpecsSection(specs: content.specs),
-          ),
+          _BentoCard(child: _SpecsSection(specs: content.specs)),
           const SizedBox(height: 18),
           _ImpactCard(
             title: content.impactTitle,
@@ -457,9 +451,7 @@ class _PriceAndTrustCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final variant = controller.selectedVariant;
-      final displayPrice = variant != null
-          ? variant.price
-          : product.basePrice;
+      final displayPrice = variant != null ? variant.price : product.basePrice;
 
       return _BentoCard(
         child: Column(
@@ -605,8 +597,8 @@ class _ColorVariantPicker extends StatelessWidget {
                     color: isSelected
                         ? AppColors.accent
                         : outOfStock
-                            ? AppColors.divider
-                            : AppColors.divider,
+                        ? AppColors.divider
+                        : AppColors.divider,
                     width: isSelected ? 1.6 : 1,
                   ),
                   boxShadow: [
@@ -626,10 +618,7 @@ class _ColorVariantPicker extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: swatch,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: swatch.withOpacity(0.35),
@@ -792,10 +781,7 @@ class _ImpactCard extends StatelessWidget {
   final String title;
   final String description;
 
-  const _ImpactCard({
-    required this.title,
-    required this.description,
-  });
+  const _ImpactCard({required this.title, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -805,10 +791,7 @@ class _ImpactCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.accent.withOpacity(0.14),
-            const Color(0xFFF8F5ED),
-          ],
+          colors: [AppColors.accent.withOpacity(0.14), const Color(0xFFF8F5ED)],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.accent.withOpacity(0.22)),
@@ -890,7 +873,9 @@ class _AvailabilityCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
-              inStock ? Icons.inventory_2_outlined : Icons.error_outline_rounded,
+              inStock
+                  ? Icons.inventory_2_outlined
+                  : Icons.error_outline_rounded,
               color: color,
             ),
           ),

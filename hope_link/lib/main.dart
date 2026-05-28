@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'config/payment_config.dart';
 import 'features/Donate Funds/pages/all_campaigns_page.dart';
+import 'features/Donate Funds/pages/all_events_page.dart';
 import 'features/Donate Funds/pages/all_volunteer_jobs_page.dart';
 import 'features/Donate Funds/pages/campaign_details_page.dart';
 import 'features/Donate Funds/pages/campaigns_list_page.dart';
@@ -74,6 +75,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/signup', page: () => const SignUpPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/campaigns-all', page: () => const AllCampaignsPage()),
+        GetPage(name: '/events-all', page: () => const AllEventsPage()),
         GetPage(
           name: '/volunteer-jobs-all',
           page: () => AllVolunteerJobsPage(),

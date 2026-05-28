@@ -23,34 +23,20 @@ class _ProductsPageState extends State<ProductsPage>
   late final CartController _cartController = Get.isRegistered<CartController>()
       ? Get.find<CartController>()
       : Get.put(CartController());
+
   final TextEditingController _searchController = TextEditingController();
   final RxString _searchText = ''.obs;
   Timer? _searchDebounce;
 
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late final AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 850),
     )..forward();
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
 
     _searchController.addListener(() {
       _searchText.value = _searchController.text;
@@ -67,170 +53,215 @@ class _ProductsPageState extends State<ProductsPage>
 
   void _onSearchChanged(String value) {
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+    _searchDebounce = Timer(const Duration(milliseconds: 320), () {
       _controller.searchProducts(value);
     });
+  }
+
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    _controller.searchProducts('');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColorToken.primary.color.withOpacity(0.06),
-              Colors.white,
-              AppColorToken.primary.color.withOpacity(0.04),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: _controller.refreshProducts,
-            color: AppColorToken.primary.color,
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: _HeaderSection(controller: _controller),
+      backgroundColor: const Color(0xFFF4F7F1),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = constraints.maxWidth >= 900 ? 32.0 : 20.0;
+
+            return RefreshIndicator(
+              onRefresh: _controller.refreshProducts,
+              color: AppColorToken.primary.color,
+              backgroundColor: Colors.white,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      12,
+                      horizontalPadding,
+                      16,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: _MarketplaceHeader(
+                        controller: _controller,
+                        cartController: _cartController,
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: _SearchSection(
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    sliver: SliverToBoxAdapter(
+                      child: _MarketplaceSearchBar(
                         controller: _searchController,
                         searchText: _searchText,
                         onChanged: _onSearchChanged,
-                        onClear: () {
-                          _searchController.clear();
-                          _controller.searchProducts('');
-                        },
+                        onClear: _clearSearch,
                       ),
                     ),
                   ),
-                ),
-                Obx(() {
-                  if (_controller.isLoading && !_controller.hasProducts) {
-                    return const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _LoadingState(),
-                    );
-                  }
-
-                  if (_controller.hasError && !_controller.hasProducts) {
-                    return SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _ErrorState(
-                        message: _controller.errorMessage,
-                        onRetry: _controller.refreshProducts,
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      16,
+                      horizontalPadding,
+                      8,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: Obx(
+                        () => _MarketplaceSummary(
+                          productCountLabel: 'Curated products',
+                          productCount: _controller.products.length.toString(),
+                          subtitle:
+                              'Handpicked goods from artisan partners and community sellers.',
+                        ),
                       ),
-                    );
-                  }
+                    ),
+                  ),
+                  Obx(() {
+                    if (_controller.isLoading && !_controller.hasProducts) {
+                      return const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _LoadingState(),
+                      );
+                    }
 
-                  if (!_controller.hasProducts) {
-                    return const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _EmptyState(),
-                    );
-                  }
+                    if (_controller.hasError && !_controller.hasProducts) {
+                      return SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _ErrorState(
+                          message: _controller.errorMessage,
+                          onRetry: _controller.refreshProducts,
+                        ),
+                      );
+                    }
 
-                  return _ProductsGrid(
-                    controller: _controller,
-                    animationController: _animationController,
-                  );
-                }),
-              ],
-            ),
-          ),
+                    if (!_controller.hasProducts) {
+                      return const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _EmptyState(),
+                      );
+                    }
+
+                    return _ProductsGrid(
+                      controller: _controller,
+                      animationController: _animationController,
+                      maxWidth: constraints.maxWidth,
+                      horizontalPadding: horizontalPadding,
+                    );
+                  }),
+                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _HeaderSection extends StatelessWidget {
+class _MarketplaceHeader extends StatelessWidget {
   final ProductController controller;
-  const _HeaderSection({required this.controller});
+  final CartController cartController;
+
+  const _MarketplaceHeader({
+    required this.controller,
+    required this.cartController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final cartController = Get.isRegistered<CartController>()
-        ? Get.find<CartController>()
-        : Get.put(CartController());
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-      child: Row(
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.88),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(
-              'Marketplace',
-              style: AppTextStyle.h3.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColorToken.primary.color,
-              ),
-            ),
-          ),
-          12.horizontalSpace,
-          IconButton(
-            onPressed: controller.refreshProducts,
-            icon: const Icon(Icons.refresh_rounded),
-            color: AppColorToken.primary.color,
-            tooltip: 'Refresh',
-          ),
-          Obx(
-            () => Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconButton(
-                  onPressed: () => Get.toNamed('/cart'),
-                  icon: const Icon(Icons.shopping_bag_outlined),
-                  color: AppColorToken.primary.color,
-                  tooltip: 'Cart',
-                ),
-                if (cartController.itemCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '${cartController.itemCount}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Marketplace',
+                      style: AppTextStyle.h3.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColorToken.primary.color,
                       ),
                     ),
-                  ),
-              ],
-            ),
+                    4.verticalSpace,
+                    Text(
+                      'Discover artisan products and everyday essentials',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _HeaderIconButton(
+                icon: Icons.refresh_rounded,
+                tooltip: 'Refresh',
+                onTap: controller.refreshProducts,
+              ),
+              8.horizontalSpace,
+              Obx(
+                () => _HeaderIconButton(
+                  icon: Icons.shopping_cart_outlined,
+                  tooltip: 'Cart',
+                  onTap: () => Get.toNamed('/cart'),
+                  badgeLabel: cartController.itemCount > 0
+                      ? '${cartController.itemCount}'
+                      : null,
+                ),
+              ),
+              8.horizontalSpace,
+              _HeaderIconButton(
+                icon: Icons.local_shipping_outlined,
+                tooltip: 'Orders',
+                onTap: () => Get.toNamed('/orders'),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () => Get.toNamed('/orders'),
-            icon: const Icon(Icons.local_shipping_outlined),
-            color: AppColorToken.primary.color,
-            tooltip: 'Orders',
+          16.verticalSpace,
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _HeaderChip(
+                icon: Icons.verified_rounded,
+                label: 'Curated sellers',
+              ),
+              _HeaderChip(
+                icon: Icons.eco_rounded,
+                label: 'Ethical sourcing',
+              ),
+              _HeaderChip(
+                icon: Icons.favorite_border_rounded,
+                label: 'Community impact',
+              ),
+            ],
           ),
         ],
       ),
@@ -238,13 +269,108 @@ class _HeaderSection extends StatelessWidget {
   }
 }
 
-class _SearchSection extends StatelessWidget {
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final String? badgeLabel;
+
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.badgeLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAF6),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: Colors.grey[800], size: 22),
+            ),
+            if (badgeLabel != null)
+              Positioned(
+                right: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    badgeLabel!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _HeaderChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColorToken.primary.color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColorToken.primary.color),
+          6.horizontalSpace,
+          Text(
+            label,
+            style: AppTextStyle.labelSmall.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColorToken.primary.color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MarketplaceSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final RxString searchText;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
 
-  const _SearchSection({
+  const _MarketplaceSearchBar({
     required this.controller,
     required this.searchText,
     required this.onChanged,
@@ -253,41 +379,44 @@ class _SearchSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColorToken.primary.color.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: AppColorToken.primary.color.withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Obx(
+        () => TextField(
+          controller: controller,
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: 'Search products, artisans, or causes...',
+            hintStyle: AppTextStyle.bodyMedium.copyWith(
+              color: Colors.grey[400],
             ),
-          ],
-        ),
-        child: Obx(
-          () => TextField(
-            controller: controller,
-            onChanged: onChanged,
-            decoration: InputDecoration(
-              hintText: 'Search products, artisans, or causes...',
-              hintStyle: AppTextStyle.bodyMedium.copyWith(
-                color: Colors.grey[400],
-              ),
-              prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400]),
-              suffixIcon: searchText.value.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear_rounded, color: Colors.grey[400]),
-                      onPressed: onClear,
-                    )
-                  : const SizedBox.shrink(),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8),
+              child: Icon(Icons.search_rounded, color: Colors.grey[500]),
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 40),
+            suffixIcon: searchText.value.isNotEmpty
+                ? IconButton(
+                    icon: Icon(Icons.clear_rounded, color: Colors.grey[400]),
+                    onPressed: onClear,
+                  )
+                : const SizedBox.shrink(),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
             ),
           ),
         ),
@@ -296,70 +425,151 @@ class _SearchSection extends StatelessWidget {
   }
 }
 
+class _MarketplaceSummary extends StatelessWidget {
+  final String productCountLabel;
+  final String productCount;
+  final String subtitle;
+
+  const _MarketplaceSummary({
+    required this.productCountLabel,
+    required this.productCount,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: AppColorToken.primary.color.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            Icons.storefront_rounded,
+            color: AppColorToken.primary.color,
+          ),
+        ),
+        12.horizontalSpace,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                productCountLabel,
+                style: AppTextStyle.labelLarge.copyWith(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              4.verticalSpace,
+              Text(
+                productCount,
+                style: AppTextStyle.h4.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey[900],
+                ),
+              ),
+              4.verticalSpace,
+              Text(
+                subtitle,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProductsGrid extends StatelessWidget {
   final ProductController controller;
   final AnimationController animationController;
+  final double maxWidth;
+  final double horizontalPadding;
 
   const _ProductsGrid({
     required this.controller,
     required this.animationController,
+    required this.maxWidth,
+    required this.horizontalPadding,
   });
 
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-      sliver: Obx(() {
-        final products = controller.products;
+      padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 0),
+      sliver: Obx(
+        () {
+          final availableWidth = maxWidth - (horizontalPadding * 2);
+          final crossAxisCount = availableWidth >= 1100
+              ? 4
+              : availableWidth >= 720
+              ? 3
+              : 2;
+          final childAspectRatio = availableWidth >= 720 ? 0.78 : 0.71;
+          final products = controller.products;
+          final showLoadingMore = controller.currentPage < controller.totalPages;
 
-        return SliverGrid(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            // Load-more trigger
-            if (index == products.length - 1 &&
-                controller.currentPage < controller.totalPages) {
-              controller.loadMoreProducts();
-            }
+          return SliverGrid(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index == products.length) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.2,
+                        color: AppColorToken.primary.color,
+                      ),
+                    ),
+                  );
+                }
 
-            if (products[index] == products.last && controller.isLoading) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColorToken.primary.color,
+                if (index == products.length - 1 &&
+                    showLoadingMore &&
+                    !controller.isLoading) {
+                  controller.loadMoreProducts();
+                }
+
+                final animation = CurvedAnimation(
+                  parent: animationController,
+                  curve: Interval(
+                    (index * 0.06).clamp(0.0, 1.0),
+                    1.0,
+                    curve: Curves.easeOutCubic,
                   ),
-                ),
-              );
-            }
+                );
 
-            final animation = CurvedAnimation(
-              parent: animationController,
-              curve: Interval(
-                (index * 0.06).clamp(0.0, 1.0),
-                1.0,
-                curve: Curves.easeOutCubic,
-              ),
-            );
-
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.08),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: ProductCard(product: products[index]),
-              ),
-            );
-          }, childCount: products.length),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.68,
-          ),
-        );
-      }),
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.08),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: ProductCard(product: products[index]),
+                  ),
+                );
+              },
+              childCount: products.length + (showLoadingMore ? 1 : 0),
+            ),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: childAspectRatio,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -375,7 +585,7 @@ class _LoadingState extends StatelessWidget {
         children: [
           CircularProgressIndicator(
             color: AppColorToken.primary.color,
-            strokeWidth: 2,
+            strokeWidth: 2.2,
           ),
           16.verticalSpace,
           Text(
@@ -485,7 +695,7 @@ class _EmptyState extends StatelessWidget {
             ),
             8.verticalSpace,
             Text(
-              'Check back soon ? our artisans are crafting something special.',
+              'Check back soon. Our artisans are crafting something special.',
               textAlign: TextAlign.center,
               style: AppTextStyle.bodySmall.copyWith(
                 color: Colors.grey[600],
