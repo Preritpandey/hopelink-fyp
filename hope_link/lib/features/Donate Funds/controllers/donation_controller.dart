@@ -1,24 +1,23 @@
-import 'dart:async';        
+import 'dart:async';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hope_link/config/constants/api_endpoints.dart';
-import 'package:hope_link/config/payment_config.dart';  
+import 'package:hope_link/config/payment_config.dart';
 import 'package:hope_link/core/services/payment_service.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/features/Donate%20Funds/models/campaign_model.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'campaign_controller.dart'; 
-          
+import 'campaign_controller.dart';
 
 enum DonationPaymentMethod { stripe, khalti }
 
 class DonationController extends GetxController {
   DonationController({PaymentService? paymentService})
-      : _paymentService = paymentService ?? PaymentService();
+    : _paymentService = paymentService ?? PaymentService();
 
   final PaymentService _paymentService;
   final TextEditingController amountController = TextEditingController();
@@ -549,7 +548,9 @@ class DonationController extends GetxController {
       PopScope(
         canPop: false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -653,6 +654,3 @@ class DonationController extends GetxController {
     super.onClose();
   }
 }
-
-
-

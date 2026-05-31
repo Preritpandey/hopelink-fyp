@@ -28,7 +28,7 @@ class ProductCard extends StatelessWidget {
             border: Border.all(color: AppColors.grey200),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withOpacity(0.04),
+                color: AppColors.black.withValues(alpha: 0.04),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -37,19 +37,16 @@ class ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Expanded(flex: 5, child: _ProductImage(product: product)),
               Expanded(
-                flex: 6,
-                child: _ProductImage(product: product),
-              ),
-              Expanded(
-                flex: 5,
+                flex: 4,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _OrgBadge(orgName: product.org.organizationName),
-                      8.verticalSpace,
+                      6.verticalSpace,
                       Text(
                         product.name,
                         maxLines: 2,
@@ -60,44 +57,48 @@ class ProductCard extends StatelessWidget {
                           height: 1.25,
                         ),
                       ),
-                      6.verticalSpace,
+                      4.verticalSpace,
                       Text(
                         product.priceDisplay,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyle.bodyMedium.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppColorToken.primary.color,
                         ),
                       ),
-                      6.verticalSpace,
+                      4.verticalSpace,
                       if (product.ratingAverage > 0)
                         _RatingRow(
                           rating: product.ratingAverage,
                           reviewCount: product.ratingCount,
                         ),
-                      6.verticalSpace,
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.volunteer_activism_rounded,
-                            size: 13,
-                            color: AppColorToken.primary.color.withOpacity(0.8),
-                          ),
-                          4.horizontalSpace,
-                          Expanded(
-                            child: Text(
-                              product.beneficiaryDescription.isNotEmpty
-                                  ? product.beneficiaryDescription
-                                  : 'Small-batch craft with community impact.',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyle.bodySmall.copyWith(
-                                color: AppColors.grey600,
-                                fontStyle: FontStyle.italic,
+                      const Spacer(),
+                      if (product.beneficiaryDescription.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.volunteer_activism_rounded,
+                              size: 13,
+                              color: AppColorToken.primary.color.withValues(
+                                alpha: 0.8,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                            4.horizontalSpace,
+                            Expanded(
+                              child: Text(
+                                product.beneficiaryDescription,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.bodySmall.copyWith(
+                                  color: AppColors.grey600,
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -126,9 +127,8 @@ class _ProductImage extends StatelessWidget {
               ? CachedNetworkImage(
                   imageUrl: product.coverImage!,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: AppColorToken.lightGrey.color,
-                  ),
+                  placeholder: (_, __) =>
+                      Container(color: AppColorToken.lightGrey.color),
                   errorWidget: (_, __, ___) => _ImageFallback(product: product),
                 )
               : _ImageFallback(product: product),
@@ -141,7 +141,7 @@ class _ProductImage extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   AppColors.transparent,
-                  AppColors.black.withOpacity(0.18),
+                  AppColors.black.withValues(alpha: 0.18),
                 ],
               ),
             ),
@@ -151,17 +151,23 @@ class _ProductImage extends StatelessWidget {
           Positioned(
             top: 10,
             right: 10,
-            child: _FloatingBadge(
-              label: '${product.displayVariants.length} options',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 104),
+              child: _FloatingBadge(
+                label: '${product.displayVariants.length} options',
+              ),
             ),
           ),
         Positioned(
           left: 10,
           bottom: 10,
-          child: _FloatingBadge(
-            label: product.category.isNotEmpty
-                ? product.category.toUpperCase()
-                : 'PRODUCT',
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 128),
+            child: _FloatingBadge(
+              label: product.category.isNotEmpty
+                  ? product.category.toUpperCase()
+                  : 'PRODUCT',
+            ),
           ),
         ),
       ],
@@ -179,11 +185,11 @@ class _FloatingBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.95),
+        color: AppColors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.08),
+            color: AppColors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -191,6 +197,8 @@ class _FloatingBadge extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: AppTextStyle.labelSmall.copyWith(
           fontWeight: FontWeight.w800,
           color: AppColorToken.primary.color,
@@ -214,7 +222,7 @@ class _ImageFallback extends StatelessWidget {
         child: Text(
           product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
           style: AppTextStyle.h2.copyWith(
-            color: AppColorToken.primary.color.withOpacity(0.35),
+            color: AppColorToken.primary.color.withValues(alpha: 0.35),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -233,11 +241,13 @@ class _OrgBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColorToken.primary.color.withOpacity(0.08),
+        color: AppColorToken.primary.color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         orgName.isNotEmpty ? orgName : 'Community Partner',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: AppTextStyle.labelSmall.copyWith(
           fontWeight: FontWeight.w700,
           color: AppColorToken.primary.color,
@@ -252,10 +262,7 @@ class _RatingRow extends StatelessWidget {
   final double rating;
   final int reviewCount;
 
-  const _RatingRow({
-    required this.rating,
-    required this.reviewCount,
-  });
+  const _RatingRow({required this.rating, required this.reviewCount});
 
   @override
   Widget build(BuildContext context) {
@@ -272,10 +279,12 @@ class _RatingRow extends StatelessWidget {
         ),
         if (reviewCount > 0) ...[
           4.horizontalSpace,
-          Text(
-            '($reviewCount)',
-            style: AppTextStyle.labelSmall.copyWith(
-              color: AppColors.grey500,
+          Flexible(
+            child: Text(
+              '($reviewCount)',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.labelSmall.copyWith(color: AppColors.grey500),
             ),
           ),
         ],
@@ -283,5 +292,3 @@ class _RatingRow extends StatelessWidget {
     );
   }
 }
-
-

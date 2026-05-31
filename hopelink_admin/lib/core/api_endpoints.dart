@@ -32,6 +32,13 @@ class ApiEndpoints {
   static String product(String productId) => '$baseUrl/products/$productId';
   static String get categories => '$baseUrl/categories';
 
+  // Admin organizations
+  static String get adminPendingOrganizations => '$baseUrl/admin/orgs/pending';
+  static String approveOrganization(String orgId) =>
+      '$baseUrl/admin/orgs/approve/$orgId';
+  static String rejectOrganization(String orgId) =>
+      '$baseUrl/admin/orgs/reject/$orgId';
+
   // Essentials
   static String get essentialRequests => '$baseUrl/essential-requests';
   static String essentialRequestById(String requestId) =>

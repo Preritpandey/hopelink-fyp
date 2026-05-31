@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -137,23 +138,6 @@ class OrganizationController extends GetxController {
     return ['jpg', 'jpeg', 'png'];
   }
 
-  String _fileLabel(String type) {
-    switch (type) {
-      case 'registrationCertificate':
-        return 'Registration Certificate (PDF)';
-      case 'taxCertificate':
-        return 'Tax Certificate (PDF)';
-      case 'constitutionFile':
-        return 'Constitution File (PDF)';
-      case 'proofOfAddress':
-        return 'Proof of Address (JPG/PNG)';
-      case 'voidCheque':
-        return 'Void Cheque (JPG/PNG)';
-      default:
-        return type;
-    }
-  }
-
   PlatformFile? fileFor(String type) {
     switch (type) {
       case 'registrationCertificate':
@@ -253,13 +237,18 @@ class OrganizationController extends GetxController {
 
       // File fields
       await _attachFile(
-          request, 'registrationCertificate', registrationCertificateFile.value!);
+        request,
+        'registrationCertificate',
+        registrationCertificateFile.value!,
+      );
       await _attachFile(request, 'taxCertificate', taxCertFile.value!);
       await _attachFile(request, 'constitutionFile', constitutionFile.value!);
       await _attachFile(request, 'proofOfAddress', proofOfAddressFile.value!);
       await _attachFile(request, 'voidCheque', voidChequeFile.value!);
 
-      final streamed = await request.send();
+      final streamed = await request.send().timeout(
+        const Duration(seconds: 45),
+      );
       final body = await streamed.stream.bytesToString();
       final json = jsonDecode(body) as Map<String, dynamic>;
 
@@ -269,15 +258,66 @@ class OrganizationController extends GetxController {
         );
         currentStep.value = totalSteps; // success screen
       } else {
-        errorMessage.value =
-            json['message'] as String? ?? 'Registration failed.';
+        final message = _messageFromResponse(json);
+        errorMessage.value = message;
+        _focusStepForError(_fieldFromResponse(json));
+        Get.snackbar(
+          'Registration failed',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFFF4C6A),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          maxWidth: 520,
+        );
       }
     } on SocketException {
       errorMessage.value = 'No internet connection. Please check your network.';
+    } on TimeoutException {
+      errorMessage.value = 'Registration timed out. Please try again.';
+    } on FormatException {
+      errorMessage.value =
+          'The server returned an invalid response. Please try again.';
     } catch (e) {
       errorMessage.value = 'Unexpected error: $e';
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  String _messageFromResponse(Map<String, dynamic> json) {
+    final topLevelMessage = json['message'];
+    if (topLevelMessage is String && topLevelMessage.isNotEmpty) {
+      return topLevelMessage;
+    }
+
+    final error = json['error'];
+    if (error is Map<String, dynamic>) {
+      final nestedMessage = error['message'];
+      if (nestedMessage is String && nestedMessage.isNotEmpty) {
+        return nestedMessage;
+      }
+    }
+
+    return 'Registration failed. Please review your details and try again.';
+  }
+
+  String? _fieldFromResponse(Map<String, dynamic> json) {
+    final error = json['error'];
+    if (error is Map<String, dynamic>) {
+      final field = error['field'];
+      if (field is String && field.isNotEmpty) return field;
+    }
+    return null;
+  }
+
+  void _focusStepForError(String? field) {
+    if (field == 'registrationNumber') {
+      currentStep.value = 0;
+      return;
+    }
+    if (field == 'officialEmail') {
+      currentStep.value = 1;
     }
   }
 

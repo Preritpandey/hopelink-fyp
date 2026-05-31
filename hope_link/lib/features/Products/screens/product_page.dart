@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
@@ -97,7 +96,9 @@ class _ProductsPageState extends State<ProductsPage>
                     ),
                   ),
                   SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                    ),
                     sliver: SliverToBoxAdapter(
                       child: _MarketplaceSearchBar(
                         controller: _searchController,
@@ -107,24 +108,24 @@ class _ProductsPageState extends State<ProductsPage>
                       ),
                     ),
                   ),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      16,
-                      horizontalPadding,
-                      8,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: Obx(
-                        () => _MarketplaceSummary(
-                          productCountLabel: 'Curated products',
-                          productCount: _controller.products.length.toString(),
-                          subtitle:
-                              'Handpicked goods from artisan partners and community sellers.',
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SliverPadding(
+                  //   padding: EdgeInsets.fromLTRB(
+                  //     horizontalPadding,
+                  //     16,
+                  //     horizontalPadding,
+                  //     8,
+                  //   ),
+                  //   sliver: SliverToBoxAdapter(
+                  //     child: Obx(
+                  //       () => _MarketplaceSummary(
+                  //         productCountLabel: 'Curated products',
+                  //         productCount: _controller.products.length.toString(),
+                  //         subtitle:
+                  //             'Handpicked goods from artisan partners and community sellers.',
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Obx(() {
                     if (_controller.isLoading && !_controller.hasProducts) {
                       return const SliverFillRemaining(
@@ -182,12 +183,12 @@ class _MarketplaceHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.88),
+        color: AppColors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
+            color: AppColors.black.withValues(alpha: 0.04),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -253,10 +254,7 @@ class _MarketplaceHeader extends StatelessWidget {
                 icon: Icons.verified_rounded,
                 label: 'Curated sellers',
               ),
-              _HeaderChip(
-                icon: Icons.eco_rounded,
-                label: 'Ethical sourcing',
-              ),
+              _HeaderChip(icon: Icons.eco_rounded, label: 'Ethical sourcing'),
               _HeaderChip(
                 icon: Icons.favorite_border_rounded,
                 label: 'Community impact',
@@ -343,7 +341,7 @@ class _HeaderChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColorToken.primary.color.withOpacity(0.06),
+        color: AppColorToken.primary.color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -387,7 +385,7 @@ class _MarketplaceSearchBar extends StatelessWidget {
         border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
-            color: AppColorToken.primary.color.withOpacity(0.05),
+            color: AppColorToken.primary.color.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -425,70 +423,6 @@ class _MarketplaceSearchBar extends StatelessWidget {
   }
 }
 
-class _MarketplaceSummary extends StatelessWidget {
-  final String productCountLabel;
-  final String productCount;
-  final String subtitle;
-
-  const _MarketplaceSummary({
-    required this.productCountLabel,
-    required this.productCount,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: AppColorToken.primary.color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Icon(
-            Icons.storefront_rounded,
-            color: AppColorToken.primary.color,
-          ),
-        ),
-        12.horizontalSpace,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                productCountLabel,
-                style: AppTextStyle.labelLarge.copyWith(
-                  color: AppColors.grey700,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              4.verticalSpace,
-              Text(
-                productCount,
-                style: AppTextStyle.h4.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.grey900,
-                ),
-              ),
-              4.verticalSpace,
-              Text(
-                subtitle,
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: AppColors.grey600,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ProductsGrid extends StatelessWidget {
   final ProductController controller;
   final AnimationController animationController;
@@ -506,70 +440,69 @@ class _ProductsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 0),
-      sliver: Obx(
-        () {
-          final availableWidth = maxWidth - (horizontalPadding * 2);
-          final crossAxisCount = availableWidth >= 1100
-              ? 4
-              : availableWidth >= 720
-              ? 3
-              : 2;
-          final childAspectRatio = availableWidth >= 720 ? 0.78 : 0.71;
-          final products = controller.products;
-          final showLoadingMore = controller.currentPage < controller.totalPages;
+      sliver: Obx(() {
+        final availableWidth = maxWidth - (horizontalPadding * 2);
+        final crossAxisCount = availableWidth >= 1100
+            ? 4
+            : availableWidth >= 720
+            ? 3
+            : 2;
+        const gridSpacing = 16.0;
+        final cardWidth =
+            (availableWidth - (gridSpacing * (crossAxisCount - 1))) /
+            crossAxisCount;
+        final cardHeight = (cardWidth * 1.55).clamp(300.0, 360.0);
+        final products = controller.products;
+        final showLoadingMore = controller.currentPage < controller.totalPages;
 
-          return SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index == products.length) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: AppColorToken.primary.color,
-                      ),
-                    ),
-                  );
-                }
-
-                if (index == products.length - 1 &&
-                    showLoadingMore &&
-                    !controller.isLoading) {
-                  controller.loadMoreProducts();
-                }
-
-                final animation = CurvedAnimation(
-                  parent: animationController,
-                  curve: Interval(
-                    (index * 0.06).clamp(0.0, 1.0),
-                    1.0,
-                    curve: Curves.easeOutCubic,
+        return SliverGrid(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index == products.length) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    color: AppColorToken.primary.color,
                   ),
-                );
+                ),
+              );
+            }
 
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.08),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: ProductCard(product: products[index]),
-                  ),
-                );
-              },
-              childCount: products.length + (showLoadingMore ? 1 : 0),
-            ),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: childAspectRatio,
-            ),
-          );
-        },
-      ),
+            if (index == products.length - 1 &&
+                showLoadingMore &&
+                !controller.isLoading) {
+              controller.loadMoreProducts();
+            }
+
+            final animation = CurvedAnimation(
+              parent: animationController,
+              curve: Interval(
+                (index * 0.06).clamp(0.0, 1.0),
+                1.0,
+                curve: Curves.easeOutCubic,
+              ),
+            );
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.08),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: ProductCard(product: products[index]),
+              ),
+            );
+          }, childCount: products.length + (showLoadingMore ? 1 : 0)),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: gridSpacing,
+            crossAxisSpacing: gridSpacing,
+            mainAxisExtent: cardHeight,
+          ),
+        );
+      }),
     );
   }
 }
@@ -615,7 +548,7 @@ class _ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColorToken.error.color.withOpacity(0.08),
+                color: AppColorToken.error.color.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -676,7 +609,7 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColorToken.primary.color.withOpacity(0.08),
+                color: AppColorToken.primary.color.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -708,5 +641,3 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-
-

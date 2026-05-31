@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../Auth/controller/login_controller.dart';
 import '../../Auth/pages/login_page.dart';
+import '../../Auth/widgets/account_switcher_button.dart';
 import '../controllers/campaign_controller.dart';
 import 'dashboard_widgets.dart';
 
@@ -225,6 +226,18 @@ class DashboardSidebar extends StatelessWidget {
           ),
 
           const Spacer(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: AccountSwitcherButton(
+              expanded: true,
+              backgroundColor: kSurface,
+              hoverColor: kSurface2,
+              borderColor: kBorder2,
+              accentColor: kAccent,
+              textColor: Colors.white,
+              mutedColor: kTextMuted,
+            ),
+          ),
           const Divider(color: kBorder, height: 1),
           Padding(
             padding: const EdgeInsets.all(12),

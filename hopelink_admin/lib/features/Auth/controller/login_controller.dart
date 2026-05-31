@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/login_model.dart';
+import '../services/account_switcher_service.dart';
 import '../../Admin/Home/pages/admin_home_page.dart';
 import '../../Dashboard/home_page.dart';
 
@@ -28,13 +29,13 @@ class LoginController extends GetxController {
   // ── Focus nodes ────────────────────────────────────────────
   final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
+  bool _skipSavedEmail = false;
+  bool _preparedForAddAccount = false;
 
   static const _baseUrl = 'http://localhost:3008/api/v1';
   static const _tokenKey = 'auth_token';
-  static const _roleKey = 'user_role';
   static const _emailKey = 'saved_email';
   static const _orgIdKey = 'org_id';
-  static const _orgNameKey = 'org_name';
 
   @override
   void onInit() {
@@ -44,11 +45,29 @@ class LoginController extends GetxController {
 
   Future<void> _loadSavedEmail() async {
     final prefs = await SharedPreferences.getInstance();
+    if (_skipSavedEmail) return;
     final saved = prefs.getString(_emailKey);
     if (saved != null && saved.isNotEmpty) {
       emailCtrl.text = saved;
       rememberMe.value = true;
     }
+  }
+
+  void prepareForAddAccount() {
+    if (_preparedForAddAccount) return;
+    _preparedForAddAccount = true;
+    _skipSavedEmail = true;
+
+    emailFocus.unfocus();
+    passwordFocus.unfocus();
+    emailCtrl.clear();
+    passwordCtrl.clear();
+    currentUser.value = null;
+    loginSuccess.value = false;
+    isLoading.value = false;
+    errorMessage.value = '';
+    rememberMe.value = false;
+    obscurePassword.value = true;
   }
 
   void toggleObscure() => obscurePassword.value = !obscurePassword.value;
@@ -94,22 +113,13 @@ class LoginController extends GetxController {
       if (response.statusCode == 200 && json['success'] == true) {
         final result = LoginResponse.fromJson(json);
 
-        // Persist token
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_tokenKey, result.token);
-        await prefs.setString(_roleKey, result.user.role);
-
-        // Save user data and organization info
         final user = result.user;
-        final orgId = user.organization.id;
-        final orgName = user.organization.name;
-
-        if (orgId.isNotEmpty) {
-          await prefs.setString(_orgIdKey, orgId);
-        }
-        if (orgName.isNotEmpty) {
-          await prefs.setString(_orgNameKey, orgName);
-        }
+        await AccountSwitcherService().persistLogin(
+          result: result,
+          email: emailCtrl.text.trim(),
+          password: passwordCtrl.text,
+        );
 
         // Save email if remember me
         if (rememberMe.value) {
@@ -145,11 +155,7 @@ class LoginController extends GetxController {
 
   // ── Sign out helper ─────────────────────────────────────────
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_roleKey);
-    await prefs.remove(_orgIdKey);
-    await prefs.remove(_orgNameKey);
+    await AccountSwitcherService().clearSession();
     currentUser.value = null;
     loginSuccess.value = false;
     passwordCtrl.clear();

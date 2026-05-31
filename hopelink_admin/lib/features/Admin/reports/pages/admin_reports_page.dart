@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hopelink_admin/features/Auth/controller/login_controller.dart';
 import 'package:hopelink_admin/features/Auth/pages/login_page.dart';
+import 'package:hopelink_admin/features/Auth/widgets/account_switcher_button.dart';
 import 'package:hopelink_admin/features/Admin/reports/widgets/report_card.dart';
 
 import '../controllers/campaign_report_controller.dart';
@@ -22,18 +22,24 @@ class AdminReportsPage extends StatefulWidget {
 class _AdminReportsPageState extends State<AdminReportsPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
-  late final Animation<double>   _fade;
+  late final Animation<double> _fade;
 
   @override
   void initState() {
     super.initState();
-    _entry = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _fade  = CurvedAnimation(parent: _entry, curve: Curves.easeOut);
+    _entry = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _fade = CurvedAnimation(parent: _entry, curve: Curves.easeOut);
     _entry.forward();
   }
 
   @override
-  void dispose() { _entry.dispose(); super.dispose(); }
+  void dispose() {
+    _entry.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +60,7 @@ class _AdminReportsPageState extends State<AdminReportsPage>
                   child: Row(
                     children: [
                       // ── List panel ────────────────────────
-                      Expanded(
-                        child: _ReportListPanel(ctrl: ctrl),
-                      ),
+                      Expanded(child: _ReportListPanel(ctrl: ctrl)),
                       // ── Detail panel ──────────────────────
                       Obx(() {
                         final r = ctrl.selectedReport.value;
@@ -95,58 +99,82 @@ class _TopBar extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: rBorder)),
       ),
-      child: Row(children: [
-        // ── Icon + title ──────────────────────────────────
-        Row(children: [
-          Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [rGold, Color(0xFFF97316)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      child: Row(
+        children: [
+          // ── Icon + title ──────────────────────────────────
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [rGold, Color(0xFFF97316)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: rR10,
+                  boxShadow: rGlow(rGold),
+                ),
+                child: const Icon(
+                  Icons.fact_check_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
-              borderRadius: rR10,
-              boxShadow: rGlow(rGold),
-            ),
-            child: const Icon(Icons.fact_check_rounded,
-                color: Colors.white, size: 18),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Campaign Reports', style: rH1()),
+                  Obx(
+                    () => Text(
+                      '${ctrl.pendingCount} pending review',
+                      style: rMonoSm(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Campaign Reports', style: rH1()),
-            Obx(() => Text(
-              '${ctrl.pendingCount} pending review',
-              style: rMonoSm(),
-            )),
-          ]),
-        ]),
-        const Spacer(),
+          const Spacer(),
 
-        // ── Search ────────────────────────────────────────
-        _SearchBar(ctrl: ctrl),
-        const SizedBox(width: 12),
+          // ── Search ────────────────────────────────────────
+          _SearchBar(ctrl: ctrl),
+          const SizedBox(width: 12),
 
-        // ── Refresh ───────────────────────────────────────
-        Obx(() => RIconBtn(
-          icon: ctrl.isLoading.value
-              ? Icons.hourglass_top_rounded
-              : Icons.refresh_rounded,
-          tooltip: 'Refresh',
-          onTap: ctrl.refresh,
-        )),
-        const SizedBox(width: 12),
-        RIconBtn(
-          icon: Icons.logout_rounded,
-          tooltip: 'Logout',
-          color: rRed,
-          onTap: () async {
-            final loginCtrl = Get.put(LoginController());
-            await loginCtrl.logout();
-            Get.offAll(() => const LoginPage());
-          },
-        ),
-      ]),
+          // ── Refresh ───────────────────────────────────────
+          Obx(
+            () => RIconBtn(
+              icon: ctrl.isLoading.value
+                  ? Icons.hourglass_top_rounded
+                  : Icons.refresh_rounded,
+              tooltip: 'Refresh',
+              onTap: ctrl.refresh,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const AccountSwitcherButton(
+            backgroundColor: rSurf,
+            hoverColor: rSurf2,
+            borderColor: rBorder,
+            accentColor: rGold,
+            textColor: rText,
+            mutedColor: rMuted,
+          ),
+          const SizedBox(width: 12),
+          RIconBtn(
+            icon: Icons.logout_rounded,
+            tooltip: 'Logout',
+            color: rRed,
+            onTap: () async {
+              final loginCtrl = Get.put(LoginController());
+              await loginCtrl.logout();
+              Get.offAll(() => const LoginPage());
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -154,7 +182,8 @@ class _TopBar extends StatelessWidget {
 class _SearchBar extends StatefulWidget {
   final CampaignReportController ctrl;
   const _SearchBar({required this.ctrl});
-  @override State<_SearchBar> createState() => _SearchBarState();
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
 }
 
 class _SearchBarState extends State<_SearchBar> {
@@ -175,39 +204,43 @@ class _SearchBarState extends State<_SearchBar> {
         ),
         boxShadow: _f ? rGlow(rGold) : [],
       ),
-      child: Row(children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Icon(Icons.search_rounded, size: 15, color: rMuted),
-        ),
-        Expanded(
-          child: TextField(
-            controller: widget.ctrl.searchCtrl,
-            onTap: () => setState(() => _f = true),
-            onEditingComplete: () => setState(() => _f = false),
-            style: GoogleFonts.nunitoSans(fontSize: 13, color: rText),
-            decoration: InputDecoration(
-              hintText: 'Search reports...',
-              hintStyle: GoogleFonts.nunitoSans(fontSize: 13, color: rMuted),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      child: Row(
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Icon(Icons.search_rounded, size: 15, color: rMuted),
+          ),
+          Expanded(
+            child: TextField(
+              controller: widget.ctrl.searchCtrl,
+              onTap: () => setState(() => _f = true),
+              onEditingComplete: () => setState(() => _f = false),
+              style: GoogleFonts.nunitoSans(fontSize: 13, color: rText),
+              decoration: InputDecoration(
+                hintText: 'Search reports...',
+                hintStyle: GoogleFonts.nunitoSans(fontSize: 13, color: rMuted),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 9,
+                ),
+              ),
             ),
           ),
-        ),
-        Obx(() {
-          if (widget.ctrl.searchQuery.value.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          return GestureDetector(
-            onTap: widget.ctrl.clearSearch,
-            child: const Padding(
-              padding: EdgeInsets.only(right: 8),
-              child: Icon(Icons.close_rounded, size: 14, color: rMuted),
-            ),
-          );
-        }),
-      ]),
+          Obx(() {
+            if (widget.ctrl.searchQuery.value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return GestureDetector(
+              onTap: widget.ctrl.clearSearch,
+              child: const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: Icon(Icons.close_rounded, size: 14, color: rMuted),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }
@@ -234,39 +267,41 @@ class _StatsBar extends StatelessWidget {
 
       return Container(
         padding: const EdgeInsets.fromLTRB(28, 14, 28, 0),
-        child: Row(children: [
-          _StatCard(
-            label: 'Pending Reports',
-            value: '${ctrl.pendingCount}',
-            icon: Icons.pending_actions_rounded,
-            color: rGold,
-            sub: 'Awaiting review',
-          ),
-          const SizedBox(width: 12),
-          _StatCard(
-            label: 'Urgent (>2 days)',
-            value: '$urgentCount',
-            icon: Icons.timer_off_rounded,
-            color: rRed,
-            sub: 'Needs attention',
-          ),
-          const SizedBox(width: 12),
-          _StatCard(
-            label: 'Organizations',
-            value: '${reports.map((r) => r.organization.id).toSet().length}',
-            icon: Icons.business_rounded,
-            color: rIndigo,
-            sub: 'Unique submitters',
-          ),
-          const SizedBox(width: 12),
-          _StatCard(
-            label: 'Total Report Size',
-            value: _totalSize(reports),
-            icon: Icons.data_usage_rounded,
-            color: rBlue,
-            sub: 'All pending files',
-          ),
-        ]),
+        child: Row(
+          children: [
+            _StatCard(
+              label: 'Pending Reports',
+              value: '${ctrl.pendingCount}',
+              icon: Icons.pending_actions_rounded,
+              color: rGold,
+              sub: 'Awaiting review',
+            ),
+            const SizedBox(width: 12),
+            _StatCard(
+              label: 'Urgent (>2 days)',
+              value: '$urgentCount',
+              icon: Icons.timer_off_rounded,
+              color: rRed,
+              sub: 'Needs attention',
+            ),
+            const SizedBox(width: 12),
+            _StatCard(
+              label: 'Organizations',
+              value: '${reports.map((r) => r.organization.id).toSet().length}',
+              icon: Icons.business_rounded,
+              color: rIndigo,
+              sub: 'Unique submitters',
+            ),
+            const SizedBox(width: 12),
+            _StatCard(
+              label: 'Total Report Size',
+              value: _totalSize(reports),
+              icon: Icons.data_usage_rounded,
+              color: rBlue,
+              sub: 'All pending files',
+            ),
+          ],
+        ),
       );
     });
   }
@@ -306,7 +341,7 @@ class _StatCardState extends State<_StatCard> {
     return Expanded(
       child: MouseRegion(
         onEnter: (_) => setState(() => _h = true),
-        onExit:  (_) => setState(() => _h = false),
+        onExit: (_) => setState(() => _h = false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(16),
@@ -314,37 +349,44 @@ class _StatCardState extends State<_StatCard> {
             color: _h ? rSurf2 : rSurf,
             borderRadius: rR14,
             border: Border.all(
-                color: _h ? widget.color.withOpacity(0.3) : rBorder),
+              color: _h ? widget.color.withOpacity(0.3) : rBorder,
+            ),
             boxShadow: _h ? rGlow(widget.color) : [],
           ),
-          child: Row(children: [
-            Container(
-              width: 38, height: 38,
-              decoration: BoxDecoration(
-                color: widget.color.withOpacity(0.1),
-                borderRadius: rR10,
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: widget.color.withOpacity(0.1),
+                  borderRadius: rR10,
+                ),
+                child: Icon(widget.icon, color: widget.color, size: 18),
               ),
-              child: Icon(widget.icon, color: widget.color, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.value,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.value,
                       style: GoogleFonts.sourceCodePro(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: rText,
                         letterSpacing: -0.3,
-                      )),
-                  Text(widget.label,
-                      style: GoogleFonts.nunitoSans(
-                          fontSize: 11, color: rSub)),
-                ],
+                      ),
+                    ),
+                    Text(
+                      widget.label,
+                      style: GoogleFonts.nunitoSans(fontSize: 11, color: rSub),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );
@@ -379,31 +421,42 @@ class _ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 12, 28, 0),
-      child: Row(children: [
-        Obx(() {
-          final n = ctrl.filtered.length;
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: rGold.withOpacity(0.08),
-              borderRadius: rR20,
-              border: Border.all(color: rGold.withOpacity(0.25)),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.pending_actions_rounded,
-                  size: 12, color: rGold),
-              const SizedBox(width: 5),
-              Text('$n pending',
-                  style: GoogleFonts.sourceCodePro(
-                      fontSize: 10, color: rGold,
-                      fontWeight: FontWeight.w600)),
-            ]),
-          );
-        }),
-        const Spacer(),
-        Text('Sorted by submission time',
-            style: rMonoSm()),
-      ]),
+      child: Row(
+        children: [
+          Obx(() {
+            final n = ctrl.filtered.length;
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: rGold.withOpacity(0.08),
+                borderRadius: rR20,
+                border: Border.all(color: rGold.withOpacity(0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.pending_actions_rounded,
+                    size: 12,
+                    color: rGold,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '$n pending',
+                    style: GoogleFonts.sourceCodePro(
+                      fontSize: 10,
+                      color: rGold,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const Spacer(),
+          Text('Sorted by submission time', style: rMonoSm()),
+        ],
+      ),
     );
   }
 }
@@ -475,12 +528,14 @@ class _ListBody extends StatelessWidget {
         itemCount: items.length,
         itemBuilder: (_, i) => _StaggerEntry(
           index: i,
-          child: Obx(() => ReportCard(
-            report: items[i],
-            ctrl: ctrl,
-            isSelected: ctrl.selectedReport.value?.id == items[i].id,
-            onTap: () => ctrl.selectReport(items[i]),
-          )),
+          child: Obx(
+            () => ReportCard(
+              report: items[i],
+              ctrl: ctrl,
+              isSelected: ctrl.selectedReport.value?.id == items[i].id,
+              onTap: () => ctrl.selectReport(items[i]),
+            ),
+          ),
         ),
       );
     });
@@ -519,32 +574,42 @@ class _StaggerEntry extends StatefulWidget {
   final int index;
   final Widget child;
   const _StaggerEntry({required this.index, required this.child});
-  @override State<_StaggerEntry> createState() => _StaggerEntryState();
+  @override
+  State<_StaggerEntry> createState() => _StaggerEntryState();
 }
 
 class _StaggerEntryState extends State<_StaggerEntry>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
-  late final Animation<double>   _fade;
-  late final Animation<Offset>   _slide;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
 
   @override
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 400));
-    _fade  = CurvedAnimation(parent: _c, curve: Curves.easeOut);
-    _slide = Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.03),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
 
     Future.delayed(
       Duration(milliseconds: (widget.index * 60).clamp(0, 240)),
-      () { if (mounted) _c.forward(); },
+      () {
+        if (mounted) _c.forward();
+      },
     );
   }
 
   @override
-  void dispose() { _c.dispose(); super.dispose(); }
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

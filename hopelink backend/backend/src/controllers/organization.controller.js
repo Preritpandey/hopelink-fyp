@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { unlink } from 'fs/promises';
 import { StatusCodes } from 'http-status-codes';
 // import Organization from '../models/organization.model.js';
 // import User from '../models/user.model.js';
@@ -50,6 +51,34 @@ const handleFileUpload = async (file, folder = 'organization-documents') => {
   }
 };
 
+const cleanupRequestFiles = async (files = {}) => {
+  const uploadedFiles = Object.values(files).flat();
+  await Promise.allSettled(
+    uploadedFiles
+      .filter((file) => file?.path)
+      .map((file) => unlink(file.path))
+  );
+};
+
+const sendDuplicateRegistrationResponse = async ({
+  req,
+  res,
+  field,
+  message,
+}) => {
+  await cleanupRequestFiles(req.files);
+  return res.status(StatusCodes.CONFLICT).json({
+    success: false,
+    message,
+    error: {
+      code: 'DUPLICATE_ORGANIZATION_REGISTRATION',
+      field,
+      message,
+      timestamp: new Date().toISOString(),
+    },
+  });
+};
+
 // ================================
 // @desc Register new organization
 // @route POST /api/v1/organizations/register
@@ -82,7 +111,12 @@ export const registerOrganization = async (req, res) => {
         ? 'A registration with this email was previously rejected.'
         : 'An organization with this email is already registered.';
     
-    throw new BadRequestError(`Email already in use. ${statusMessage}`);
+    return sendDuplicateRegistrationResponse({
+      req,
+      res,
+      field: 'officialEmail',
+      message: `Email already in use. ${statusMessage}`,
+    });
   }
 
   // Check for duplicate registration number
@@ -97,7 +131,12 @@ export const registerOrganization = async (req, res) => {
         ? 'A registration with this number was previously rejected.'
         : 'This registration number is already in use.';
     
-    throw new BadRequestError(`Registration number already in use. ${statusMessage}`);
+    return sendDuplicateRegistrationResponse({
+      req,
+      res,
+      field: 'registrationNumber',
+      message: `Registration number already in use. ${statusMessage}`,
+    });
   }
 
   // Validate required fields

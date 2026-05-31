@@ -4,10 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../Dashboard/home_page.dart';
 import '../controller/login_controller.dart';
+import 'organization_registration_screen.dart';
 import '../widgets/login_widget.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool addAccountMode;
+
+  const LoginPage({super.key, this.addAccountMode = false});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -59,7 +62,10 @@ class _LoginPageState extends State<LoginPage>
                   // ── Left decorative panel ──────────────────
                   Expanded(flex: 5, child: _LeftPanel()),
                   // ── Right login form ───────────────────────
-                  Expanded(flex: 4, child: _RightPanel()),
+                  Expanded(
+                    flex: 4,
+                    child: _RightPanel(addAccountMode: widget.addAccountMode),
+                  ),
                 ],
               ),
             ),
@@ -210,9 +216,16 @@ class _DotsDecor extends StatelessWidget {
 //  RIGHT PANEL  (the login form)
 // ─────────────────────────────────────────────────────────────
 class _RightPanel extends StatelessWidget {
+  final bool addAccountMode;
+
+  const _RightPanel({required this.addAccountMode});
+
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.put(LoginController());
+    if (addAccountMode) {
+      ctrl.prepareForAddAccount();
+    }
 
     return Container(
       color: const Color(0xFF06101E),
@@ -416,7 +429,9 @@ class _RightPanel extends StatelessWidget {
                         WidgetSpan(
                           child: GestureDetector(
                             onTap: () {
-                              // Get.toNamed('/register');
+                              Get.to(
+                                () => const OrganizationRegistrationScreen(),
+                              );
                             },
                             child: Text(
                               'Register your organization',
