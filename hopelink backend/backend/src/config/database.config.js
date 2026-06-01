@@ -13,13 +13,9 @@ console.log('Connecting to MongoDB with URI:', mongoUri);
 const connectDB = async () => {
   try {
     // Set mongoose options
-    const options = {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    };
 
     // Attempt to connect to MongoDB
-    const conn = await mongoose.connect(mongoUri, options);
+    const conn = await mongoose.connect(mongoUri);
     
     // Log successful connection
     console.log(`MongoDB Connected: ${conn.connection.host}`);

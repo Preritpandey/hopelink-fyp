@@ -31,8 +31,8 @@ class DonationHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 16,
-            runSpacing: 14,
+            // spacing: 16,
+            // runSpacing: 14,
             crossAxisAlignment: WrapCrossAlignment.center,
             alignment: WrapAlignment.spaceBetween,
             runAlignment: WrapAlignment.spaceBetween,
@@ -44,23 +44,7 @@ class DonationHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Text(
-                    //   'Campaigns',
-                    //   style: AppTextStyle.h4.copyWith(
-                    //     fontWeight: FontWeight.bold,
-                    //     color: AppColorToken.primary.color,
-                    //   ),
-                    // ),
-                    // Obx(
-                    //   () => Text(
-                    //     '${campaignController.filteredCampaigns.length} active campaigns',
-                    //     style: AppTextStyle.bodySmall.copyWith(
-                    //       color: AppColors.grey600,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+                  children: [],
                 ),
               ),
               SizedBox(
@@ -74,19 +58,8 @@ class DonationHeader extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        _buildHeaderAction(
-                          label: 'Essentials',
-                          icon: Icons.inventory_2_outlined,
-                          onPressed: () => Get.toNamed('/essentials'),
-                          compact: isCompact,
-                        ),
-                        // if (creditController != null)
-                        // _buildPointsBadge(creditController),
-                      ],
+                      children: [],
                     ),
                     Obx(
                       () => campaignController.isOfflineMode.value
@@ -124,52 +97,6 @@ class DonationHeader extends StatelessWidget {
       label: Text(label),
     );
   }
-
-  // Widget _buildPointsBadge(VolunteerCreditController controller) {
-  //   return Obx(() {
-  //     final credits = controller.credits.value;
-  //     final isLoading = controller.isLoading.value && credits == null;
-
-  //     return Container(
-  //       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-  //       decoration: BoxDecoration(
-  //         color: AppColorToken.primary.color.withOpacity(0.08),
-  //         borderRadius: BorderRadius.circular(18),
-  //       ),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.end,
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           Text(
-  //             'Points',
-  //             style: AppTextStyle.bodySmall.copyWith(
-  //               color: AppColors.grey700,
-  //               fontWeight: FontWeight.w600,
-  //             ),
-  //           ),
-  //           const SizedBox(height: 2),
-  //           if (isLoading)
-  //             SizedBox(
-  //               width: 16,
-  //               height: 16,
-  //               child: CircularProgressIndicator(
-  //                 strokeWidth: 2,
-  //                 color: AppColorToken.primary.color,
-  //               ),
-  //             )
-  //           else
-  //             Text(
-  //               '${credits?.totalPoints ?? 0}',
-  //               style: AppTextStyle.h4.copyWith(
-  //                 fontWeight: FontWeight.bold,
-  //                 color: AppColorToken.primary.color,
-  //               ),
-  //             ),
-  //         ],
-  //       ),
-  //     );
-  //   });
-  // }
 
   Widget _buildOfflineBadge() {
     return Container(
@@ -211,5 +138,3 @@ class DonationHeader extends StatelessWidget {
     }
   }
 }
-
-

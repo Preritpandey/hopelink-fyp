@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hopelink_admin/features/Event/pages/org_events_page.dart';
 
 import '../../Dashboard/controllers/campaign_controller.dart';
+import '../../../shared/widgets/location_map_picker.dart';
 import '../controllers/event_controller.dart';
 import '../models/event_model.dart';
 import '../widgets/event_widgets.dart';
@@ -636,97 +638,16 @@ class _Step1Location extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Coordinates
-                  Text(
-                    'GPS Coordinates',
-                    style: GoogleFonts.sora(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: kEvSub,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Enter longitude first, then latitude (optional but improves discoverability)',
-                    style: GoogleFonts.sora(fontSize: 10.5, color: kEvMuted),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: EvField(
-                          controller: ctrl.lngCtrl,
-                          label: 'Longitude',
-                          hint: '-118.4912',
-                          required: false,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            signed: true,
-                            decimal: true,
-                          ),
-                          prefix: const Padding(
-                            padding: EdgeInsets.only(left: 12, right: 8),
-                            child: Icon(
-                              Icons.west_rounded,
-                              size: 15,
-                              color: kEvMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: EvField(
-                          controller: ctrl.latCtrl,
-                          label: 'Latitude',
-                          hint: '34.0195',
-                          required: false,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            signed: true,
-                            decimal: true,
-                          ),
-                          prefix: const Padding(
-                            padding: EdgeInsets.only(left: 12, right: 8),
-                            child: Icon(
-                              Icons.north_rounded,
-                              size: 15,
-                              color: kEvMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Map hint card
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: kEvAccent2.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: kEvAccent2.withOpacity(0.2)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.map_rounded,
-                          color: kEvAccent2.withOpacity(0.7),
-                          size: 18,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Coordinates help volunteers find your event on the map. Use Google Maps to find accurate coordinates.',
-                            style: GoogleFonts.sora(
-                              fontSize: 11,
-                              color: kEvSub,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  LocationMapPicker(
+                    latCtrl: ctrl.latCtrl,
+                    lngCtrl: ctrl.lngCtrl,
+                    title: 'Event Map Location',
+                    accentColor: kEvAccent2,
+                    markerColor: kEvAccent,
+                    surfaceColor: kEvSurf2,
+                    borderColor: kEvBorder,
+                    textColor: Colors.white,
+                    mutedTextColor: kEvMuted,
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -1543,7 +1464,10 @@ class _SuccessScreenState extends State<_SuccessScreen>
                 EvPrimaryBtn(
                   label: 'Back to Dashboard',
                   icon: Icons.dashboard_rounded,
-                  onTap: () => widget.navCtrl.navigateTo(0),
+                  onTap: () => Get.to(
+                    () => OrgEventsPage(),
+                    transition: Transition.fadeIn,
+                  ),
                 ),
               ],
             ),

@@ -224,7 +224,7 @@ class CampaignListController extends GetxController {
         _showSnack('Campaign updated.', isError: false);
         return true;
       }
-      _showSnack(json['message'] as String? ?? 'Update failed.');
+      _showSnack(_responseMessage(json, 'Update failed.'));
     } on SocketException {
       _showSnack('No internet connection.');
     } on TimeoutException {
@@ -655,6 +655,32 @@ class CampaignListController extends GetxController {
     final idx = allCampaigns.indexWhere((c) => c.id == id);
     if (idx == -1) return null;
     return allCampaigns[idx];
+  }
+
+  String _responseMessage(Map<String, dynamic> json, String fallback) {
+    final message = json['message'];
+    if (message is String && message.trim().isNotEmpty) return message;
+
+    final error = json['error'];
+    if (error is Map<String, dynamic>) {
+      final details = error['details'];
+      if (details is List && details.isNotEmpty) {
+        final first = details.first;
+        if (first is Map<String, dynamic>) {
+          final detailMessage = first['message'];
+          if (detailMessage is String && detailMessage.trim().isNotEmpty) {
+            return detailMessage;
+          }
+        }
+      }
+
+      final errorMessage = error['message'];
+      if (errorMessage is String && errorMessage.trim().isNotEmpty) {
+        return errorMessage;
+      }
+    }
+
+    return fallback;
   }
 
   void _showSnack(String msg, {bool isError = true}) {

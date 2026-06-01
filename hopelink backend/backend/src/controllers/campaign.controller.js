@@ -289,15 +289,13 @@ export const updateCampaign = async (req, res) => {
     req.body.images = await uploadCampaignAssetFiles(req.files.images, 'campaigns');
   }
 
-  // Update campaign
-  campaign = await Campaign.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  // Update the loaded document so cross-field validators see existing values.
+  campaign.set(req.body);
+  await campaign.save();
 
   res.status(StatusCodes.OK).json({
     success: true,
-    data: campaign,
+    data: transformCampaign(campaign),
   });
 };
 

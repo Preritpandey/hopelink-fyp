@@ -1,13 +1,11 @@
 enum EventCategory {
+  cleaning('cleaning', 'Cleaning'),
   education('education', 'Education'),
+  awareness('awareness', 'Awareness'),
   health('health', 'Health'),
   environment('environment', 'Environment'),
-  humanRights('human-rights', 'Human Rights'),
-  disasterRelief('disaster-relief', 'Disaster Relief'),
-  womenEmpowerment('women-empowerment', 'Women Empowerment'),
-  youthDevelopment('youth-development', 'Youth Development'),
-  animalWelfare('animal-welfare', 'Animal Welfare'),
-  communityService('community-service', 'Community Service'),
+  animals('animals', 'Animals'),
+  community('community', 'Community'),
   other('other', 'Other');
 
   final String value;
@@ -23,9 +21,7 @@ enum EventCategory {
 enum EventType {
   oneDay('one-day', 'One Day'),
   multiDay('multi-day', 'Multi Day'),
-  weekly('weekly', 'Weekly'),
-  monthly('monthly', 'Monthly'),
-  ongoing('ongoing', 'Ongoing');
+  recurring('recurring', 'Recurring');
 
   final String value;
   final String label;

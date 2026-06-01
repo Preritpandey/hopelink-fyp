@@ -1,0 +1,89 @@
+name: Hope Link Mobile CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'hope_link/**'
+      - '.github/workflows/hope_link_mobile.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'hope_link/**'
+      - '.github/workflows/hope_link_mobile.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: hope-link-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: hope_link
+
+jobs:
+  android:
+    name: Analyze, test, and build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate Dart sources
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed lib test
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Run tests
+        run: |
+          if find test -name '*_test.dart' | grep -q .; then
+            flutter test
+          else
+            echo "No Flutter tests found; skipping."
+          fi
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Build release app bundle
+        run: flutter build appbundle --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hope-link-release-apk
+          path: hope_link/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload app bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hope-link-release-aab
+          path: hope_link/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error

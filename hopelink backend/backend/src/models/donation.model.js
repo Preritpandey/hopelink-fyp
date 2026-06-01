@@ -68,6 +68,10 @@ const donationSchema = new mongoose.Schema(
 donationSchema.index({ donor: 1, createdAt: -1 });
 donationSchema.index({ campaign: 1, createdAt: -1 });
 donationSchema.index({ organization: 1, createdAt: -1 });
+donationSchema.index(
+  { paymentMethod: 1, paymentId: 1 },
+  { unique: true }
+);
 
 // Static method to get total donations for a campaign
 donationSchema.statics.getTotalDonations = async function (campaignId) {

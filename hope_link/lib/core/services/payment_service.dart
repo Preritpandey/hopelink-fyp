@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -102,17 +100,16 @@ class PaymentService {
 
     final completer = Completer<void>();
     var checkoutClosed = false;
+    var paymentCompletionStarted = false;
 
     final khalti = await Khalti.init(
       enableDebugging: true,
       payConfig: payConfig,
       onPaymentResult: (paymentResult, khalti) async {
-        _closeKhaltiCheckout(
-          khalti,
-          context,
-          completer,
-          alreadyClosed: checkoutClosed,
-        );
+        if (paymentCompletionStarted) return;
+        paymentCompletionStarted = true;
+
+        _closeKhaltiCheckout(khalti, context, alreadyClosed: checkoutClosed);
         checkoutClosed = true;
         _showPaymentConfirmationDialog(
           title: confirmationTitle,
@@ -123,31 +120,39 @@ class PaymentService {
           await onPaymentSuccess(paymentResult.payload?.pidx ?? pidx);
         } finally {
           _dismissActiveDialog();
-        }
-      },
-      onMessage: (
-        khalti, {
-        description,
-        statusCode,
-        event,
-        needsPaymentConfirmation,
-      }) async {
-        if (needsPaymentConfirmation == true) {
-          await khalti.verify();
-        }
-        if (event == KhaltiEvent.kpgDisposed) {
           if (!completer.isCompleted) {
             completer.complete();
           }
-          checkoutClosed = true;
         }
       },
+      onMessage:
+          (
+            khalti, {
+            description,
+            statusCode,
+            event,
+            needsPaymentConfirmation,
+          }) async {
+            if (needsPaymentConfirmation == true) {
+              await khalti.verify();
+            }
+            if (event == KhaltiEvent.kpgDisposed) {
+              if (!paymentCompletionStarted && !completer.isCompleted) {
+                completer.complete();
+              }
+              checkoutClosed = true;
+            }
+          },
       onReturn: () {
-        if (!completer.isCompleted) {
+        if (!paymentCompletionStarted && !completer.isCompleted) {
           completer.complete();
         }
       },
     );
+
+    if (!context.mounted) {
+      throw Exception('Unable to open Khalti checkout. Please try again.');
+    }
 
     khalti.open(context);
     await completer.future;
@@ -163,7 +168,9 @@ class PaymentService {
       PopScope(
         canPop: false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -177,7 +184,10 @@ class PaymentService {
                 const SizedBox(height: 20),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -202,18 +212,11 @@ class PaymentService {
 
   void _closeKhaltiCheckout(
     Khalti khalti,
-    BuildContext context,
-    Completer<void> completer, {
+    BuildContext context, {
     required bool alreadyClosed,
   }) {
     if (!alreadyClosed) {
       khalti.close(context);
     }
-    if (!completer.isCompleted) {
-      completer.complete();
-    }
   }
 }
-
-
-

@@ -33,13 +33,13 @@ import { uploadImage } from '../middleware/multer.js';
 const router = express.Router();
 
 // Public routes
-router.get('/', authenticateIfPresent, getCampaigns);
-router.get('/closed', authenticateIfPresent, getClosedCampaigns);
-router.get('/upcoming', authenticateIfPresent, getUpcomingCampaigns);
+router.get('/', authenticateIfPresent, asyncHandler(getCampaigns));
+router.get('/closed', authenticateIfPresent, asyncHandler(getClosedCampaigns));
+router.get('/upcoming', authenticateIfPresent, asyncHandler(getUpcomingCampaigns));
 router.get(
   '/with-details/all',
   authenticateIfPresent,
-  getCampaignsWithDonationsAndEvents,
+  asyncHandler(getCampaignsWithDonationsAndEvents),
 );
 router.get('/:id/summary', asyncHandler(getApprovedCampaignReportSummary));
 // Organization campaigns (protected)
@@ -47,11 +47,11 @@ router.get(
   '/organization',
   authenticate,
   authorize('organization'),
-  getOrganizationCampaigns,
+  asyncHandler(getOrganizationCampaigns),
 );
 // Fund tracking routes (public)
-router.get('/:id/fund-status', authenticateIfPresent, getCampaignFundStatus);
-router.get('/:id', authenticateIfPresent, getCampaign);
+router.get('/:id/fund-status', authenticateIfPresent, asyncHandler(getCampaignFundStatus));
+router.get('/:id', authenticateIfPresent, asyncHandler(getCampaign));
 
 // Protected routes (require authentication)
 router.use(authenticate);
@@ -61,54 +61,54 @@ router.post(
   '/',
   authorize('organization'),
   handleFileUpload([{ name: 'images', maxCount: 10 }]),
-  createCampaign
+  asyncHandler(createCampaign)
 );
 
 router.put(
   '/:id',
   authorize('organization'),
   handleFileUpload([{ name: 'images', maxCount: 10 }]),
-  updateCampaign
+  asyncHandler(updateCampaign)
 );
 
-router.delete('/:id', authorize('organization'), deleteCampaign);
+router.delete('/:id', authorize('organization'), asyncHandler(deleteCampaign));
 
 // Image upload routes
 router.put(
   '/:id/images',
   authorize('organization'),
   handleFileUpload([{ name: 'images', maxCount: 10 }]),
-  uploadCampaignImages
+  asyncHandler(uploadCampaignImages)
 );
 
 router.put(
   '/:id/evidence',
   authorize('organization'),
   uploadImage.array('evidencePhotos', 10),
-  uploadCampaignEvidencePhotos
+  asyncHandler(uploadCampaignEvidencePhotos)
 );
 
 router.delete(
   '/:id/images/:imageId',
   authorize('organization'),
-  deleteCampaignImage
+  asyncHandler(deleteCampaignImage)
 );
 
 router.delete(
   '/:id/evidence/:imageId',
   authorize('organization'),
-  deleteCampaignEvidencePhoto
+  asyncHandler(deleteCampaignEvidencePhoto)
 );
 
 router.put(
   '/:id/images/:imageId/set-primary',
   authorize('organization'),
-  setPrimaryCampaignImage
+  asyncHandler(setPrimaryCampaignImage)
 );
 
 // Campaign updates and FAQs
-router.post('/:id/updates', authorize('organization'), addCampaignUpdate);
-router.post('/:id/faqs', authorize('organization'), addCampaignFaq);
+router.post('/:id/updates', authorize('organization'), asyncHandler(addCampaignUpdate));
+router.post('/:id/faqs', authorize('organization'), asyncHandler(addCampaignFaq));
 
 // Campaign donations (organization/admin)
 router.get(

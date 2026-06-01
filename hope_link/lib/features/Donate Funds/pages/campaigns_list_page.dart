@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:hope_link/core/extensions/num_extension.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/core/theme/app_text_styles.dart';
+import 'package:hope_link/features/DonateEssentials/controllers/donate_essentials_controller.dart';
+import 'package:hope_link/features/DonateEssentials/models/essential_models.dart';
+import 'package:hope_link/features/DonateEssentials/widgets/horizontal_essential_request_card.dart';
 
 import '../controllers/campaign_controller.dart';
 import '../controllers/event_controller.dart';
@@ -28,6 +31,10 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     with SingleTickerProviderStateMixin {
   final CampaignController _campaignController = Get.put(CampaignController());
   final EventController _eventController = Get.put(EventController());
+  final DonateEssentialsController _essentialsController =
+      Get.isRegistered<DonateEssentialsController>()
+      ? Get.find<DonateEssentialsController>()
+      : Get.put(DonateEssentialsController());
   final VolunteerJobController _volunteerJobController = Get.put(
     VolunteerJobController(),
   );
@@ -53,6 +60,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     _searchController.addListener(() {
       _searchText.value = _searchController.text;
     });
+    _loadEssentialsForCampaignList();
   }
 
   @override
@@ -65,6 +73,12 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     _animationController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadEssentialsForCampaignList({bool forceRefresh = false}) {
+    _essentialsController.selectedCategory.value = 'all';
+    _essentialsController.selectedUrgency.value = 'all';
+    return _essentialsController.loadRequests(forceRefresh: forceRefresh);
   }
 
   @override
@@ -122,7 +136,8 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                   _volunteerJobController.searchJobs(value);
                 },
                 decoration: InputDecoration(
-                  hintText: 'Search campaigns, events, and volunteer roles',
+                  hintText:
+                      'Search campaigns, essentials, events, and volunteer roles',
                   hintStyle: AppTextStyle.bodyMedium.copyWith(
                     color: AppColors.grey400,
                   ),
@@ -166,6 +181,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
       onRefresh: () async {
         await _campaignController.loadCampaigns(forceRefresh: true);
         await _eventController.fetchEvents();
+        await _loadEssentialsForCampaignList(forceRefresh: true);
         await _volunteerJobController.refreshJobs();
         await _leaderboardPreviewController.refreshLeaderboard();
       },
@@ -188,6 +204,8 @@ class _CampaignsListPageState extends State<CampaignsListPage>
               onViewFullLeaderboard: () =>
                   Get.to(() => const VolunteerLeaderboardPage()),
             ),
+            28.verticalSpace,
+            _buildVerticalEssentialsSection(),
             32.verticalSpace,
           ],
         ),
@@ -203,7 +221,7 @@ class _CampaignsListPageState extends State<CampaignsListPage>
         children: [
           6.verticalSpace,
           Text(
-            'Browse fundraising, upcoming events, and volunteer roles ',
+            'Browse fundraising, essentials, upcoming events, and volunteer roles.',
             style: AppTextStyle.bodyMedium.copyWith(
               color: AppColors.grey600,
               height: 1.45,
@@ -223,8 +241,22 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                     subtitle:
                         '${_campaignController.activeCampaignsCount} active',
                     icon: Icons.volunteer_activism_rounded,
-                    colors: const [AppColors.primaryDark, AppColors.primaryLight],
+                    colors: const [
+                      AppColors.primaryDark,
+                      AppColors.primaryLight,
+                    ],
                     onTap: () => Get.toNamed('/campaigns-all'),
+                  ),
+                ),
+                12.horizontalSpace,
+                Obx(
+                  () => _buildInsightCard(
+                    title: 'Essentials',
+                    value: '${_filteredEssentialRequests.length}',
+                    subtitle: '$_urgentEssentialsCount urgent requests',
+                    icon: Icons.inventory_2_rounded,
+                    colors: const [AppColors.accentDark, AppColors.accentLight],
+                    onTap: () => Get.toNamed('/essentials'),
                   ),
                 ),
                 12.horizontalSpace,
@@ -382,6 +414,55 @@ class _CampaignsListPageState extends State<CampaignsListPage>
     });
   }
 
+  Widget _buildVerticalEssentialsSection() {
+    return Obx(() {
+      final requests = _filteredEssentialRequests;
+
+      if (_essentialsController.isLoadingRequests.value && requests.isEmpty) {
+        return const SizedBox(
+          height: 320,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (requests.isEmpty) {
+        return _buildEmptySection(
+          title: 'No essentials found',
+          subtitle:
+              'Try another search or check back for new verified item requests.',
+          icon: Icons.inventory_2_outlined,
+        );
+      }
+
+      return _buildSectionContainer(
+        title: 'Essential Donation Requests',
+        subtitle: 'Give food, clothes, medicine, and daily supplies directly.',
+        actionLabel: 'See All',
+        onTap: () => Get.toNamed('/essentials'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: requests.asMap().entries.map((entry) {
+              final index = entry.key;
+              final request = entry.value;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == requests.length - 1 ? 0 : 14,
+                ),
+                child: VerticalEssentialRequestCard(
+                  request: request,
+                  controller: _essentialsController,
+                  animationController: _animationController,
+                  animationIndex: index,
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _buildHorizontalVolunteerJobsSection() {
     return Obx(() {
       if (_volunteerJobController.isLoading.value &&
@@ -511,7 +592,9 @@ class _CampaignsListPageState extends State<CampaignsListPage>
                       vertical: 9,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColorToken.primary.color.withValues(alpha: 0.08),
+                      color: AppColorToken.primary.color.withValues(
+                        alpha: 0.08,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -592,6 +675,38 @@ class _CampaignsListPageState extends State<CampaignsListPage>
       ),
     );
   }
+
+  List<EssentialRequest> get _filteredEssentialRequests {
+    final query = _searchText.value.trim().toLowerCase();
+    final activeRequests = _essentialsController.requests
+        .where((request) => !request.isExpired)
+        .toList(growable: false);
+
+    if (query.isEmpty) return activeRequests;
+
+    return activeRequests
+        .where((request) {
+          final searchableItems = request.itemsNeeded
+              .map((item) => item.itemName)
+              .join(' ')
+              .toLowerCase();
+          final searchableText = [
+            request.title,
+            request.description,
+            request.category,
+            request.urgencyLevel,
+            request.organization.organizationName,
+            searchableItems,
+          ].join(' ').toLowerCase();
+
+          return searchableText.contains(query);
+        })
+        .toList(growable: false);
+  }
+
+  int get _urgentEssentialsCount {
+    return _essentialsController.requests
+        .where((request) => !request.isExpired && request.isUrgent)
+        .length;
+  }
 }
-
-

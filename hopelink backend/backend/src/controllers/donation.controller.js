@@ -755,20 +755,32 @@ const finalizeDonation = async ({
   paymentMeta = {},
 }) => {
   let donation = await Donation.findOne({ paymentMethod, paymentId });
-  const isNewDonation = !donation;
+  let isNewDonation = !donation;
 
   if (!donation) {
-    donation = await Donation.create({
-      donor: userId,
-      campaign: campaign._id,
-      organization: campaign.organization,
-      amount,
-      paymentMethod,
-      paymentId,
-      isAnonymous: isAnonymous || false,
-      message: message || '',
-      status: 'completed',
-    });
+    try {
+      donation = await Donation.create({
+        donor: userId,
+        campaign: campaign._id,
+        organization: campaign.organization,
+        amount,
+        paymentMethod,
+        paymentId,
+        isAnonymous: isAnonymous || false,
+        message: message || '',
+        status: 'completed',
+      });
+    } catch (error) {
+      if (error?.code !== 11000) {
+        throw error;
+      }
+
+      donation = await Donation.findOne({ paymentMethod, paymentId });
+      isNewDonation = false;
+      if (!donation) {
+        throw error;
+      }
+    }
   }
 
   if (isNewDonation) {
@@ -820,7 +832,7 @@ const finalizeDonation = async ({
     console.error('[Backend] Error fetching user for donation receipt:', err);
   }
 
-  if (!donation.receiptSent && user?.email) {
+  if (isNewDonation && !donation.receiptSent && user?.email) {
     try {
       await sendDonationReceipt({
         to: user.email,
