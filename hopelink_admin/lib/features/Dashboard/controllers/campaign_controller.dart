@@ -13,7 +13,7 @@ import '../models/campaign_model.dart';
 import 'campaign_list_controller.dart';
 
 class CampaignController extends GetxController {
-  static const _base = 'http://localhost:3008/api/v1';
+  static const _base = 'https://hopelink-fyp.onrender.com/api/v1';
 
   // ── Auth ────────────────────────────────────────────────────
   String _token = '';
@@ -25,6 +25,7 @@ class CampaignController extends GetxController {
   final selectedCampaign = Rxn<Campaign>();
   final categories = <CampaignCategory>[].obs;
   final isLoadingList = false.obs;
+  final isLoadingCategories = false.obs;
   final isSubmitting = false.obs;
   final errorMsg = ''.obs;
   final successMsg = ''.obs;
@@ -65,6 +66,14 @@ class CampaignController extends GetxController {
   String get orgName => _orgName.value;
   String get userName => _userName.value;
   DashboardStats get stats => DashboardStats.fromCampaigns(campaigns);
+
+  List<CampaignCategory> get _fallbackCategories => const [
+    CampaignCategory(id: '69533b891456cdbcd16177ad', name: 'Health'),
+    CampaignCategory(id: '69533b891456cdbcd16177ae', name: 'Education'),
+    CampaignCategory(id: '69533b891456cdbcd16177af', name: 'Environment'),
+    CampaignCategory(id: '69533b891456cdbcd16177b0', name: 'Disaster Relief'),
+    CampaignCategory(id: '69533b891456cdbcd16177b1', name: 'Women Empowerment'),
+  ];
 
   // ─────────────────────────────────────────────────────────────
   @override
@@ -110,38 +119,30 @@ class CampaignController extends GetxController {
 
   // ─── FETCH categories ─────────────────────────────────────────
   Future<void> fetchCategories() async {
+    isLoadingCategories.value = true;
     try {
       final res = await http
           .get(Uri.parse('$_base/categories'), headers: _authHeaders)
           .timeout(const Duration(seconds: 10));
       final json = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && json['success'] == true) {
-        final list = (json['data'] as List)
-            .map((e) => CampaignCategory.fromJson(e as Map<String, dynamic>))
+        final data = json['data'];
+        final list = (data is List ? data : const [])
+            .whereType<Map>()
+            .map((e) => CampaignCategory.fromJson(e.cast<String, dynamic>()))
+            .where((category) => category.id.isNotEmpty)
             .toList();
-        categories.assignAll(list);
+        categories.assignAll(list.isEmpty ? _fallbackCategories : list);
+      } else if (categories.isEmpty) {
+        categories.assignAll(_fallbackCategories);
       }
     } catch (_) {
-      // If categories API unavailable, use fallback
-      categories.assignAll([
-        const CampaignCategory(id: '69533b891456cdbcd16177ad', name: 'Health'),
-        const CampaignCategory(
-          id: '69533b891456cdbcd16177ae',
-          name: 'Education',
-        ),
-        const CampaignCategory(
-          id: '69533b891456cdbcd16177af',
-          name: 'Environment',
-        ),
-        const CampaignCategory(
-          id: '69533b891456cdbcd16177b0',
-          name: 'Disaster Relief',
-        ),
-        const CampaignCategory(
-          id: '69533b891456cdbcd16177b1',
-          name: 'Women Empowerment',
-        ),
-      ]);
+      if (categories.isEmpty) categories.assignAll(_fallbackCategories);
+    } finally {
+      if (!categories.any((cat) => cat.id == selectedCategory.value)) {
+        selectedCategory.value = '';
+      }
+      isLoadingCategories.value = false;
     }
   }
 
@@ -392,9 +393,7 @@ class CampaignController extends GetxController {
             ? const Color(0xFFEF4444)
             : const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),
@@ -402,7 +401,10 @@ class CampaignController extends GetxController {
   }
 
   void navigateTo(int index) {
-    if (index == 2) resetCreateForm();
+    if (index == 2) {
+      resetCreateForm();
+      if (categories.isEmpty) fetchCategories();
+    }
     currentNavIndex.value = index;
   }
 

@@ -171,8 +171,8 @@ class CampaignCategory {
 
   factory CampaignCategory.fromJson(Map<String, dynamic> json) {
     return CampaignCategory(
-      id: json['_id'] as String,
-      name: json['name'] as String,
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      name: (json['name'] ?? json['title'] ?? 'Unnamed category').toString(),
     );
   }
 }

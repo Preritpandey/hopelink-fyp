@@ -16,25 +16,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/campaign_list_model.dart';
 
-
 class CampaignListController extends GetxController {
-  static const _base     = 'http://localhost:3008/api/v1';
+  static const _base = 'https://hopelink-fyp.onrender.com/api/v1';
   static const _tokenKey = 'auth_token';
 
   // ── State ────────────────────────────────────────────────────
-  final allCampaigns     = <CampaignListItem>[].obs;
-  final isLoading        = false.obs;
-  final errorMsg         = ''.obs;
-  final searchQuery      = ''.obs;
-  final activeFilter     = CampaignStatusFilter.all.obs;
-  final sortOption       = CampaignSortOption.newest.obs;
-  final viewMode         = CampaignViewMode.grid.obs;
+  final allCampaigns = <CampaignListItem>[].obs;
+  final isLoading = false.obs;
+  final errorMsg = ''.obs;
+  final searchQuery = ''.obs;
+  final activeFilter = CampaignStatusFilter.all.obs;
+  final sortOption = CampaignSortOption.newest.obs;
+  final viewMode = CampaignViewMode.grid.obs;
   final selectedCampaign = Rxn<CampaignListItem>();
   final expandedFaqIndex = (-1).obs;
-  final actionLoading    = false.obs;
+  final actionLoading = false.obs;
 
   // Images upload
-  final pickedImages     = <PlatformFile>[].obs;
+  final pickedImages = <PlatformFile>[].obs;
   final isUploadingImages = false.obs;
   final pickedEvidencePhotos = <PlatformFile>[].obs;
   final isUploadingEvidencePhotos = false.obs;
@@ -42,15 +41,15 @@ class CampaignListController extends GetxController {
   final isUploadingReport = false.obs;
 
   // Donations
-  final donations        = <CampaignDonation>[].obs;
+  final donations = <CampaignDonation>[].obs;
   final donationsLoading = false.obs;
-  final donationsError   = ''.obs;
+  final donationsError = ''.obs;
   final donationsNextPage = RxnInt();
   String _donationsForId = '';
 
   // ── Controllers ───────────────────────────────────────────────
   final searchCtrl = TextEditingController();
-  String _token    = '';
+  String _token = '';
 
   // ─────────────────────────────────────────────────────────────
   @override
@@ -74,7 +73,7 @@ class CampaignListController extends GetxController {
   // ── Fetch ─────────────────────────────────────────────────────
   Future<void> fetchCampaigns() async {
     isLoading.value = true;
-    errorMsg.value  = '';
+    errorMsg.value = '';
 
     try {
       final uri = Uri.parse('$_base/campaigns/organization');
@@ -145,8 +144,7 @@ class CampaignListController extends GetxController {
   }
 
   // ── Stats ─────────────────────────────────────────────────────
-  int get activeCount =>
-      allCampaigns.where((c) => c.status == 'active').length;
+  int get activeCount => allCampaigns.where((c) => c.status == 'active').length;
 
   double get totalRaised =>
       allCampaigns.fold(0.0, (sum, c) => sum + c.currentAmount);
@@ -157,8 +155,7 @@ class CampaignListController extends GetxController {
   double get overallProgress =>
       totalTarget > 0 ? (totalRaised / totalTarget * 100).clamp(0, 100) : 0;
 
-  int get withImagesCount =>
-      allCampaigns.where((c) => c.hasImages).length;
+  int get withImagesCount => allCampaigns.where((c) => c.hasImages).length;
 
   int get totalUpdates =>
       allCampaigns.fold(0, (sum, c) => sum + c.updates.length);
@@ -187,8 +184,7 @@ class CampaignListController extends GetxController {
   void closeDetail() => selectedCampaign.value = null;
 
   void toggleFaq(int index) {
-    expandedFaqIndex.value =
-        expandedFaqIndex.value == index ? -1 : index;
+    expandedFaqIndex.value = expandedFaqIndex.value == index ? -1 : index;
   }
 
   void clearSearch() {
@@ -236,14 +232,8 @@ class CampaignListController extends GetxController {
     return false;
   }
 
-  Future<bool> updateCampaignStatus(
-    String campaignId,
-    String status,
-  ) {
-    return updateCampaign(
-      campaignId,
-      UpdateCampaignRequest(status: status),
-    );
+  Future<bool> updateCampaignStatus(String campaignId, String status) {
+    return updateCampaign(campaignId, UpdateCampaignRequest(status: status));
   }
 
   // â”€â”€ Campaign Updates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -607,27 +597,21 @@ class CampaignListController extends GetxController {
   void _appendUpdate(String campaignId, CampaignListUpdate update) {
     final current = _getCampaign(campaignId);
     if (current == null) return;
-    final next = current.copyWith(
-      updates: [update, ...current.updates],
-    );
+    final next = current.copyWith(updates: [update, ...current.updates]);
     _replaceCampaign(next);
   }
 
   void _appendFaq(String campaignId, CampaignListFaq faq) {
     final current = _getCampaign(campaignId);
     if (current == null) return;
-    final next = current.copyWith(
-      faqs: [faq, ...current.faqs],
-    );
+    final next = current.copyWith(faqs: [faq, ...current.faqs]);
     _replaceCampaign(next);
   }
 
   void _appendImages(String campaignId, List<String> urls) {
     final current = _getCampaign(campaignId);
     if (current == null) return;
-    final next = current.copyWith(
-      images: [...urls, ...current.images],
-    );
+    final next = current.copyWith(images: [...urls, ...current.images]);
     _replaceCampaign(next);
   }
 
@@ -692,9 +676,7 @@ class CampaignListController extends GetxController {
             ? const Color(0xFFEF4444)
             : const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),

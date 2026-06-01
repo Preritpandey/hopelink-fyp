@@ -327,15 +327,25 @@ class _Step0Info extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Obx(
-                        () => DropdownButtonFormField<String>(
-                          value: ctrl.selectedCategory.value.isEmpty
-                              ? null
-                              : ctrl.selectedCategory.value,
+                      Obx(() {
+                        final categories = ctrl.categories;
+                        final selected = categories.any(
+                          (cat) => cat.id == ctrl.selectedCategory.value,
+                        )
+                            ? ctrl.selectedCategory.value
+                            : null;
+                        final isLoading =
+                            ctrl.isLoadingCategories.value && categories.isEmpty;
+
+                        return DropdownButtonFormField<String>(
+                          value: selected,
+                          isExpanded: true,
                           dropdownColor: kSurface2,
                           style: GoogleFonts.dmSans(fontSize: 13, color: kText),
                           hint: Text(
-                            'Select category',
+                            isLoading
+                                ? 'Loading categories...'
+                                : 'Select category',
                             style: GoogleFonts.dmSans(
                               fontSize: 13,
                               color: kTextMuted,
@@ -355,12 +365,38 @@ class _Step0Info extends StatelessWidget {
                                 width: 1.5,
                               ),
                             ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: kRed),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: kRed,
+                                width: 1.5,
+                              ),
+                            ),
+                            errorStyle:
+                                GoogleFonts.dmSans(fontSize: 11, color: kRed),
+                            suffixIcon: isLoading
+                                ? const Padding(
+                                    padding: EdgeInsets.all(14),
+                                    child: SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        color: kAccent,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : null,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 14,
                               vertical: 13,
                             ),
                           ),
-                          items: ctrl.categories
+                          items: categories
                               .map(
                                 (cat) => DropdownMenuItem(
                                   value: cat.id,
@@ -368,13 +404,20 @@ class _Step0Info extends StatelessWidget {
                                 ),
                               )
                               .toList(),
+                          onTap: () {
+                            if (ctrl.categories.isEmpty &&
+                                !ctrl.isLoadingCategories.value) {
+                              ctrl.fetchCategories();
+                            }
+                          },
                           onChanged: (v) {
                             if (v != null) ctrl.selectedCategory.value = v;
                           },
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Required' : null,
-                        ),
-                      ),
+                          validator: (_) => ctrl.selectedCategory.value.isEmpty
+                              ? 'Required'
+                              : null,
+                        );
+                      }),
                     ],
                   ),
                 ),
