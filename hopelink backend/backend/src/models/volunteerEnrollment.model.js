@@ -73,10 +73,6 @@ volunteerEnrollmentSchema.pre('save', async function(next) {
     throw new Error('Event not found');
   }
   
-  if (event.status !== 'published') {
-    throw new Error('Event is not open for enrollment');
-  }
-  
   if (event.registrationDeadline && new Date() > event.registrationDeadline) {
     throw new Error('Registration deadline has passed');
   }

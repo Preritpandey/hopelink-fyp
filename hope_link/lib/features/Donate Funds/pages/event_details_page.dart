@@ -783,10 +783,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           final alreadyEnrolled = _controller.isEnrolled(_event.id);
           final isFull = _event.spotsLeft <= 0;
           final isBusy = _controller.isEnrolling.value;
-          final isOpenForEnrollment = _event.status == 'published';
-
-          final canEnroll =
-              isOpenForEnrollment && !alreadyEnrolled && !isFull && !isBusy;
+          final canEnroll = !alreadyEnrolled && !isFull && !isBusy;
 
           String buttonLabel = 'Enroll Now';
           if (status == 'pending') {
@@ -795,8 +792,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             buttonLabel = 'Approved';
           } else if (status == 'rejected') {
             buttonLabel = 'Rejected';
-          } else if (!isOpenForEnrollment) {
-            buttonLabel = 'Enrollment Closed';
           } else if (isFull) {
             buttonLabel = 'Event Full';
           }

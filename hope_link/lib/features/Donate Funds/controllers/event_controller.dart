@@ -188,11 +188,7 @@ class EventController extends GetxController {
         filtered = filtered.where((event) => event.isFeatured).toList();
       } else if (selectedFilter.value == 'active') {
         filtered = filtered
-            .where(
-              (event) =>
-                  event.status == 'published' &&
-                  event.startDate.isAfter(DateTime.now()),
-            )
+            .where((event) => event.startDate.isAfter(DateTime.now()))
             .toList();
       }
     }

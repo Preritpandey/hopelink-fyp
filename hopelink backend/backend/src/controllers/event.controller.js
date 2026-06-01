@@ -512,11 +512,6 @@ export const enrollInEvent = async (req, res, next) => {
       throw new NotFoundError('Event not found');
     }
 
-    // Check if event is open for enrollment
-    if (event.status !== 'published') {
-      throw new BadRequestError('This event is not open for enrollment');
-    }
-
     // Check if user is already enrolled
     const existingEnrollment = await VolunteerEnrollment.findOne({
       event: event._id,
