@@ -29,7 +29,7 @@ const mockRes = () => {
 
 async function run() {
     try {
-        const mongoUri = 'mongodb://localhost:27017/charity_platform';
+        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/hopelink';
         console.log("Connecting to DB...", mongoUri);
         await mongoose.connect(mongoUri);
         console.log("Connected to DB");

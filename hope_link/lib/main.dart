@@ -138,7 +138,7 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(
           name: '/essential-commitments',
-          page: () =>  MyEssentialCommitmentsPage(),
+          page: () => MyEssentialCommitmentsPage(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

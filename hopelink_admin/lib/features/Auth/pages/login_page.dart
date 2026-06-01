@@ -50,7 +50,11 @@ class _LoginPageState extends State<LoginPage>
       body: Stack(
         children: [
           // ── Background mesh ─────────────────────────────────
-          const _BackgroundMesh(),
+          IconButton(
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white24),
+          ),
+          _BackgroundMesh(),
 
           // ── Content ─────────────────────────────────────────
           FadeTransition(

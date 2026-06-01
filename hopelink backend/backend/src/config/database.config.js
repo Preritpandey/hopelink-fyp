@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Get MongoDB connection string from environment variables
-const mongoUri =  'mongodb://localhost:27017/charity_platform';
+const mongoUri =  process.env.MONGODB_URI || 'mongodb://localhost:27017/hopelink';
 
 // Log the MongoDB URI (for debugging, remove in production)
 console.log('Connecting to MongoDB with URI:', mongoUri);
