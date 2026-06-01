@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import Donation from '../models/donation.model.js';
+import PlatformSupportTransaction from '../models/platformSupportTransaction.model.js';
 import Campaign from '../models/campaign.model.js';
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
@@ -15,11 +16,113 @@ import {
   getKhaltiPaymentId,
   lookupKhaltiEpayment,
   isKhaltiEpaymentCompleted,
+  retrieveStripePaymentIntent,
+  isStripePaymentSuccessful,
+  stripeAmountToMajorUnit,
+  convertToNPR,
 } from '../services/payment.service.js';
 import mongoose from 'mongoose';
 import path from 'path';
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const toAmount = (value, fallback = 0) => {
+  const number = Number(value ?? fallback);
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const resolveDonationAmounts = ({
+  amount,
+  campaignAmount,
+  supportPlatform,
+  platformSupportAmount,
+  totalAmount,
+  amountIncludesSupport = false,
+}) => {
+  const supportAmount = supportPlatform
+    ? toAmount(platformSupportAmount, 0)
+    : 0;
+  const rawAmount = toAmount(amount, 0);
+  const resolvedCampaignAmount =
+    campaignAmount != null
+      ? toAmount(campaignAmount, 0)
+      : amountIncludesSupport
+        ? rawAmount - supportAmount
+        : rawAmount;
+  const resolvedTotalAmount =
+    totalAmount != null
+      ? toAmount(totalAmount, 0)
+      : resolvedCampaignAmount + supportAmount;
+
+  if (resolvedCampaignAmount < 1) {
+    throw new BadRequestError('Campaign donation amount must be at least 1');
+  }
+
+  if (supportAmount < 0) {
+    throw new BadRequestError('Platform support amount cannot be negative');
+  }
+
+  if (resolvedTotalAmount !== resolvedCampaignAmount + supportAmount) {
+    throw new BadRequestError(
+      'Total amount must equal campaign amount plus platform support amount',
+    );
+  }
+
+  return {
+    campaignAmount: resolvedCampaignAmount,
+    platformSupportAmount: supportAmount,
+    totalAmount: resolvedTotalAmount,
+    supportPlatform: supportAmount > 0,
+  };
+};
+
+const campaignDonationNprExpression = {
+  $ifNull: ['$convertedAmountNpr', { $ifNull: ['$campaignAmount', '$amount'] }],
+};
+
+const totalDonationNprExpression = {
+  $ifNull: [
+    '$convertedTotalAmountNpr',
+    {
+      $ifNull: [
+        '$totalAmount',
+        { $add: [campaignDonationNprExpression, 0] },
+      ],
+    },
+  ],
+};
+
+const roundNpr = (value) => Number(Number(value || 0).toFixed(2));
+
+const buildNprConversionSnapshot = ({
+  campaignAmount,
+  platformSupportAmount = 0,
+  totalAmount,
+  currency = 'NPR',
+  exchangeRate = 1,
+}) => {
+  const originalCampaignAmount = toAmount(campaignAmount, 0);
+  const originalPlatformSupportAmount = toAmount(platformSupportAmount, 0);
+  const originalTotalAmount = toAmount(
+    totalAmount,
+    originalCampaignAmount + originalPlatformSupportAmount,
+  );
+  const rate = toAmount(exchangeRate, 1);
+
+  return {
+    originalAmount: originalCampaignAmount,
+    originalCampaignAmount,
+    originalPlatformSupportAmount,
+    originalTotalAmount,
+    originalCurrency: String(currency || 'NPR').toUpperCase(),
+    exchangeRate: rate,
+    convertedAmountNpr: roundNpr(originalCampaignAmount * rate),
+    convertedPlatformSupportAmountNpr: roundNpr(
+      originalPlatformSupportAmount * rate,
+    ),
+    convertedTotalAmountNpr: roundNpr(originalTotalAmount * rate),
+  };
+};
 
 // @desc    Create a new donation
 // @route   POST /api/v1/donations
@@ -30,6 +133,10 @@ export const createDonation = async (req, res) => {
   const {
     campaign: campaignId,
     amount,
+    campaignAmount,
+    platformSupportAmount,
+    totalAmount,
+    supportPlatform,
     paymentMethod,
     paymentId,
     isAnonymous,
@@ -56,12 +163,31 @@ export const createDonation = async (req, res) => {
     throw new BadRequestError('This campaign has ended');
   }
 
+  const amounts = resolveDonationAmounts({
+    amount,
+    campaignAmount,
+    platformSupportAmount,
+    totalAmount,
+    supportPlatform,
+  });
+  const conversion = buildNprConversionSnapshot({
+    campaignAmount: amounts.campaignAmount,
+    platformSupportAmount: amounts.platformSupportAmount,
+    totalAmount: amounts.totalAmount,
+    currency: 'NPR',
+  });
+
   // Create donation
   const donation = await Donation.create({
     donor: userId,
     campaign: campaignId,
     organization: campaign.organization,
-    amount,
+    amount: amounts.campaignAmount,
+    campaignAmount: amounts.campaignAmount,
+    platformSupportAmount: amounts.platformSupportAmount,
+    totalAmount: amounts.totalAmount,
+    ...conversion,
+    supportPlatform: amounts.supportPlatform,
     paymentMethod,
     paymentId:
       paymentId ||
@@ -73,7 +199,7 @@ export const createDonation = async (req, res) => {
   });
 
   // Update campaign's current amount
-  campaign.currentAmount += amount;
+  campaign.currentAmount += amounts.campaignAmount;
   campaign.donationsCount += 1;
   await campaign.save();
 
@@ -84,6 +210,10 @@ export const createDonation = async (req, res) => {
     resourceId: donation._id,
     metadata: {
       amount,
+      campaignAmount: amounts.campaignAmount,
+      platformSupportAmount: amounts.platformSupportAmount,
+      totalAmount: amounts.totalAmount,
+      supportPlatform: amounts.supportPlatform,
       campaignId: campaign._id,
       campaignTitle: campaign.title,
       organizationId: campaign.organization,
@@ -101,7 +231,9 @@ export const createDonation = async (req, res) => {
     await sendDonationReceipt({
       to: user.email,
       userName: user.name,
-      amount,
+      amount: amounts.campaignAmount,
+      platformSupportAmount: amounts.platformSupportAmount,
+      totalAmount: amounts.totalAmount,
       campaignTitle: campaign.title,
       organizationName: organization
         ? organization.organizationName
@@ -141,7 +273,8 @@ export const getOrgDonationSummary = async (req, res) => {
     {
       $group: {
         _id: '$organization',
-        totalAmount: { $sum: '$amount' },
+        totalAmount: { $sum: campaignDonationNprExpression },
+        totalAmountNpr: { $sum: campaignDonationNprExpression },
         donationCount: { $sum: 1 },
       },
     },
@@ -153,6 +286,7 @@ export const getOrgDonationSummary = async (req, res) => {
       summary || {
         _id: orgId,
         totalAmount: 0,
+        totalAmountNpr: 0,
         donationCount: 0,
       },
   });
@@ -171,7 +305,8 @@ export const getDonationsSummaryByOrg = async (req, res) => {
     {
       $group: {
         _id: '$organization',
-        totalAmount: { $sum: '$amount' },
+        totalAmount: { $sum: campaignDonationNprExpression },
+        totalAmountNpr: { $sum: campaignDonationNprExpression },
         donationCount: { $sum: 1 },
       },
     },
@@ -203,7 +338,8 @@ export const getOrgDonationSummaryById = async (req, res) => {
     {
       $group: {
         _id: '$organization',
-        totalAmount: { $sum: '$amount' },
+        totalAmount: { $sum: campaignDonationNprExpression },
+        totalAmountNpr: { $sum: campaignDonationNprExpression },
         donationCount: { $sum: 1 },
       },
     },
@@ -215,6 +351,7 @@ export const getOrgDonationSummaryById = async (req, res) => {
       summary || {
         _id: orgId,
         totalAmount: 0,
+        totalAmountNpr: 0,
         donationCount: 0,
       },
   });
@@ -447,21 +584,26 @@ const sendDonationReceipt = async ({
   to,
   userName,
   amount,
+  platformSupportAmount = 0,
+  totalAmount,
   campaignTitle,
   organizationName,
   donationId,
   date,
   isAnonymous,
 }) => {
+  const payableAmount = totalAmount ?? amount + platformSupportAmount;
   const subject = 'Thank you for your donation';
   const text = `
     Dear ${userName},
     
-    Thank you for your generous donation of $${amount.toFixed(2)} to "${campaignTitle}" by ${organizationName}.
+    Thank you for your generous donation of NPR ${amount.toFixed(2)} to "${campaignTitle}" by ${organizationName}.
     
     Donation ID: ${donationId}
     Date: ${date.toLocaleDateString()}
-    Amount: $${amount.toFixed(2)}
+    Campaign Amount: NPR ${amount.toFixed(2)}
+    Platform Support: NPR ${platformSupportAmount.toFixed(2)}
+    Total Paid: NPR ${payableAmount.toFixed(2)}
     ${isAnonymous ? 'This donation was made anonymously.' : ''}
     
     Your support is greatly appreciated!
@@ -534,13 +676,15 @@ const sendDonationReceipt = async ({
         
         <div class="content">
           <p>Dear ${userName},</p>
-          <p>Thank you for your generous donation of <strong>$${amount.toFixed(2)}</strong> to "<strong>${campaignTitle}</strong>" by <strong>${organizationName}</strong>.</p>
+          <p>Thank you for your generous donation of <strong>NPR ${amount.toFixed(2)}</strong> to "<strong>${campaignTitle}</strong>" by <strong>${organizationName}</strong>.</p>
           
           <div class="details-box">
             <p><strong>Donation Details:</strong></p>
             <p>Donation ID: ${donationId}</p>
             <p>Date: ${date.toLocaleDateString()}</p>
-            <p>Amount: $${amount.toFixed(2)}</p>
+            <p>Campaign Amount: NPR ${amount.toFixed(2)}</p>
+            <p>Platform Support: NPR ${platformSupportAmount.toFixed(2)}</p>
+            <p>Total Paid: NPR ${payableAmount.toFixed(2)}</p>
             ${isAnonymous ? '<p>This donation was made anonymously.</p>' : ''}
           </div>
           
@@ -748,12 +892,42 @@ const finalizeDonation = async ({
   userId,
   campaign,
   amount,
+  campaignAmount,
+  platformSupportAmount,
+  totalAmount,
+  supportPlatform,
   paymentMethod,
   paymentId,
   isAnonymous,
   message,
   paymentMeta = {},
+  conversion = null,
 }) => {
+  const amounts = resolveDonationAmounts({
+    amount,
+    campaignAmount,
+    platformSupportAmount,
+    totalAmount,
+    supportPlatform,
+    amountIncludesSupport: true,
+  });
+  const conversionSnapshot =
+    conversion ||
+    buildNprConversionSnapshot({
+      campaignAmount: amounts.campaignAmount,
+      platformSupportAmount: amounts.platformSupportAmount,
+      totalAmount: amounts.totalAmount,
+      currency: 'NPR',
+    });
+  const nprAmounts = {
+    campaignAmount: conversionSnapshot.convertedAmountNpr,
+    platformSupportAmount:
+      conversionSnapshot.convertedPlatformSupportAmountNpr || 0,
+    totalAmount: conversionSnapshot.convertedTotalAmountNpr,
+    supportPlatform:
+      (conversionSnapshot.convertedPlatformSupportAmountNpr || 0) > 0,
+  };
+
   let donation = await Donation.findOne({ paymentMethod, paymentId });
   let isNewDonation = !donation;
 
@@ -763,7 +937,12 @@ const finalizeDonation = async ({
         donor: userId,
         campaign: campaign._id,
         organization: campaign.organization,
-        amount,
+        amount: nprAmounts.campaignAmount,
+        campaignAmount: nprAmounts.campaignAmount,
+        platformSupportAmount: nprAmounts.platformSupportAmount,
+        totalAmount: nprAmounts.totalAmount,
+        ...conversionSnapshot,
+        supportPlatform: nprAmounts.supportPlatform,
         paymentMethod,
         paymentId,
         isAnonymous: isAnonymous || false,
@@ -784,7 +963,8 @@ const finalizeDonation = async ({
   }
 
   if (isNewDonation) {
-    campaign.currentAmount = (campaign.currentAmount || 0) + amount;
+    campaign.currentAmount =
+      (campaign.currentAmount || 0) + nprAmounts.campaignAmount;
     campaign.donationsCount = (campaign.donationsCount || 0) + 1;
     await campaign.save();
 
@@ -794,7 +974,15 @@ const finalizeDonation = async ({
       resourceType: 'Donation',
       resourceId: donation._id,
       metadata: {
-        amount,
+        amount: nprAmounts.campaignAmount,
+        campaignAmount: nprAmounts.campaignAmount,
+        platformSupportAmount: nprAmounts.platformSupportAmount,
+        totalAmount: nprAmounts.totalAmount,
+        supportPlatform: nprAmounts.supportPlatform,
+        originalAmount: conversionSnapshot.originalAmount,
+        originalCurrency: conversionSnapshot.originalCurrency,
+        exchangeRate: conversionSnapshot.exchangeRate,
+        convertedAmountNpr: conversionSnapshot.convertedAmountNpr,
         campaignId: campaign._id,
         campaignTitle: campaign.title,
         organizationId: campaign.organization,
@@ -812,7 +1000,7 @@ const finalizeDonation = async ({
         campaign.organization,
         {
           $inc: {
-            totalDonationsReceived: amount,
+            totalDonationsReceived: nprAmounts.campaignAmount,
             totalDonationCount: 1,
           },
         },
@@ -823,6 +1011,27 @@ const finalizeDonation = async ({
     }
   } catch (err) {
     console.error('[Backend] Error updating organization funds:', err);
+  }
+
+  if (nprAmounts.supportPlatform) {
+    try {
+      await PlatformSupportTransaction.findOneAndUpdate(
+        { donation: donation._id },
+        {
+          donation: donation._id,
+          donor: userId,
+          campaign: campaign._id,
+          organization: campaign.organization,
+          amount: nprAmounts.platformSupportAmount,
+          paymentMethod,
+          paymentId,
+          status: 'completed',
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
+    } catch (err) {
+      console.error('[Backend] Error recording platform support:', err);
+    }
   }
 
   let user = null;
@@ -837,7 +1046,9 @@ const finalizeDonation = async ({
       await sendDonationReceipt({
         to: user.email,
         userName: user?.name || 'Donor',
-        amount,
+        amount: nprAmounts.campaignAmount,
+        platformSupportAmount: nprAmounts.platformSupportAmount,
+        totalAmount: nprAmounts.totalAmount,
         campaignTitle: campaign.title,
         organizationName: organization
           ? organization.organizationName
@@ -910,6 +1121,10 @@ export const completeStripePayment = async (req, res, next) => {
     const {
       paymentIntentId,
       amount,
+      campaignAmount,
+      platformSupportAmount,
+      totalAmount,
+      supportPlatform,
       campaignId,
       isAnonymous,
       message,
@@ -931,14 +1146,66 @@ export const completeStripePayment = async (req, res, next) => {
       return res.status(campaignError.status).json(campaignError.body);
     }
 
+    const intent = await retrieveStripePaymentIntent(paymentIntentId);
+    if (!isStripePaymentSuccessful(intent)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Stripe payment is not completed',
+        data: {
+          id: intent.id,
+          status: intent.status,
+        },
+      });
+    }
+
+    const originalCurrency = String(intent.currency || 'NPR').toUpperCase();
+    const originalTotalAmount = stripeAmountToMajorUnit({
+      amount: intent.amount,
+      currency: intent.currency,
+    });
+    const originalPlatformSupportAmount = toAmount(
+      platformSupportAmount ?? intent.metadata?.platformSupportAmount,
+      0,
+    );
+    const originalCampaignAmount = toAmount(
+      campaignAmount ?? intent.metadata?.campaignAmount,
+      Math.max(originalTotalAmount - originalPlatformSupportAmount, 0),
+    );
+    const conversionRate = await convertToNPR(1, originalCurrency);
+    const conversion = buildNprConversionSnapshot({
+      campaignAmount: originalCampaignAmount,
+      platformSupportAmount: originalPlatformSupportAmount,
+      totalAmount: originalTotalAmount,
+      currency: originalCurrency,
+      exchangeRate: conversionRate.exchangeRate,
+    });
+    const resolvedSupportPlatform =
+      supportPlatform == null
+        ? originalPlatformSupportAmount > 0
+        : supportPlatform === true || String(supportPlatform) === 'true';
+
     const finalized = await finalizeDonation({
       userId,
       campaign,
-      amount,
+      amount: originalTotalAmount,
+      campaignAmount: originalCampaignAmount,
+      platformSupportAmount: originalPlatformSupportAmount,
+      totalAmount: originalTotalAmount,
+      supportPlatform: resolvedSupportPlatform,
       paymentMethod: 'stripe',
       paymentId: paymentIntentId,
       isAnonymous,
       message,
+      conversion,
+      paymentMeta: {
+        stripePaymentIntentId: intent.id,
+        stripeAmount: intent.amount,
+        stripeCurrency: originalCurrency,
+        originalAmount: originalCampaignAmount,
+        originalCurrency,
+        exchangeRate: conversion.exchangeRate,
+        convertedAmountNpr: conversion.convertedAmountNpr,
+      },
     });
 
     return res.status(StatusCodes.CREATED).json({
@@ -969,6 +1236,10 @@ export const completeKhaltiPayment = async (req, res, next) => {
       pidx,
       amount,
       amountInPaisa,
+      campaignAmount,
+      platformSupportAmount,
+      totalAmount,
+      supportPlatform,
       campaignId,
       isAnonymous,
       message,
@@ -1020,12 +1291,20 @@ export const completeKhaltiPayment = async (req, res, next) => {
       userId,
       campaign,
       amount: amountInRupees,
+      campaignAmount,
+      platformSupportAmount,
+      totalAmount,
+      supportPlatform,
       paymentMethod: 'khalti',
       paymentId,
       isAnonymous,
       message,
       paymentMeta: {
         amountInPaisa: normalizedPaisa,
+        campaignAmount,
+        platformSupportAmount,
+        totalAmount: totalAmount ?? amountInRupees,
+        supportPlatform,
         khaltiPidx: pidx,
       },
     });
@@ -1055,4 +1334,325 @@ export const completeKhaltiPayment = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const buildAdminDonationFilter = (query) => {
+  const filter = {};
+  const {
+    status,
+    paymentMethod,
+    campaign,
+    campaignId,
+    donor,
+    userId,
+    organization,
+    organizationId,
+    supportPlatform,
+    from,
+    to,
+  } = query;
+
+  if (status) filter.status = status;
+  if (paymentMethod) filter.paymentMethod = paymentMethod;
+  if (campaign || campaignId) filter.campaign = campaign || campaignId;
+  if (donor || userId) filter.donor = donor || userId;
+  if (organization || organizationId) {
+    filter.organization = organization || organizationId;
+  }
+  if (supportPlatform != null) {
+    filter.supportPlatform = String(supportPlatform) === 'true';
+  }
+  if (from || to) {
+    filter.createdAt = {};
+    if (from) filter.createdAt.$gte = new Date(from);
+    if (to) filter.createdAt.$lte = new Date(to);
+  }
+
+  return filter;
+};
+
+const getPaginatedDonations = async (req, extraFilter = {}) => {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const skip = (page - 1) * limit;
+  const sort = req.query.sort
+    ? req.query.sort.split(',').join(' ')
+    : '-createdAt';
+  const filter = {
+    ...buildAdminDonationFilter(req.query),
+    ...extraFilter,
+  };
+
+  const [donations, total] = await Promise.all([
+    Donation.find(filter)
+      .populate('donor', 'name email')
+      .populate('campaign', 'title')
+      .populate('organization', 'organizationName')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit),
+    Donation.countDocuments(filter),
+  ]);
+
+  return {
+    donations,
+    total,
+    page,
+    pages: Math.ceil(total / limit) || 1,
+    limit,
+  };
+};
+
+// @desc    Admin: retrieve all donation records
+// @route   GET /api/v1/admin/donations
+// @access  Private (Admin)
+export const getAdminDonations = async (req, res) => {
+  const result = await getPaginatedDonations(req);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: result.donations.length,
+    total: result.total,
+    page: result.page,
+    pages: result.pages,
+    data: result.donations,
+  });
+};
+
+// @desc    Admin: retrieve one donation record
+// @route   GET /api/v1/admin/donations/:id
+// @access  Private (Admin)
+export const getAdminDonationById = async (req, res) => {
+  const donation = await Donation.findById(req.params.id)
+    .populate('donor', 'name email phone')
+    .populate('campaign', 'title targetAmount currentAmount')
+    .populate('organization', 'organizationName email phone');
+
+  if (!donation) {
+    throw new NotFoundError(`No donation with id ${req.params.id}`);
+  }
+
+  const platformSupportTransaction =
+    await PlatformSupportTransaction.findOne({ donation: donation._id });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: {
+      donation,
+      platformSupportTransaction,
+    },
+  });
+};
+
+// @desc    Admin: retrieve donations with platform support
+// @route   GET /api/v1/admin/platform-support-donations
+// @access  Private (Admin)
+export const getAdminPlatformSupportDonations = async (req, res) => {
+  const result = await getPaginatedDonations(req, {
+    supportPlatform: true,
+    platformSupportAmount: { $gt: 0 },
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: result.donations.length,
+    total: result.total,
+    page: result.page,
+    pages: result.pages,
+    data: result.donations,
+  });
+};
+
+// @desc    Admin: retrieve donation history for a specific user
+// @route   GET /api/v1/admin/users/:userId/donations
+// @access  Private (Admin)
+export const getAdminUserDonations = async (req, res) => {
+  const result = await getPaginatedDonations(req, {
+    donor: req.params.userId,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: result.donations.length,
+    total: result.total,
+    page: result.page,
+    pages: result.pages,
+    data: result.donations,
+  });
+};
+
+export const getPlatformFeeSummary = async (req, res) => {
+  const [summary] = await PlatformSupportTransaction.aggregate([
+    { $match: { status: 'completed' } },
+    {
+      $group: {
+        _id: null,
+        totalPlatformFeesCollected: { $sum: '$amount' },
+        totalSupportContributions: { $sum: 1 },
+        averageSupportContributionAmount: { $avg: '$amount' },
+        highestSupportContribution: { $max: '$amount' },
+      },
+    },
+  ]);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: summary || {
+      totalPlatformFeesCollected: 0,
+      totalSupportContributions: 0,
+      averageSupportContributionAmount: 0,
+      highestSupportContribution: 0,
+    },
+  });
+};
+
+export const getMonthlyPlatformFees = async (req, res) => {
+  const data = await PlatformSupportTransaction.aggregate([
+    { $match: { status: 'completed' } },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+        totalPlatformFees: { $sum: '$amount' },
+        contributions: { $sum: 1 },
+      },
+    },
+    { $sort: { '_id.year': 1, '_id.month': 1 } },
+  ]);
+
+  res.status(StatusCodes.OK).json({ success: true, data });
+};
+
+export const getYearlyPlatformFees = async (req, res) => {
+  const data = await PlatformSupportTransaction.aggregate([
+    { $match: { status: 'completed' } },
+    {
+      $group: {
+        _id: { year: { $year: '$createdAt' } },
+        totalPlatformFees: { $sum: '$amount' },
+        contributions: { $sum: 1 },
+      },
+    },
+    { $sort: { '_id.year': 1 } },
+  ]);
+
+  res.status(StatusCodes.OK).json({ success: true, data });
+};
+
+export const getPlatformFeesByCampaign = async (req, res) => {
+  const data = await PlatformSupportTransaction.aggregate([
+    { $match: { status: 'completed' } },
+    {
+      $group: {
+        _id: '$campaign',
+        totalPlatformFees: { $sum: '$amount' },
+        contributions: { $sum: 1 },
+        donors: { $addToSet: '$donor' },
+      },
+    },
+    {
+      $lookup: {
+        from: 'campaigns',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'campaign',
+      },
+    },
+    { $unwind: { path: '$campaign', preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        campaignId: '$_id',
+        campaignTitle: '$campaign.title',
+        totalPlatformFees: 1,
+        contributions: 1,
+        uniqueDonors: { $size: '$donors' },
+      },
+    },
+    { $sort: { totalPlatformFees: -1 } },
+  ]);
+
+  res.status(StatusCodes.OK).json({ success: true, data });
+};
+
+export const getAdminDonationDashboardStats = async (req, res) => {
+  const [
+    donationTotals,
+    supportSummary,
+    monthlyPlatformFees,
+    recentDonations,
+    recentPlatformSupportContributions,
+  ] = await Promise.all([
+    Donation.aggregate([
+      { $match: { status: 'completed' } },
+      {
+        $group: {
+          _id: null,
+          totalCampaignDonations: { $sum: campaignDonationNprExpression },
+          totalCampaignDonationsNpr: { $sum: campaignDonationNprExpression },
+          totalAmountProcessed: { $sum: totalDonationNprExpression },
+          totalAmountProcessedNpr: { $sum: totalDonationNprExpression },
+          donors: { $addToSet: '$donor' },
+          donationsProcessed: { $sum: 1 },
+        },
+      },
+    ]),
+    PlatformSupportTransaction.aggregate([
+      { $match: { status: 'completed' } },
+      {
+        $group: {
+          _id: null,
+          totalPlatformFeesGenerated: { $sum: '$amount' },
+          supportContributors: { $addToSet: '$donor' },
+          supportContributionCount: { $sum: 1 },
+        },
+      },
+    ]),
+    PlatformSupportTransaction.aggregate([
+      { $match: { status: 'completed' } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          totalPlatformFees: { $sum: '$amount' },
+          contributions: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]),
+    Donation.find({ status: 'completed' })
+      .populate('donor', 'name email')
+      .populate('campaign', 'title')
+      .sort('-createdAt')
+      .limit(10),
+    PlatformSupportTransaction.find({ status: 'completed' })
+      .populate('donor', 'name email')
+      .populate('campaign', 'title')
+      .sort('-createdAt')
+      .limit(10),
+  ]);
+
+  const totals = donationTotals[0] || {};
+  const support = supportSummary[0] || {};
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: {
+      totalPlatformFeesGenerated: support.totalPlatformFeesGenerated || 0,
+      totalCampaignDonations: totals.totalCampaignDonations || 0,
+      totalCampaignDonationsNpr: totals.totalCampaignDonationsNpr || 0,
+      totalAmountProcessed: totals.totalAmountProcessed || 0,
+      totalAmountProcessedNpr: totals.totalAmountProcessedNpr || 0,
+      numberOfDonors: totals.donors?.length || 0,
+      numberOfSupportContributors: support.supportContributors?.length || 0,
+      supportContributionCount: support.supportContributionCount || 0,
+      donationsProcessed: totals.donationsProcessed || 0,
+      monthlyPlatformFeeRevenue: monthlyPlatformFees,
+      recentDonations,
+      recentPlatformSupportContributions,
+    },
+  });
 };

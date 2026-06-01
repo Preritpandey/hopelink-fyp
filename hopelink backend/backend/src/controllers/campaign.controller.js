@@ -9,6 +9,21 @@ const mapMediaUrls = (items = []) =>
     .map((item) => item?.url)
     .filter(Boolean);
 
+const donationCampaignAmountNpr = (donation = {}) =>
+  donation.convertedAmountNpr ?? donation.campaignAmount ?? donation.amount ?? 0;
+
+const donationTotalAmountNpr = (donation = {}) =>
+  donation.convertedTotalAmountNpr ??
+  donation.totalAmount ??
+  donationCampaignAmountNpr(donation) +
+    (donation.convertedPlatformSupportAmountNpr ??
+      donation.platformSupportAmount ??
+      0);
+
+const campaignDonationNprExpression = {
+  $ifNull: ['$convertedAmountNpr', { $ifNull: ['$campaignAmount', '$amount'] }],
+};
+
 // Utility function to transform campaign data
 const transformCampaign = (campaign) => {
   const campaignObj = campaign.toObject ? campaign.toObject() : campaign;
@@ -584,7 +599,18 @@ export const getCampaignsWithDonationsAndEvents = async (req, res) => {
     const result = campaigns.map((campaign) => ({
       ...transformCampaign(campaign),
       donations: (donationsByCampaign[campaign._id] || []).map((donation) => ({
-        amount: donation.amount,
+        amount: donationCampaignAmountNpr(donation),
+        campaignAmount: donationCampaignAmountNpr(donation),
+        platformSupportAmount:
+          donation.convertedPlatformSupportAmountNpr ??
+          donation.platformSupportAmount ??
+          0,
+        totalAmount: donationTotalAmountNpr(donation),
+        originalAmount: donation.originalAmount,
+        originalCurrency: donation.originalCurrency,
+        exchangeRate: donation.exchangeRate,
+        convertedAmountNpr: donation.convertedAmountNpr,
+        supportPlatform: donation.supportPlatform || false,
         donor: donation.donor,
         message: donation.message,
         isAnonymous: donation.isAnonymous,
@@ -598,7 +624,7 @@ export const getCampaignsWithDonationsAndEvents = async (req, res) => {
         image: event.image,
       })),
       totalDonations: (donationsByCampaign[campaign._id] || []).reduce(
-        (sum, donation) => sum + donation.amount,
+        (sum, donation) => sum + donationCampaignAmountNpr(donation),
         0,
       ),
       donationCount: (donationsByCampaign[campaign._id] || []).length,
@@ -761,7 +787,8 @@ export const getCampaignFundStatus = async (req, res) => {
       {
         $group: {
           _id: '$campaign',
-          totalAmount: { $sum: '$amount' },
+          totalAmount: { $sum: campaignDonationNprExpression },
+          totalAmountNpr: { $sum: campaignDonationNprExpression },
           count: { $sum: 1 },
         },
       },
@@ -851,7 +878,9 @@ export const getOrganizationFundStatus = async (req, res) => {
         })
           .sort('-createdAt')
           .limit(5)
-          .select('amount donor campaignId createdAt')
+          .select(
+            'amount convertedAmountNpr originalAmount originalCurrency exchangeRate donor campaign createdAt',
+          )
           .lean(),
       },
     });

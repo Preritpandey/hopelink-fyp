@@ -7,11 +7,11 @@ import 'package:hope_link/config/constants/api_endpoints.dart';
 import 'package:hope_link/config/payment_config.dart';
 import 'package:hope_link/core/services/payment_service.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
-import 'package:hope_link/features/Donate%20Funds/models/campaign_model.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'campaign_controller.dart';
+import '../models/campaign_model.dart';
 
 enum DonationPaymentMethod { stripe, khalti }
 
@@ -25,8 +25,13 @@ class DonationController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+  final TextEditingController platformSupportAmountController =
+      TextEditingController();
 
   final RxInt selectedAmount = 0.obs;
+  final RxInt customAmount = 0.obs;
+  final RxBool supportPlatform = false.obs;
+  final RxInt selectedPlatformSupportAmount = 0.obs;
   final RxBool isAnonymous = false.obs;
   final RxBool isProcessing = false.obs;
   final Rx<DonationPaymentMethod> paymentMethod =
@@ -34,13 +39,44 @@ class DonationController extends GetxController {
 
   Campaign? campaign;
 
+  @override
+  void onInit() {
+    super.onInit();
+    amountController.addListener(() {
+      if (selectedAmount.value == 0) {
+        customAmount.value = int.tryParse(amountController.text) ?? 0;
+      }
+    });
+    platformSupportAmountController.addListener(() {
+      selectedPlatformSupportAmount.value =
+          int.tryParse(platformSupportAmountController.text) ?? 0;
+    });
+  }
+
   void setCampaign(Campaign camp) {
     campaign = camp;
   }
 
   void setAmount(int amount) {
     selectedAmount.value = amount;
+    customAmount.value = amount;
     amountController.text = amount.toString();
+  }
+
+  void setPlatformSupport(bool value) {
+    supportPlatform.value = value;
+    if (!value) {
+      selectedPlatformSupportAmount.value = 0;
+      platformSupportAmountController.clear();
+    } else if (selectedPlatformSupportAmount.value == 0) {
+      setPlatformSupportAmount(50);
+    }
+  }
+
+  void setPlatformSupportAmount(int amount) {
+    supportPlatform.value = amount > 0;
+    selectedPlatformSupportAmount.value = amount;
+    platformSupportAmountController.text = amount > 0 ? amount.toString() : '';
   }
 
   void setPaymentMethod(DonationPaymentMethod method) {
@@ -118,9 +154,21 @@ class DonationController extends GetxController {
         : int.tryParse(amountController.text) ?? 0;
   }
 
+  int _resolvePlatformSupportAmount() {
+    if (!supportPlatform.value) return 0;
+    return selectedPlatformSupportAmount.value > 0
+        ? selectedPlatformSupportAmount.value
+        : int.tryParse(platformSupportAmountController.text) ?? 0;
+  }
+
+  int get totalPayableAmount =>
+      _resolveAmount() + _resolvePlatformSupportAmount();
+
   Future<void> _processStripeDonation(int amount) async {
     try {
-      final amountInPaisa = amount * 100; // convert NPR to paisa
+      final platformSupportAmount = _resolvePlatformSupportAmount();
+      final totalAmount = amount + platformSupportAmount;
+      final amountInPaisa = totalAmount * 100; // convert NPR to paisa
       final paymentIntentId = await _paymentService.processStripePayment(
         initializePayment: () async {
           final res = await _authorizedPost(
@@ -130,6 +178,11 @@ class DonationController extends GetxController {
               'currency': 'npr',
               'type': 'donation',
               'campaignId': campaign!.id,
+              'metadata': {
+                'campaignAmount': amount.toString(),
+                'platformSupportAmount': platformSupportAmount.toString(),
+                'supportPlatform': (platformSupportAmount > 0).toString(),
+              },
             },
           );
           return Map<String, dynamic>.from(res.data['data'] as Map);
@@ -145,7 +198,12 @@ class DonationController extends GetxController {
         },
       );
 
-      await _completeStripeDonation(paymentIntentId, amount);
+      await _completeStripeDonation(
+        paymentIntentId,
+        campaignAmount: amount,
+        platformSupportAmount: platformSupportAmount,
+        totalAmount: totalAmount,
+      );
     } catch (e) {
       print('[Donation] Stripe payment error: $e');
       if (e is dio.DioException) {
@@ -196,7 +254,9 @@ class DonationController extends GetxController {
         return;
       }
 
-      final amountInPaisa = amount * 100;
+      final platformSupportAmount = _resolvePlatformSupportAmount();
+      final totalAmount = amount + platformSupportAmount;
+      final amountInPaisa = totalAmount * 100;
       await _paymentService.processKhaltiPayment(
         context: context,
         publicKey: PaymentConfig.khaltiPublicKey!,
@@ -216,7 +276,13 @@ class DonationController extends GetxController {
         },
         onPaymentSuccess: (paidPidx) async {
           try {
-            await _completeKhaltiDonation(paidPidx, amountInPaisa);
+            await _completeKhaltiDonation(
+              paidPidx,
+              amountInPaisa,
+              campaignAmount: amount,
+              platformSupportAmount: platformSupportAmount,
+              totalAmount: totalAmount,
+            );
           } on dio.DioException catch (e) {
             print(
               '[Donation] Khalti completion Dio error body: ${e.response?.data}',
@@ -274,15 +340,21 @@ class DonationController extends GetxController {
   }
 
   Future<void> _completeStripeDonation(
-    String paymentIntentId,
-    int amount,
-  ) async {
+    String paymentIntentId, {
+    required int campaignAmount,
+    required int platformSupportAmount,
+    required int totalAmount,
+  }) async {
     try {
       final completeRes = await _authorizedPost(
         ApiEndpoints.completePayment,
         data: {
           'paymentIntentId': paymentIntentId,
-          'amount': amount,
+          'amount': totalAmount,
+          'campaignAmount': campaignAmount,
+          'platformSupportAmount': platformSupportAmount,
+          'totalAmount': totalAmount,
+          'supportPlatform': platformSupportAmount > 0,
           'campaignId': campaign!.id,
           'isAnonymous': isAnonymous.value,
           'message': messageController.text,
@@ -291,7 +363,7 @@ class DonationController extends GetxController {
 
       print('[Donation] Complete payment response: ${completeRes.data}');
       await _updateCampaignCache();
-      _showSuccessDialog(amount);
+      _showSuccessDialog(totalAmount);
       _clearForm();
     } catch (e) {
       print('[Donation] Error creating donation record: $e');
@@ -299,7 +371,13 @@ class DonationController extends GetxController {
     }
   }
 
-  Future<void> _completeKhaltiDonation(String pidx, int amountInPaisa) async {
+  Future<void> _completeKhaltiDonation(
+    String pidx,
+    int amountInPaisa, {
+    required int campaignAmount,
+    required int platformSupportAmount,
+    required int totalAmount,
+  }) async {
     print(
       '[Donation] Completing Khalti donation with pidx=$pidx amountInPaisa=$amountInPaisa campaignId=${campaign?.id}',
     );
@@ -308,6 +386,10 @@ class DonationController extends GetxController {
       data: {
         'pidx': pidx,
         'amount': amountInPaisa,
+        'campaignAmount': campaignAmount,
+        'platformSupportAmount': platformSupportAmount,
+        'totalAmount': totalAmount,
+        'supportPlatform': platformSupportAmount > 0,
         'campaignId': campaign!.id,
         'isAnonymous': isAnonymous.value,
         'message': messageController.text,
@@ -317,7 +399,7 @@ class DonationController extends GetxController {
     print('[Donation] Complete Khalti payment response: ${completeRes.data}');
     _dismissActiveDialog();
     await _updateCampaignCache();
-    _showSuccessDialog(amountInPaisa ~/ 100);
+    _showSuccessDialog(totalAmount);
     _clearForm();
   }
 
@@ -615,7 +697,11 @@ class DonationController extends GetxController {
     emailController.clear();
     phoneController.clear();
     messageController.clear();
+    platformSupportAmountController.clear();
     selectedAmount.value = 0;
+    customAmount.value = 0;
+    supportPlatform.value = false;
+    selectedPlatformSupportAmount.value = 0;
     isAnonymous.value = false;
   }
 
@@ -651,6 +737,7 @@ class DonationController extends GetxController {
     emailController.dispose();
     phoneController.dispose();
     messageController.dispose();
+    platformSupportAmountController.dispose();
     super.onClose();
   }
 }

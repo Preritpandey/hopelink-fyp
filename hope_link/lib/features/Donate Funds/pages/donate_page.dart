@@ -333,6 +333,8 @@ class _DonatePageState extends State<DonatePage>
                   ),
                 ),
                 24.verticalSpace,
+                _buildPlatformSupportSection(),
+                24.verticalSpace,
                 Text(
                   'Payment Method',
                   style: AppTextStyle.bodySmall.copyWith(
@@ -352,6 +354,103 @@ class _DonatePageState extends State<DonatePage>
     );
   }
 
+  Widget _buildPlatformSupportSection() {
+    const supportAmounts = [25, 50, 100];
+
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.grey50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.grey.withOpacity(0.18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile.adaptive(
+              value: _controller.supportPlatform.value,
+              onChanged: _controller.setPlatformSupport,
+              contentPadding: EdgeInsets.zero,
+              activeColor: AppColorToken.primary.color,
+              title: Text(
+                'Support HopeLink platform',
+                style: AppTextStyle.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey900,
+                ),
+              ),
+              subtitle: Text(
+                'Optional contribution to help maintain and improve HopeLink.',
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.grey600,
+                  height: 1.35,
+                ),
+              ),
+            ),
+            if (_controller.supportPlatform.value) ...[
+              12.verticalSpace,
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: supportAmounts
+                    .map((amount) => _buildPlatformSupportChip(amount))
+                    .toList(),
+              ),
+              12.verticalSpace,
+              AppTextField(
+                controller: _controller.platformSupportAmountController,
+                borderRadius: 12,
+                hintText: 'Custom support amount (NPR)',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                prefix: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Text(
+                    'NPR',
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      color: AppColors.grey700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformSupportChip(int amount) {
+    final isSelected =
+        _controller.selectedPlatformSupportAmount.value == amount;
+
+    return GestureDetector(
+      onTap: () => _controller.setPlatformSupportAmount(amount),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColorToken.primary.color : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppColorToken.primary.color
+                : AppColors.grey.withOpacity(0.25),
+          ),
+        ),
+        child: Text(
+          _formatCurrency(amount.toDouble()),
+          style: AppTextStyle.bodySmall.copyWith(
+            color: isSelected ? AppColors.white : AppColors.grey700,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPaymentMethodSelector() {
     return Obx(
       () => Row(
@@ -361,11 +460,11 @@ class _DonatePageState extends State<DonatePage>
               title: 'Stripe',
               subtitle: 'Card / Wallet',
               icon: Icons.credit_card_rounded,
-              isSelected: _controller.paymentMethod.value ==
+              isSelected:
+                  _controller.paymentMethod.value ==
                   DonationPaymentMethod.stripe,
-              onTap: () => _controller.setPaymentMethod(
-                DonationPaymentMethod.stripe,
-              ),
+              onTap: () =>
+                  _controller.setPaymentMethod(DonationPaymentMethod.stripe),
             ),
           ),
           12.horizontalSpace,
@@ -374,11 +473,11 @@ class _DonatePageState extends State<DonatePage>
               title: 'Khalti',
               subtitle: 'Wallet',
               icon: Icons.account_balance_wallet_rounded,
-              isSelected: _controller.paymentMethod.value ==
+              isSelected:
+                  _controller.paymentMethod.value ==
                   DonationPaymentMethod.khalti,
-              onTap: () => _controller.setPaymentMethod(
-                DonationPaymentMethod.khalti,
-              ),
+              onTap: () =>
+                  _controller.setPaymentMethod(DonationPaymentMethod.khalti),
             ),
           ),
         ],
@@ -431,7 +530,9 @@ class _DonatePageState extends State<DonatePage>
               child: Icon(
                 icon,
                 size: 20,
-                color: isSelected ? AppColors.white : AppColorToken.primary.color,
+                color: isSelected
+                    ? AppColors.white
+                    : AppColorToken.primary.color,
               ),
             ),
             12.horizontalSpace,
@@ -443,8 +544,7 @@ class _DonatePageState extends State<DonatePage>
                     title,
                     style: AppTextStyle.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color:
-                          isSelected ? AppColors.grey900 : AppColors.grey700,
+                      color: isSelected ? AppColors.grey900 : AppColors.grey700,
                     ),
                   ),
                   2.verticalSpace,
@@ -465,8 +565,8 @@ class _DonatePageState extends State<DonatePage>
 
   Widget _buildPaymentInfoCard() {
     return Obx(() {
-      final isKhalti = _controller.paymentMethod.value ==
-          DonationPaymentMethod.khalti;
+      final isKhalti =
+          _controller.paymentMethod.value == DonationPaymentMethod.khalti;
       final message = isKhalti
           ? 'You will be redirected to Khalti to complete your payment'
           : 'Card details will be collected on the next screen';
@@ -563,27 +663,41 @@ class _DonatePageState extends State<DonatePage>
             Obx(() {
               final amount = _controller.selectedAmount.value > 0
                   ? _controller.selectedAmount.value
-                  : int.tryParse(_controller.amountController.text) ?? 0;
+                  : _controller.customAmount.value;
+              final supportAmount = _controller.supportPlatform.value
+                  ? _controller.selectedPlatformSupportAmount.value
+                  : 0;
+              final totalAmount = amount + supportAmount;
 
               if (amount > 0) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Text(
-                        'Amount to Pay',
-                        style: AppTextStyle.bodyLarge.copyWith(
-                          color: AppColors.grey700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        _formatCurrency(amount.toDouble()),
-                        style: AppTextStyle.h5.copyWith(
-                          color: AppColorToken.primary.color,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _buildPayableRow('Campaign Donation', amount),
+                      if (supportAmount > 0) ...[
+                        6.verticalSpace,
+                        _buildPayableRow('HopeLink Support', supportAmount),
+                      ],
+                      10.verticalSpace,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Amount to Pay',
+                            style: AppTextStyle.bodyLarge.copyWith(
+                              color: AppColors.grey700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            _formatCurrency(totalAmount.toDouble()),
+                            style: AppTextStyle.h5.copyWith(
+                              color: AppColorToken.primary.color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -603,9 +717,7 @@ class _DonatePageState extends State<DonatePage>
                         // Check if amount is selected either from quick buttons or custom input
                         final hasAmount =
                             _controller.selectedAmount.value > 0 ||
-                            (int.tryParse(_controller.amountController.text) ??
-                                    0) >
-                                0;
+                            _controller.customAmount.value > 0;
 
                         if (!hasAmount) {
                           Get.snackbar(
@@ -632,6 +744,26 @@ class _DonatePageState extends State<DonatePage>
       ),
     );
   }
+
+  Widget _buildPayableRow(String label, int amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColors.grey600,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          _formatCurrency(amount.toDouble()),
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColors.grey700,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
 }
-
-

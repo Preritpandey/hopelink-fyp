@@ -50,6 +50,73 @@ export const getStripePaymentId = (intent) => {
   return intent?.latest_charge || intent?.id || '';
 };
 
+const STRIPE_ZERO_DECIMAL_CURRENCIES = new Set([
+  'bif',
+  'clp',
+  'djf',
+  'gnf',
+  'jpy',
+  'kmf',
+  'krw',
+  'mga',
+  'pyg',
+  'rwf',
+  'ugx',
+  'vnd',
+  'vuv',
+  'xaf',
+  'xof',
+  'xpf',
+]);
+
+export const getStripeCurrencyMinorUnit = (currency = '') => {
+  const normalized = String(currency || '').toLowerCase();
+  return STRIPE_ZERO_DECIMAL_CURRENCIES.has(normalized) ? 1 : 100;
+};
+
+export const stripeAmountToMajorUnit = ({ amount, currency }) => {
+  const parsed = Number(amount);
+  if (!Number.isFinite(parsed)) {
+    throw new Error('Stripe amount must be a valid number');
+  }
+
+  return parsed / getStripeCurrencyMinorUnit(currency);
+};
+
+export const convertToNPR = async (amount, currency = 'NPR') => {
+  const parsedAmount = Number(amount);
+  if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
+    throw new Error('Amount must be a valid non-negative number');
+  }
+
+  const sourceCurrency = String(currency || 'NPR').trim().toUpperCase();
+  if (sourceCurrency === 'NPR') {
+    return {
+      originalAmount: parsedAmount,
+      originalCurrency: sourceCurrency,
+      exchangeRate: 1,
+      convertedAmountNpr: Number(parsedAmount.toFixed(2)),
+    };
+  }
+
+  const response = await axios.get(
+    `https://api.exchangerate-api.com/v4/latest/${sourceCurrency}`,
+    { timeout: 10000 },
+  );
+  const rate = Number(response.data?.rates?.NPR);
+
+  if (!Number.isFinite(rate) || rate <= 0) {
+    throw new Error(`NPR exchange rate not available for ${sourceCurrency}`);
+  }
+
+  return {
+    originalAmount: parsedAmount,
+    originalCurrency: sourceCurrency,
+    exchangeRate: rate,
+    convertedAmountNpr: Number((parsedAmount * rate).toFixed(2)),
+  };
+};
+
 export const verifyKhaltiPayment = async ({ token, amount }) => {
   if (!KHALTI_SECRET_KEY) {
     throw new Error('Khalti is not configured on the server');

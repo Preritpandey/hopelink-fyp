@@ -23,7 +23,7 @@ const router = express.Router();
 // Protected routes (require authentication)
 router.use(authenticate);
 
-router.get('/', asyncHandler(getDonations));
+router.get('/', authorize('admin'), asyncHandler(getDonations));
 
 // Complete Stripe payment - Called after Stripe payment succeeds
 router.post('/complete-payment', asyncHandler(completeStripePayment));

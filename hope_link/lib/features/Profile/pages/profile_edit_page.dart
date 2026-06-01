@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hope_link/features/Profile/pages/profile_page.dart';
+import 'package:hope_link/features/Profile/pages/profile_view_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
@@ -88,7 +90,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     return Scaffold(
       backgroundColor: AppColors.grey50,
       appBar: AppBar(
-      
         backgroundColor: AppColorToken.primary.color,
         elevation: 0,
         leading: IconButton(
@@ -105,7 +106,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         actions: [
           Obx(
             () => TextButton(
-              onPressed: controller.isLoading.value ? null : _saveProfile,
+              onPressed: controller.isLoading.value
+                  ? null
+                  : () async {
+                      await _saveProfile();
+                      Get.to(const ProfileViewPage(token: ''));
+                    },
               child: Text(
                 'Save',
                 style: AppTextStyle.bodyMedium.copyWith(
@@ -203,7 +209,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                             decoration: BoxDecoration(
                               color: AppColorToken.primary.color,
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.white, width: 3),
+                              border: Border.all(
+                                color: AppColors.white,
+                                width: 3,
+                              ),
                             ),
                             child: const Icon(
                               Icons.camera_alt_rounded,
@@ -461,7 +470,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       Text(
                         interest,
                         style: AppTextStyle.bodySmall.copyWith(
-                          color: isSelected ? AppColors.white : AppColors.grey700,
+                          color: isSelected
+                              ? AppColors.white
+                              : AppColors.grey700,
                           fontWeight: isSelected
                               ? FontWeight.w600
                               : FontWeight.normal,
@@ -783,5 +794,3 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     Get.back();
   }
 }
-
-

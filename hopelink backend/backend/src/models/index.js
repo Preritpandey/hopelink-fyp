@@ -6,6 +6,7 @@ import Organization from './organization.model.js';
 import Campaign from './campaign.model.js';
 import Category from './category.model.js';
 import Donation from './donation.model.js';
+import PlatformSupportTransaction from './platformSupportTransaction.model.js';
 import Event from './event.model.js';
 import CampaignReport from './campaignReport.model.js';
 import EssentialRequest from './essentialRequest.model.js';
@@ -34,6 +35,8 @@ const models = {
   Campaign: mongoose.models.Campaign || Campaign,
   Category: mongoose.models.Category || Category,
   Donation: mongoose.models.Donation || Donation,
+  PlatformSupportTransaction:
+    mongoose.models.PlatformSupportTransaction || PlatformSupportTransaction,
   Event: mongoose.models.Event || Event,
   CampaignReport: mongoose.models.CampaignReport || CampaignReport,
   EssentialRequest: mongoose.models.EssentialRequest || EssentialRequest,
@@ -64,6 +67,7 @@ export {
   Campaign,
   Category,
   Donation,
+  PlatformSupportTransaction,
   Event,
   CampaignReport,
   EssentialRequest,
