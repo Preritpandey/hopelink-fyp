@@ -6,7 +6,8 @@ class ApiEndpoints {
   // 'http://10.0.2.2:3008/api/v1'; // Android emulator
   // static const String baseUrl = 'http://192.168.1.105:3008/api/v1';
 
-  static const String baseUrl = 'http://192.168.1.66:3008/api/v1'; // college
+  static const String baseUrl =
+      'https://hopelink-fyp.onrender.com/api/v1'; // college
   //   static const String baseUrl = 'http://localhost:3008/api/v1'; // college
 
   // Authentication

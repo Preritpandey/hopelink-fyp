@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserRegistrationController extends GetxController {
   static UserRegistrationController get to => Get.find();
   final bool permanent = true; // Add this line to make the instance permanent
-  final String baseUrl = 'http://localhost:3008/api/v1';
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString token = ''.obs;

@@ -15,7 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrgEventsController extends GetxController {
-  static const _base = 'http://localhost:3008/api/v1';
+  static const _base = 'https://hopelink-fyp.onrender.com/api/v1';
   static const _tokenKey = 'auth_token';
   static const _orgIdKey = 'org_id';
 

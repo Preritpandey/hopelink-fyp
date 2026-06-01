@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/event_model.dart';
 
 class EventController extends GetxController {
-  static const _base = 'http://localhost:3008/api/v1';
+  static const _base = 'https://hopelink-fyp.onrender.com/api/v1';
 
   // ── Auth ────────────────────────────────────────────────────
   String _token = '';

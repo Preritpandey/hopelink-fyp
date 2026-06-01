@@ -204,7 +204,7 @@ class OrganizationController extends GetxController {
 
     try {
       final uri = Uri.parse(
-        'http://localhost:3008/api/v1/organizations/register',
+        'https://hopelink-fyp.onrender.com/api/v1/organizations/register',
       );
       final request = http.MultipartRequest('POST', uri);
 

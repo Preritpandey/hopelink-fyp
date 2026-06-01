@@ -32,7 +32,7 @@ class LoginController extends GetxController {
   bool _skipSavedEmail = false;
   bool _preparedForAddAccount = false;
 
-  static const _baseUrl = 'http://localhost:3008/api/v1';
+  static const _baseUrl = 'https://hopelink-fyp.onrender.com/api/v1';
   static const _tokenKey = 'auth_token';
   static const _emailKey = 'saved_email';
   static const _orgIdKey = 'org_id';

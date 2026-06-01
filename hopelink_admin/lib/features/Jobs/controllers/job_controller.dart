@@ -13,55 +13,54 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/job_model.dart';
 
-
 // ── View mode for the jobs panel ─────────────────────────────
 enum JobPanelView { list, create, applications }
 
 class JobController extends GetxController {
-  static const _base     = 'http://localhost:3008/api/v1';
+  static const _base = 'https://hopelink-fyp.onrender.com/api/v1';
   static const _tokenKey = 'auth_token';
 
   // ── Auth ────────────────────────────────────────────────────
   String _token = '';
 
   // ── Panel navigation ────────────────────────────────────────
-  final panelView     = JobPanelView.list.obs;
-  final selectedJob   = Rxn<VolunteerJob>();
+  final panelView = JobPanelView.list.obs;
+  final selectedJob = Rxn<VolunteerJob>();
 
   // ── Jobs state ───────────────────────────────────────────────
-  final jobs           = <VolunteerJob>[].obs;
-  final isLoadingJobs  = false.obs;
-  final jobsError      = ''.obs;
+  final jobs = <VolunteerJob>[].obs;
+  final isLoadingJobs = false.obs;
+  final jobsError = ''.obs;
   final jobSearchQuery = ''.obs;
-  final jobFilter      = 'all'.obs; // 'all','open','closed','paused'
+  final jobFilter = 'all'.obs; // 'all','open','closed','paused'
 
   // ── Applications state ───────────────────────────────────────
-  final applications         = <JobApplication>[].obs;
+  final applications = <JobApplication>[].obs;
   final isLoadingApplications = false.obs;
-  final appsError            = ''.obs;
-  final selectedApplication  = Rxn<JobApplication>();
-  final appActionLoading     = ''.obs; // applicationId being actioned
+  final appsError = ''.obs;
+  final selectedApplication = Rxn<JobApplication>();
+  final appActionLoading = ''.obs; // applicationId being actioned
 
   // ── Create job form state ────────────────────────────────────
-  final createFormKey          = GlobalKey<FormState>();
-  final titleCtrl              = TextEditingController();
-  final descCtrl               = TextEditingController();
-  final selectedCategory       = 'Technology'.obs;
-  final addressCtrl            = TextEditingController();
-  final cityCtrl               = TextEditingController();
-  final stateCtrl              = TextEditingController(text: 'Bagmati');
-  final latCtrl                = TextEditingController();
-  final lngCtrl                = TextEditingController();
-  final positionsCtrl          = TextEditingController(text: '1');
-  final deadlineCtrl           = TextEditingController();
-  final selectedJobType        = JobType.onsite.obs;
-  final certificateProvided    = false.obs;
-  final creditHoursCtrl        = TextEditingController(text: '10');
-  final skillInputCtrl         = TextEditingController();
-  final selectedSkills         = <String>[].obs;
-  final isCreatingJob          = false.obs;
-  final createError            = ''.obs;
-  final createSuccess          = ''.obs;
+  final createFormKey = GlobalKey<FormState>();
+  final titleCtrl = TextEditingController();
+  final descCtrl = TextEditingController();
+  final selectedCategory = 'Technology'.obs;
+  final addressCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  final stateCtrl = TextEditingController(text: 'Bagmati');
+  final latCtrl = TextEditingController();
+  final lngCtrl = TextEditingController();
+  final positionsCtrl = TextEditingController(text: '1');
+  final deadlineCtrl = TextEditingController();
+  final selectedJobType = JobType.onsite.obs;
+  final certificateProvided = false.obs;
+  final creditHoursCtrl = TextEditingController(text: '10');
+  final skillInputCtrl = TextEditingController();
+  final selectedSkills = <String>[].obs;
+  final isCreatingJob = false.obs;
+  final createError = ''.obs;
+  final createSuccess = ''.obs;
   DateTime? _deadlineDate;
 
   // ── Search controller ────────────────────────────────────────
@@ -82,9 +81,9 @@ class JobController extends GetxController {
   }
 
   Map<String, String> get _authHeaders => {
-        'Authorization': 'Bearer $_token',
-        'Content-Type':  'application/json',
-      };
+    'Authorization': 'Bearer $_token',
+    'Content-Type': 'application/json',
+  };
 
   // ─────────────────────────────────────────────────────────────
   //  JOBS
@@ -94,16 +93,14 @@ class JobController extends GetxController {
     jobsError.value = '';
     try {
       final res = await http
-          .get(Uri.parse('$_base/volunteer-jobs/org/my'),
-              headers: _authHeaders)
+          .get(Uri.parse('$_base/volunteer-jobs/org/my'), headers: _authHeaders)
           .timeout(const Duration(seconds: 15));
       final json = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && json['success'] == true) {
         final resp = VolunteerJobsResponse.fromJson(json);
         jobs.assignAll(resp.data);
       } else {
-        jobsError.value =
-            json['message'] as String? ?? 'Failed to load jobs.';
+        jobsError.value = json['message'] as String? ?? 'Failed to load jobs.';
       }
     } on SocketException {
       jobsError.value = 'No internet connection.';
@@ -120,10 +117,14 @@ class JobController extends GetxController {
     }
     final q = jobSearchQuery.value.trim().toLowerCase();
     if (q.isNotEmpty) {
-      list = list.where((j) =>
-          j.title.toLowerCase().contains(q) ||
-          j.category.toLowerCase().contains(q) ||
-          j.location.city.toLowerCase().contains(q)).toList();
+      list = list
+          .where(
+            (j) =>
+                j.title.toLowerCase().contains(q) ||
+                j.category.toLowerCase().contains(q) ||
+                j.location.city.toLowerCase().contains(q),
+          )
+          .toList();
     }
     return list;
   }
@@ -140,29 +141,31 @@ class JobController extends GetxController {
       return;
     }
     isCreatingJob.value = true;
-    createError.value   = '';
+    createError.value = '';
     createSuccess.value = '';
     try {
       final body = CreateJobRequest(
-        title:               titleCtrl.text.trim(),
-        description:         descCtrl.text.trim(),
-        category:            selectedCategory.value,
-        requiredSkills:      selectedSkills.join(','),
-        address:             addressCtrl.text.trim(),
-        city:                cityCtrl.text.trim(),
-        state:               stateCtrl.text.trim(),
-        coordinates:         '${latCtrl.text.trim()},${lngCtrl.text.trim()}',
-        positionsAvailable:  int.tryParse(positionsCtrl.text) ?? 1,
+        title: titleCtrl.text.trim(),
+        description: descCtrl.text.trim(),
+        category: selectedCategory.value,
+        requiredSkills: selectedSkills.join(','),
+        address: addressCtrl.text.trim(),
+        city: cityCtrl.text.trim(),
+        state: stateCtrl.text.trim(),
+        coordinates: '${latCtrl.text.trim()},${lngCtrl.text.trim()}',
+        positionsAvailable: int.tryParse(positionsCtrl.text) ?? 1,
         applicationDeadline: _deadlineDate!.toIso8601String(),
-        jobType:             selectedJobType.value.value,
+        jobType: selectedJobType.value.value,
         certificateProvided: certificateProvided.value,
-        creditHours:         int.tryParse(creditHoursCtrl.text) ?? 0,
+        creditHours: int.tryParse(creditHoursCtrl.text) ?? 0,
       );
 
       final res = await http
-          .post(Uri.parse('$_base/volunteer-jobs'),
-              headers: _authHeaders,
-              body: jsonEncode(body.toJson()))
+          .post(
+            Uri.parse('$_base/volunteer-jobs'),
+            headers: _authHeaders,
+            body: jsonEncode(body.toJson()),
+          )
           .timeout(const Duration(seconds: 15));
 
       final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -170,14 +173,14 @@ class JobController extends GetxController {
           json['success'] == true) {
         createSuccess.value = 'Job posted successfully!';
         final newJob = VolunteerJob.fromJson(
-            json['data'] as Map<String, dynamic>);
+          json['data'] as Map<String, dynamic>,
+        );
         jobs.insert(0, newJob);
         await Future.delayed(const Duration(seconds: 1));
         _resetCreateForm();
         panelView.value = JobPanelView.list;
       } else {
-        createError.value =
-            json['message'] as String? ?? 'Failed to post job.';
+        createError.value = json['message'] as String? ?? 'Failed to post job.';
       }
     } on SocketException {
       createError.value = 'No internet connection.';
@@ -191,15 +194,16 @@ class JobController extends GetxController {
   Future<void> pickDeadline(BuildContext ctx) async {
     final picked = await showDatePicker(
       context: ctx,
-      initialDate: _deadlineDate ?? DateTime.now().add(const Duration(days: 14)),
+      initialDate:
+          _deadlineDate ?? DateTime.now().add(const Duration(days: 14)),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
       builder: (c, child) => Theme(
         data: Theme.of(c).copyWith(
           colorScheme: const ColorScheme.dark(
-            primary:   Color(0xFF34D399),
+            primary: Color(0xFF34D399),
             onPrimary: Colors.black,
-            surface:   Color(0xFF0D1A2A),
+            surface: Color(0xFF0D1A2A),
             onSurface: Colors.white,
           ),
         ),
@@ -232,8 +236,10 @@ class JobController extends GetxController {
     selectedApplication.value = null;
     try {
       final res = await http
-          .get(Uri.parse('$_base/volunteer-applications/job/$jobId'),
-              headers: _authHeaders)
+          .get(
+            Uri.parse('$_base/volunteer-applications/job/$jobId'),
+            headers: _authHeaders,
+          )
           .timeout(const Duration(seconds: 15));
       final json = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && json['success'] == true) {
@@ -255,9 +261,9 @@ class JobController extends GetxController {
     try {
       final res = await http
           .patch(
-              Uri.parse(
-                  '$_base/volunteer-applications/$applicationId/approve'),
-              headers: _authHeaders)
+            Uri.parse('$_base/volunteer-applications/$applicationId/approve'),
+            headers: _authHeaders,
+          )
           .timeout(const Duration(seconds: 15));
       if (res.statusCode == 200) {
         _updateApplicationStatus(applicationId, ApplicationStatus.approved);
@@ -284,12 +290,10 @@ class JobController extends GetxController {
       }
       final res = await http
           .patch(
-              Uri.parse(
-                  '$_base/volunteer-applications/$applicationId/reject'),
-              headers: _authHeaders,
-              body: jsonEncode({
-                'reason': trimmed,
-              }))
+            Uri.parse('$_base/volunteer-applications/$applicationId/reject'),
+            headers: _authHeaders,
+            body: jsonEncode({'reason': trimmed}),
+          )
           .timeout(const Duration(seconds: 15));
       if (res.statusCode == 200) {
         _updateApplicationStatus(applicationId, ApplicationStatus.rejected);
@@ -333,7 +337,7 @@ class JobController extends GetxController {
   // ── Navigation ────────────────────────────────────────────────
   void openJobApplications(VolunteerJob job) {
     selectedJob.value = job;
-    panelView.value   = JobPanelView.applications;
+    panelView.value = JobPanelView.applications;
     fetchApplications(job.id);
   }
 
@@ -343,19 +347,19 @@ class JobController extends GetxController {
   }
 
   void backToList() {
-    panelView.value       = JobPanelView.list;
-    selectedJob.value     = null;
+    panelView.value = JobPanelView.list;
+    selectedJob.value = null;
     selectedApplication.value = null;
   }
 
   // ── Stats ─────────────────────────────────────────────────────
-  int get openJobsCount   => jobs.where((j) => j.status == JobStatus.open).length;
-  int get totalPositions  => jobs.fold(0, (s, j) => s + j.positionsAvailable);
+  int get openJobsCount => jobs.where((j) => j.status == JobStatus.open).length;
+  int get totalPositions => jobs.fold(0, (s, j) => s + j.positionsAvailable);
   int get filledPositions => jobs.fold(0, (s, j) => s + j.positionsFilled);
 
-  int get pendingCount    =>
+  int get pendingCount =>
       applications.where((a) => a.status == ApplicationStatus.pending).length;
-  int get approvedCount   =>
+  int get approvedCount =>
       applications.where((a) => a.status == ApplicationStatus.approved).length;
 
   // ── Helpers ───────────────────────────────────────────────────
@@ -365,17 +369,18 @@ class JobController extends GetxController {
 
   void _showSnack(String msg, {bool isError = true}) {
     if (Get.context == null) return;
-    ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError
-          ? const Color(0xFFEF4444)
-          : const Color(0xFF10B981),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
-    ));
+    ScaffoldMessenger.of(Get.context!).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError
+            ? const Color(0xFFEF4444)
+            : const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   void _resetCreateForm() {
@@ -392,20 +397,31 @@ class JobController extends GetxController {
     skillInputCtrl.clear();
     selectedSkills.clear();
     selectedCategory.value = 'Technology';
-    selectedJobType.value  = JobType.onsite;
+    selectedJobType.value = JobType.onsite;
     certificateProvided.value = false;
     _deadlineDate = null;
-    createError.value   = '';
+    createError.value = '';
     createSuccess.value = '';
   }
 
   @override
   void onClose() {
     for (final c in [
-      titleCtrl, descCtrl, addressCtrl, cityCtrl, stateCtrl,
-      latCtrl, lngCtrl, positionsCtrl, deadlineCtrl,
-      creditHoursCtrl, skillInputCtrl, searchCtrl,
-    ]) { c.dispose(); }
+      titleCtrl,
+      descCtrl,
+      addressCtrl,
+      cityCtrl,
+      stateCtrl,
+      latCtrl,
+      lngCtrl,
+      positionsCtrl,
+      deadlineCtrl,
+      creditHoursCtrl,
+      skillInputCtrl,
+      searchCtrl,
+    ]) {
+      c.dispose();
+    }
     super.onClose();
   }
 }

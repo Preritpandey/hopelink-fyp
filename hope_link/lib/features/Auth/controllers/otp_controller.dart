@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpController extends GetxController {
-  final String baseUrl = 'http://localhost:3008/api/v1';
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString successMessage = ''.obs;

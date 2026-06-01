@@ -201,21 +201,17 @@ eventSchema.virtual('isCompleted').get(function () {
   return this.status === 'completed' || now > endTime;
 });
 
-// Pre-save hook to update status based on dates
+// Pre-save hook to close events after they end without overriding manual publishing.
 eventSchema.pre('save', function(next) {
   const now = new Date();
   const endTime = this.endDate || new Date(this.startDate.getTime() + (4 * 60 * 60 * 1000));
-  
-  if (this.status !== 'cancelled' && this.status !== 'completed') {
+
+  if (this.status === 'published' || this.status === 'ongoing') {
     if (now > endTime) {
       this.status = 'completed';
-    } else if (now >= this.startDate && now <= endTime) {
-      this.status = 'ongoing';
-    } else if (this.status === 'draft' && this.isPublished) {
-      this.status = 'published';
     }
   }
-  
+
   next();
 });
 

@@ -284,7 +284,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_rounded, size: 16, color: AppColors.white),
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 16,
+                    color: AppColors.white,
+                  ),
                   4.horizontalSpace,
                   Text(
                     'Featured',
@@ -399,7 +403,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColorToken.primary.color.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: AppColorToken.primary.color.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         children: [
@@ -710,8 +716,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor:
-                        AppColorToken.primary.color.withValues(alpha: 0.1),
+                    backgroundColor: AppColorToken.primary.color.withValues(
+                      alpha: 0.1,
+                    ),
                     child: Text(
                       _event.organizer.organizationName.isNotEmpty
                           ? _event.organizer.organizationName[0].toUpperCase()
@@ -776,8 +783,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           final alreadyEnrolled = _controller.isEnrolled(_event.id);
           final isFull = _event.spotsLeft <= 0;
           final isBusy = _controller.isEnrolling.value;
+          final isOpenForEnrollment = _event.status == 'published';
 
-          final canEnroll = !alreadyEnrolled && !isFull && !isBusy;
+          final canEnroll =
+              isOpenForEnrollment && !alreadyEnrolled && !isFull && !isBusy;
 
           String buttonLabel = 'Enroll Now';
           if (status == 'pending') {
@@ -786,6 +795,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             buttonLabel = 'Approved';
           } else if (status == 'rejected') {
             buttonLabel = 'Rejected';
+          } else if (!isOpenForEnrollment) {
+            buttonLabel = 'Enrollment Closed';
+          } else if (isFull) {
+            buttonLabel = 'Event Full';
           }
 
           return ElevatedButton(
@@ -833,5 +846,3 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     await _controller.enrollInEvent(_event.id);
   }
 }
-
-

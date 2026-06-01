@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/config/hive_config.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/features/Auth/pages/otp_verification_page.dart';
 import 'package:hope_link/features/Auth/pages/user_registration_page.dart';
 import 'package:hope_link/features/Auth/pages/login_page.dart';
@@ -30,6 +32,19 @@ import 'features/Donate Funds/pages/volunteer_job_details_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: SystemUiOverlay.values,
+  );
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: AppColors.background,
+      systemNavigationBarColor: AppColors.background,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   // Initialize Hive
   await HiveConfig.initialize();

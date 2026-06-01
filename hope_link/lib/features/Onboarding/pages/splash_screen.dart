@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -82,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: AppColors.transparent,
+        statusBarColor: AppColors.background,
         systemNavigationBarColor: AppColors.background,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
@@ -96,7 +95,11 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.background, AppColors.background, AppColors.background],
+            colors: [
+              AppColors.background,
+              AppColors.background,
+              AppColors.background,
+            ],
           ),
         ),
         child: Stack(
@@ -209,6 +212,3 @@ class _SoftCircle extends StatelessWidget {
     );
   }
 }
-
-
-
