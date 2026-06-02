@@ -94,6 +94,33 @@ const totalDonationNprExpression = {
 
 const roundNpr = (value) => Number(Number(value || 0).toFixed(2));
 
+const donationCampaignAmountNpr = (donation = {}) =>
+  donation.convertedAmountNpr ?? donation.campaignAmount ?? donation.amount ?? 0;
+
+const donationPlatformSupportAmountNpr = (donation = {}) =>
+  donation.convertedPlatformSupportAmountNpr ?? donation.platformSupportAmount ?? 0;
+
+const donationTotalAmountNpr = (donation = {}) =>
+  donation.convertedTotalAmountNpr ??
+  donation.totalAmount ??
+  donationCampaignAmountNpr(donation) + donationPlatformSupportAmountNpr(donation);
+
+const withDonationNprAmounts = (donation) => {
+  if (!donation) return donation;
+  const obj = donation.toObject ? donation.toObject() : { ...donation };
+  const amountNpr = donationCampaignAmountNpr(obj);
+  const platformSupportAmountNpr = donationPlatformSupportAmountNpr(obj);
+  const totalAmountNpr = donationTotalAmountNpr(obj);
+
+  return {
+    ...obj,
+    amountNpr,
+    campaignAmountNpr: amountNpr,
+    platformSupportAmountNpr,
+    totalAmountNpr,
+  };
+};
+
 const buildNprConversionSnapshot = ({
   campaignAmount,
   platformSupportAmount = 0,
@@ -141,6 +168,7 @@ export const createDonation = async (req, res) => {
     paymentId,
     isAnonymous,
     message,
+    currency = 'NPR',
   } = req.body;
   
   console.log('Extracted campaignId:', campaignId); // Debug log
@@ -170,11 +198,20 @@ export const createDonation = async (req, res) => {
     totalAmount,
     supportPlatform,
   });
+  
+  // Convert to NPR if currency is not NPR
+  let exchangeRate = 1;
+  if (String(currency).toUpperCase() !== 'NPR') {
+    const rateData = await convertToNPR(1, currency);
+    exchangeRate = rateData.exchangeRate;
+  }
+  
   const conversion = buildNprConversionSnapshot({
     campaignAmount: amounts.campaignAmount,
     platformSupportAmount: amounts.platformSupportAmount,
     totalAmount: amounts.totalAmount,
-    currency: 'NPR',
+    currency: currency,
+    exchangeRate: exchangeRate,
   });
 
   // Create donation
@@ -198,10 +235,17 @@ export const createDonation = async (req, res) => {
     message: message || '',
   });
 
-  // Update campaign's current amount
-  campaign.currentAmount += amounts.campaignAmount;
+  // Update campaign and organization totals in NPR.
+  campaign.currentAmount += conversion.convertedAmountNpr;
   campaign.donationsCount += 1;
   await campaign.save();
+
+  await Organization.findByIdAndUpdate(campaign.organization, {
+    $inc: {
+      totalDonationsReceived: conversion.convertedAmountNpr,
+      totalDonationCount: 1,
+    },
+  });
 
   await logUserActivity({
     user: userId,
@@ -210,9 +254,9 @@ export const createDonation = async (req, res) => {
     resourceId: donation._id,
     metadata: {
       amount,
-      campaignAmount: amounts.campaignAmount,
-      platformSupportAmount: amounts.platformSupportAmount,
-      totalAmount: amounts.totalAmount,
+      campaignAmount: conversion.convertedAmountNpr,
+      platformSupportAmount: conversion.convertedPlatformSupportAmountNpr,
+      totalAmount: conversion.convertedTotalAmountNpr,
       supportPlatform: amounts.supportPlatform,
       campaignId: campaign._id,
       campaignTitle: campaign.title,
@@ -231,9 +275,9 @@ export const createDonation = async (req, res) => {
     await sendDonationReceipt({
       to: user.email,
       userName: user.name,
-      amount: amounts.campaignAmount,
-      platformSupportAmount: amounts.platformSupportAmount,
-      totalAmount: amounts.totalAmount,
+      amount: conversion.convertedAmountNpr,
+      platformSupportAmount: conversion.convertedPlatformSupportAmountNpr,
+      totalAmount: conversion.convertedTotalAmountNpr,
       campaignTitle: campaign.title,
       organizationName: organization
         ? organization.organizationName
@@ -249,7 +293,7 @@ export const createDonation = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
-    data: donation,
+    data: withDonationNprAmounts(donation),
   });
 };
 
@@ -409,7 +453,7 @@ export const getDonations = async (req, res) => {
   query = query.skip(startIndex).limit(limit);
 
   // Executing query
-  const donations = await query;
+  const donations = (await query).map(withDonationNprAmounts);
 
   // Pagination result
   const pagination = {};
@@ -465,7 +509,7 @@ export const getDonation = async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    data: donation,
+    data: withDonationNprAmounts(donation),
   });
 };
 
@@ -487,9 +531,9 @@ export const getDonationsForCampaign = async (req, res) => {
     throw new UnauthorizedError('Not authorized to view these donations');
   }
 
-  const donations = await Donation.find({ campaign: req.params.campaignId })
+  const donations = (await Donation.find({ campaign: req.params.campaignId })
     .populate('donor', 'name email')
-    .sort('-createdAt');
+    .sort('-createdAt')).map(withDonationNprAmounts);
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -514,10 +558,10 @@ export const getUserDonations = async (req, res) => {
     throw new UnauthorizedError('Not authorized to view these donations');
   }
 
-  const donations = await Donation.find({ donor: userId })
+  const donations = (await Donation.find({ donor: userId })
     .populate('campaign', 'title image')
     .populate('organization', 'organizationName')
-    .sort('-createdAt');
+    .sort('-createdAt')).map(withDonationNprAmounts);
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -575,7 +619,7 @@ export const updateDonationStatus = async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    data: donation,
+    data: withDonationNprAmounts(donation),
   });
 };
 

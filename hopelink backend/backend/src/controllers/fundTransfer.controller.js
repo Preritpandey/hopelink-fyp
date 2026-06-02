@@ -499,13 +499,13 @@ export const getOrgFundTransferSummary = async (req, res, next) => {
       },
     ]);
 
-    // Also get total donations collected
+    // Also get total donations collected (in NPR)
     const [donations] = await Donation.aggregate([
       { $match: { organization: new mongoose.Types.ObjectId(organizationId), status: 'completed' } },
       {
         $group: {
           _id: null,
-          totalDonations: { $sum: { $ifNull: ['$campaignAmount', '$amount'] } },
+          totalDonations: { $sum: { $ifNull: ['$convertedAmountNpr', { $ifNull: ['$campaignAmount', '$amount'] }] } },
         },
       },
     ]);
