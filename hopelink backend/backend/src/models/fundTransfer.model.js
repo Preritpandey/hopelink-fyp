@@ -136,8 +136,8 @@ fundTransferSchema.index({ organization: 1, status: 1 });
 fundTransferSchema.index({ initiatedAt: -1 });
 fundTransferSchema.index({ status: 1, initiatedAt: -1 });
 
-// Pre-save hook to generate transferId if not exists
-fundTransferSchema.pre('save', async function (next) {
+// Generate transferId before required-field validation runs.
+fundTransferSchema.pre('validate', async function (next) {
   if (!this.transferId) {
     const count = await mongoose.model('FundTransfer').countDocuments();
     const timestamp = Date.now().toString().slice(-6);
