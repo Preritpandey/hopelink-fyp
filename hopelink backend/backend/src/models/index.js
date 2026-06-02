@@ -19,6 +19,7 @@ import UserActivity from './userActivity.model.js';
 import PostLike from './postLike.model.js';
 import PostComment from './postComment.model.js';
 import SavedCause from './savedCause.model.js';
+import FundTransfer from './fundTransfer.model.js';
 
 // E-commerce Models
 import Product from './ecommerce/product.model.js';
@@ -52,6 +53,7 @@ const models = {
   PostLike: mongoose.models.PostLike || PostLike,
   PostComment: mongoose.models.PostComment || PostComment,
   SavedCause: mongoose.models.SavedCause || SavedCause,
+  FundTransfer: mongoose.models.FundTransfer || FundTransfer,
   Product: mongoose.models.Product || Product,
   ProductVariant: mongoose.models.ProductVariant || ProductVariant,
   Cart: mongoose.models.Cart || Cart,
@@ -80,6 +82,7 @@ export {
   PostLike,
   PostComment,
   SavedCause,
+  FundTransfer,
   Product,
   ProductVariant,
   Cart,

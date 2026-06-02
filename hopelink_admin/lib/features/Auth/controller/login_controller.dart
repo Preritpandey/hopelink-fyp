@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/api_endpoints.dart';
 import '../models/login_model.dart';
 import '../services/account_switcher_service.dart';
 import '../../Admin/Home/pages/admin_home_page.dart';
@@ -32,7 +33,6 @@ class LoginController extends GetxController {
   bool _skipSavedEmail = false;
   bool _preparedForAddAccount = false;
 
-  static const _baseUrl = 'https://hopelink-fyp.onrender.com/api/v1';
   static const _tokenKey = 'auth_token';
   static const _emailKey = 'saved_email';
   static const _orgIdKey = 'org_id';
@@ -94,7 +94,7 @@ class LoginController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final uri = Uri.parse('$_baseUrl/auth/login');
+      final uri = Uri.parse(ApiEndpoints.login);
       final response = await http
           .post(
             uri,

@@ -272,37 +272,50 @@ class _StatsBar extends StatelessWidget {
           children: [
             _StatTile(
               label: 'Total Campaigns',
-              value: '${ctrl.allCampaigns.length}',
+              value: '${ctrl.orgFundStatus.value?.totalCampaigns ?? ctrl.allCampaigns.length}',
               icon: Icons.campaign_rounded,
               color: cEmerald,
             ),
             const SizedBox(width: 12),
             _StatTile(
               label: 'Active Now',
-              value: '${ctrl.activeCount}',
+              value: '${ctrl.orgFundStatus.value?.activeCampaigns ?? ctrl.activeCount}',
               icon: Icons.bolt_rounded,
               color: cSky,
             ),
             const SizedBox(width: 12),
             _StatTile(
+              label: 'Completed',
+              value: '${ctrl.completedCampaigns}',
+              icon: Icons.verified_rounded,
+              color: cEmerald,
+            ),
+            const SizedBox(width: 12),
+            _StatTile(
               label: 'Total Raised',
-              value: ctrl.formatCurrency(ctrl.totalRaised),
+              value: ctrl.formatCurrency(ctrl.donationTotalRaised),
               icon: Icons.savings_rounded,
               color: cViolet,
             ),
             const SizedBox(width: 12),
             _StatTile(
-              label: 'Overall Progress',
-              value: '${ctrl.overallProgress.toStringAsFixed(1)}%',
-              icon: Icons.pie_chart_rounded,
+              label: 'Donations',
+              value: '${ctrl.donationCount}',
+              icon: Icons.volunteer_activism_rounded,
               color: cAmber,
             ),
             const SizedBox(width: 12),
             _StatTile(
-              label: 'With Photos',
-              value: '${ctrl.withImagesCount}',
-              icon: Icons.image_rounded,
-              color: cEmerald,
+              label: ctrl.allOrgDonationSummaries.isEmpty
+                  ? 'Remaining'
+                  : 'All Orgs Raised',
+              value: ctrl.allOrgDonationSummaries.isEmpty
+                  ? ctrl.formatCurrency(ctrl.remainingToRaise)
+                  : ctrl.formatCurrency(ctrl.allOrganizationDonationTotal),
+              icon: ctrl.allOrgDonationSummaries.isEmpty
+                  ? Icons.flag_rounded
+                  : Icons.account_balance_rounded,
+              color: ctrl.allOrgDonationSummaries.isEmpty ? cRose : cSky,
             ),
           ],
         ),
@@ -330,10 +343,10 @@ class _StatTileState extends State<_StatTile> {
   bool _h = false;
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _h = true),
-      onExit: (_) => setState(() => _h = false),
-      child: Expanded(
+    return Expanded(
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -357,23 +370,30 @@ class _StatTileState extends State<_StatTile> {
                 child: Icon(widget.icon, color: widget.color, size: 17),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.value,
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: cText,
-                      letterSpacing: -0.3,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        widget.value,
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: cText,
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    widget.label,
-                    style: GoogleFonts.inter(fontSize: 10, color: cTextSub),
-                  ),
-                ],
+                    Text(
+                      widget.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(fontSize: 10, color: cTextSub),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

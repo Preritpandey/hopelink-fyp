@@ -47,6 +47,17 @@ class CampaignListController extends GetxController {
   final donationsNextPage = RxnInt();
   String _donationsForId = '';
 
+  // Donation and fund stats
+  final orgDonationSummary = Rxn<DonationSummary>();
+  final selectedOrgDonationSummary = Rxn<DonationSummary>();
+  final allOrgDonationSummaries = <DonationSummary>[].obs;
+  final orgFundStatus = Rxn<OrganizationFundStatus>();
+  final campaignFundStatus = Rxn<CampaignFundStatus>();
+  final donationStatsLoading = false.obs;
+  final donationStatsError = ''.obs;
+  final campaignFundLoading = false.obs;
+  final campaignFundError = ''.obs;
+
   // ── Controllers ───────────────────────────────────────────────
   final searchCtrl = TextEditingController();
   String _token = '';
@@ -86,6 +97,7 @@ class CampaignListController extends GetxController {
       if (res.statusCode == 200 && json['success'] == true) {
         final resp = CampaignListResponse.fromJson(json);
         allCampaigns.assignAll(resp.data);
+        await fetchDonationStats();
       } else {
         errorMsg.value =
             json['message'] as String? ?? 'Failed to load campaigns.';
@@ -160,6 +172,48 @@ class CampaignListController extends GetxController {
   int get totalUpdates =>
       allCampaigns.fold(0, (sum, c) => sum + c.updates.length);
 
+  String get organizationId {
+    final selectedOrgId = selectedCampaign.value?.organization?.id ?? '';
+    if (selectedOrgId.isNotEmpty) return selectedOrgId;
+    for (final campaign in allCampaigns) {
+      final id = campaign.organization?.id ?? '';
+      if (id.isNotEmpty) return id;
+    }
+    return '';
+  }
+
+  DonationSummary? get bestOrgDonationSummary =>
+      selectedOrgDonationSummary.value ?? orgDonationSummary.value;
+
+  double get donationTotalRaised =>
+      bestOrgDonationSummary?.totalAmount ??
+      orgFundStatus.value?.totalDonationsReceived ??
+      totalRaised;
+
+  int get donationCount =>
+      bestOrgDonationSummary?.donationCount ??
+      orgFundStatus.value?.totalDonationCount ??
+      0;
+
+  int get allOrganizationDonationCount =>
+      allOrgDonationSummaries.fold(0, (sum, item) => sum + item.donationCount);
+
+  double get allOrganizationDonationTotal => allOrgDonationSummaries.fold(
+        0.0,
+        (sum, item) => sum + item.totalAmount,
+      );
+
+  double get remainingToRaise =>
+      orgFundStatus.value?.remainingAmount ??
+      (totalTarget - totalRaised).clamp(0.0, double.infinity).toDouble();
+
+  int get completedCampaigns =>
+      orgFundStatus.value?.completedCampaigns ??
+      allCampaigns.where((c) => c.status == 'completed').length;
+
+  int get recentDonationCount =>
+      orgFundStatus.value?.recentDonations.length ?? 0;
+
   // ── Interactions ─────────────────────────────────────────────
   void setFilter(CampaignStatusFilter f) {
     activeFilter.value = f;
@@ -177,6 +231,7 @@ class CampaignListController extends GetxController {
   void openDetail(CampaignListItem c) {
     expandedFaqIndex.value = -1;
     selectedCampaign.value = c;
+    fetchCampaignFundStatus(c.id);
     fetchDonations(c.id);
     fetchCampaignReportStatus(c.id);
   }
@@ -556,6 +611,121 @@ class CampaignListController extends GetxController {
     final next = donationsNextPage.value;
     if (next == null || _donationsForId.isEmpty) return;
     await fetchDonations(_donationsForId, page: next);
+  }
+
+  Future<void> fetchDonationStats() async {
+    donationStatsLoading.value = true;
+    donationStatsError.value = '';
+    await Future.wait([
+      _fetchOrgDonationSummary(),
+      _fetchAllOrgDonationSummaries(),
+      _fetchOrganizationFundStatus(),
+    ]);
+    final orgId = organizationId;
+    if (orgId.isNotEmpty) {
+      await _fetchOrgDonationSummaryById(orgId);
+    }
+    donationStatsLoading.value = false;
+  }
+
+  Future<void> fetchCampaignFundStatus(String campaignId) async {
+    campaignFundLoading.value = true;
+    campaignFundError.value = '';
+    campaignFundStatus.value = null;
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/campaigns/$campaignId/fund-status'))
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final data = json['data'];
+        if (data is Map<String, dynamic>) {
+          campaignFundStatus.value = CampaignFundStatus.fromJson(data);
+        }
+      } else {
+        campaignFundError.value =
+            json['message'] as String? ?? 'Failed to load fund status.';
+      }
+    } catch (e) {
+      campaignFundError.value = 'Error: $e';
+    }
+    campaignFundLoading.value = false;
+  }
+
+  Future<void> _fetchOrgDonationSummary() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/donations/summary/org'), headers: _authHeaders)
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final data = json['data'];
+        if (data is Map<String, dynamic>) {
+          orgDonationSummary.value = DonationSummary.fromJson(data);
+        }
+      }
+    } catch (e) {
+      donationStatsError.value = 'Some donation stats could not be loaded.';
+    }
+  }
+
+  Future<void> _fetchAllOrgDonationSummaries() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/donations/summary/all'), headers: _authHeaders)
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final data = json['data'] as List? ?? [];
+        allOrgDonationSummaries.assignAll(
+          data
+              .whereType<Map<String, dynamic>>()
+              .map(DonationSummary.fromJson)
+              .toList(),
+        );
+      }
+    } catch (e) {
+      donationStatsError.value = 'Some donation stats could not be loaded.';
+    }
+  }
+
+  Future<void> _fetchOrgDonationSummaryById(String orgId) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$_base/donations/summary/org/$orgId'),
+            headers: _authHeaders,
+          )
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final data = json['data'];
+        if (data is Map<String, dynamic>) {
+          selectedOrgDonationSummary.value = DonationSummary.fromJson(data);
+        }
+      }
+    } catch (e) {
+      donationStatsError.value = 'Some donation stats could not be loaded.';
+    }
+  }
+
+  Future<void> _fetchOrganizationFundStatus() async {
+    final orgId = organizationId;
+    if (orgId.isEmpty) return;
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/campaigns/organization/$orgId/fund-status'))
+          .timeout(const Duration(seconds: 15));
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && json['success'] == true) {
+        final data = json['data'];
+        if (data is Map<String, dynamic>) {
+          orgFundStatus.value = OrganizationFundStatus.fromJson(data);
+        }
+      }
+    } catch (e) {
+      donationStatsError.value = 'Some donation stats could not be loaded.';
+    }
   }
 
   // ── Formatters ────────────────────────────────────────────────

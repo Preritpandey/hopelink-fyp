@@ -39,6 +39,24 @@ class ApiEndpoints {
   static String rejectOrganization(String orgId) =>
       '$baseUrl/admin/orgs/reject/$orgId';
 
+  // Admin fund transfers
+  static String get fundTransfers => '$baseUrl/fund-transfers';
+  static String fundTransfer(String transferId) =>
+      '$baseUrl/fund-transfers/$transferId';
+  static String fundTransferStatus(String transferId) =>
+      '$baseUrl/fund-transfers/$transferId/status';
+  static String cancelFundTransfer(String transferId) =>
+      '$baseUrl/fund-transfers/$transferId/cancel';
+  static String get fundTransferStats =>
+      '$baseUrl/fund-transfers/stats/summary';
+  static String orgFundTransferHistory(String organizationId) =>
+      '$baseUrl/fund-transfers/org/$organizationId/history';
+  static String orgFundTransferSummary(String organizationId) =>
+      '$baseUrl/fund-transfers/org/$organizationId/summary';
+  static String fundTransferReceipt(String transferId) =>
+      '$baseUrl/fund-transfers/$transferId/receipt';
+  static String get allDonationSummaries => '$baseUrl/donations/summary/all';
+
   // Essentials
   static String get essentialRequests => '$baseUrl/essential-requests';
   static String essentialRequestById(String requestId) =>

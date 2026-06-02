@@ -31,7 +31,6 @@ class _CampaignDetailPanelState extends State<CampaignDetailPanel>
   late final AnimationController _anim;
   late final Animation<Offset> _slide;
   late final Animation<double> _fade;
-  int _imgIdx = 0;
 
   @override
   void initState() {
@@ -935,6 +934,96 @@ class _CampaignDetailPanelState extends State<CampaignDetailPanel>
                       ),
                       const SizedBox(height: 16),
 
+                      Obx(() {
+                        if (widget.ctrl.campaignFundLoading.value) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: LinearProgressIndicator(
+                              minHeight: 2,
+                              valueColor: AlwaysStoppedAnimation(cEmerald),
+                              backgroundColor: cSurf3,
+                            ),
+                          );
+                        }
+
+                        final fund = widget.ctrl.campaignFundStatus.value;
+                        if (fund == null) {
+                          if (widget.ctrl.campaignFundError.value.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Text(
+                              widget.ctrl.campaignFundError.value,
+                              style: bodySm().copyWith(color: cRose),
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _SectionLabel(
+                                'Campaign Stats',
+                                Icons.analytics_rounded,
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _FundStatTile(
+                                      icon: Icons.volunteer_activism_rounded,
+                                      label: 'DONATIONS',
+                                      value: '${fund.donationCount}',
+                                      color: cEmerald,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _FundStatTile(
+                                      icon: fund.isComplete
+                                          ? Icons.check_circle_rounded
+                                          : Icons.pending_actions_rounded,
+                                      label: 'FUND STATUS',
+                                      value: fund.isComplete
+                                          ? 'Complete'
+                                          : 'In progress',
+                                      color: fund.isComplete ? cSky : cAmber,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _FundStatTile(
+                                      icon: Icons.event_available_rounded,
+                                      label: 'DAYS LEFT',
+                                      value: fund.daysRemaining <= 0
+                                          ? 'Ended'
+                                          : '${fund.daysRemaining}',
+                                      color: cViolet,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _FundStatTile(
+                                      icon: Icons.business_rounded,
+                                      label: 'ORG DONATIONS',
+                                      value:
+                                          '${fund.organizationTotalDonationCount}',
+                                      color: cSky,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+
                       // â”€â”€ Timeline Block â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                       _SectionLabel('Timeline', Icons.date_range_rounded),
                       Row(
@@ -1453,6 +1542,67 @@ class _SectionLabel extends StatelessWidget {
           Text(
             text,
             style: headingMd().copyWith(fontSize: 12, color: cTextSub),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FundStatTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _FundStatTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.06),
+        borderRadius: r10,
+        border: Border.all(color: color.withOpacity(0.18)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: r8,
+            ),
+            child: Icon(icon, size: 14, color: color),
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: monoSm().copyWith(letterSpacing: 0.5)),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 12,
+                      color: cText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

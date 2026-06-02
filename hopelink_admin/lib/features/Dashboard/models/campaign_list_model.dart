@@ -2,6 +2,9 @@
 //  MODEL  —  campaign_list_model.dart
 // ─────────────────────────────────────────────────────────────
 
+double _numToDouble(dynamic value) => value is num ? value.toDouble() : 0.0;
+int _numToInt(dynamic value) => value is num ? value.toInt() : 0;
+
 // ── Organisation (embedded) ───────────────────────────────────
 class CampaignOrganization {
   final String id;
@@ -125,6 +128,150 @@ class CampaignReportSnapshot {
               json['reportFile'] as Map<String, dynamic>,
             )
           : null,
+    );
+  }
+}
+
+class DonationSummary {
+  final String organizationId;
+  final double totalAmount;
+  final int donationCount;
+
+  const DonationSummary({
+    required this.organizationId,
+    required this.totalAmount,
+    required this.donationCount,
+  });
+
+  factory DonationSummary.fromJson(Map<String, dynamic> json) {
+    return DonationSummary(
+      organizationId: json['_id'] as String? ??
+          json['organizationId'] as String? ??
+          json['id'] as String? ??
+          '',
+      totalAmount: _numToDouble(json['totalAmount']),
+      donationCount: _numToInt(json['donationCount']),
+    );
+  }
+}
+
+class OrganizationFundStatus {
+  final String organizationId;
+  final String organizationName;
+  final double totalDonationsReceived;
+  final int totalDonationCount;
+  final int totalCampaigns;
+  final int activeCampaigns;
+  final int completedCampaigns;
+  final double totalTargetAmount;
+  final double totalCurrentAmount;
+  final double remainingAmount;
+  final double overallProgress;
+  final List<CampaignDonation> recentDonations;
+
+  const OrganizationFundStatus({
+    required this.organizationId,
+    required this.organizationName,
+    required this.totalDonationsReceived,
+    required this.totalDonationCount,
+    required this.totalCampaigns,
+    required this.activeCampaigns,
+    required this.completedCampaigns,
+    required this.totalTargetAmount,
+    required this.totalCurrentAmount,
+    required this.remainingAmount,
+    required this.overallProgress,
+    required this.recentDonations,
+  });
+
+  factory OrganizationFundStatus.fromJson(Map<String, dynamic> json) {
+    final fundStatus = json['fundStatus'] as Map<String, dynamic>? ?? {};
+    final overview = json['campaignOverview'] as Map<String, dynamic>? ?? {};
+    return OrganizationFundStatus(
+      organizationId: json['organizationId'] as String? ?? '',
+      organizationName: json['organizationName'] as String? ?? 'Organization',
+      totalDonationsReceived: _numToDouble(
+        fundStatus['totalDonationsReceived'],
+      ),
+      totalDonationCount: _numToInt(fundStatus['totalDonationCount']),
+      totalCampaigns: _numToInt(fundStatus['totalCampaigns']),
+      activeCampaigns: _numToInt(fundStatus['activeCampaigns']),
+      completedCampaigns: _numToInt(fundStatus['completedCampaigns']),
+      totalTargetAmount: _numToDouble(overview['totalTargetAmount']),
+      totalCurrentAmount: _numToDouble(overview['totalCurrentAmount']),
+      remainingAmount: _numToDouble(overview['remainingAmount']),
+      overallProgress: _numToDouble(overview['overallProgress']),
+      recentDonations: (json['recentDonations'] as List? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(CampaignDonation.fromJson)
+          .toList(),
+    );
+  }
+}
+
+class CampaignFundStatus {
+  final String campaignId;
+  final String campaignTitle;
+  final String organizationId;
+  final String organizationName;
+  final double organizationTotalDonationsReceived;
+  final int organizationTotalDonationCount;
+  final double targetAmount;
+  final double currentAmount;
+  final double remainingAmount;
+  final double progress;
+  final double progressPercentage;
+  final int donationCount;
+  final bool isComplete;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int daysRemaining;
+  final bool isActive;
+
+  const CampaignFundStatus({
+    required this.campaignId,
+    required this.campaignTitle,
+    required this.organizationId,
+    required this.organizationName,
+    required this.organizationTotalDonationsReceived,
+    required this.organizationTotalDonationCount,
+    required this.targetAmount,
+    required this.currentAmount,
+    required this.remainingAmount,
+    required this.progress,
+    required this.progressPercentage,
+    required this.donationCount,
+    required this.isComplete,
+    required this.startDate,
+    required this.endDate,
+    required this.daysRemaining,
+    required this.isActive,
+  });
+
+  factory CampaignFundStatus.fromJson(Map<String, dynamic> json) {
+    final org = json['organization'] as Map<String, dynamic>? ?? {};
+    final fund = json['fundStatus'] as Map<String, dynamic>? ?? {};
+    final timeline = json['timeline'] as Map<String, dynamic>? ?? {};
+    return CampaignFundStatus(
+      campaignId: json['campaignId'] as String? ?? '',
+      campaignTitle: json['campaignTitle'] as String? ?? '',
+      organizationId: org['id'] as String? ?? '',
+      organizationName: org['name'] as String? ?? 'Organization',
+      organizationTotalDonationsReceived: _numToDouble(
+        org['totalDonationsReceived'],
+      ),
+      organizationTotalDonationCount: _numToInt(org['totalDonationCount']),
+      targetAmount: _numToDouble(fund['targetAmount']),
+      currentAmount: _numToDouble(fund['currentAmount']),
+      remainingAmount: _numToDouble(fund['remainingAmount']),
+      progress: _numToDouble(fund['progress']),
+      progressPercentage: _numToDouble(fund['progressPercentage']),
+      donationCount: _numToInt(fund['donationCount']),
+      isComplete: fund['isComplete'] as bool? ?? false,
+      startDate: DateTime.tryParse(timeline['startDate'] as String? ?? ''),
+      endDate: DateTime.tryParse(timeline['endDate'] as String? ?? ''),
+      daysRemaining: _numToInt(timeline['daysRemaining']),
+      isActive: timeline['isActive'] as bool? ?? false,
     );
   }
 }

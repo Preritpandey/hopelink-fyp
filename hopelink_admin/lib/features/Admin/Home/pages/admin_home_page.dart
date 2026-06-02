@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hopelink_admin/features/Admin/fund_transfers/pages/fund_transfer_page.dart';
 import 'package:hopelink_admin/features/Admin/organizations/pages/organization_approval_page.dart';
 import 'package:hopelink_admin/features/Admin/reports/pages/admin_reports_page.dart';
 
@@ -69,13 +70,22 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 selectedIcon: Icon(Icons.fact_check_rounded),
                 label: Text('Reports'),
               ),
+              NavigationRailDestination(
+                icon: Icon(Icons.payments_outlined),
+                selectedIcon: Icon(Icons.payments_rounded),
+                label: Text('Funds'),
+              ),
             ],
           ),
           const VerticalDivider(width: 1, color: Color(0xFF243148)),
           Expanded(
             child: IndexedStack(
               index: _selectedIndex,
-              children: const [OrganizationApprovalPage(), AdminReportsPage()],
+              children: const [
+                OrganizationApprovalPage(),
+                AdminReportsPage(),
+                FundTransferPage(),
+              ],
             ),
           ),
         ],

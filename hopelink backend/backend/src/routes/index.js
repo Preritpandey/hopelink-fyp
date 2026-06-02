@@ -19,6 +19,7 @@ import commentRoutes from './comment.routes.js';
 import essentialRequestRoutes from './essentialRequest.routes.js';
 import donationCommitmentRoutes from './donationCommitment.routes.js';
 import savedCauseRoutes from './savedCause.routes.js';
+import fundTransferRoutes from './fundTransfer.routes.js';
 
 const router = express.Router();
 
@@ -62,6 +63,7 @@ router.use('/posts', postRoutes);
 router.use('/comments', commentRoutes);
 router.use('/essential-requests', essentialRequestRoutes);
 router.use('/saved-causes', savedCauseRoutes);
+router.use('/fund-transfers', fundTransferRoutes);
 router.use('/', donationCommitmentRoutes);
 
 // E-commerce Routes
