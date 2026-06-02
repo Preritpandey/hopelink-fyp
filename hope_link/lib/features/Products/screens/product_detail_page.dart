@@ -548,11 +548,17 @@ class _ColorVariantPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasColorVariants = variants.any(
+      (variant) => (variant.attributes.color ?? '').trim().isNotEmpty,
+    );
+    final hasVariablePricing =
+        variants.map((variant) => variant.price).toSet().length > 1;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Choose Color',
+        Text(
+          hasColorVariants ? 'Choose Color' : 'Choose Variant',
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 16,
@@ -561,8 +567,10 @@ class _ColorVariantPicker extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Select your preferred tone. Price stays consistent across the available options.',
+        Text(
+          hasVariablePricing
+              ? 'Select from the available backend variants. Price updates with your choice.'
+              : 'Select from the available backend variants for this product.',
           style: TextStyle(
             fontFamily: 'DM Sans',
             fontSize: 13,
@@ -577,8 +585,9 @@ class _ColorVariantPicker extends StatelessWidget {
           children: variants.map((variant) {
             final isSelected = selectedVariant?.id == variant.id;
             final outOfStock = !variant.inStock;
-            final label = _variantColorLabel(variant);
+            final label = _variantLabel(variant);
             final swatch = _colorForVariant(label);
+            final hasColor = (variant.attributes.color ?? '').trim().isNotEmpty;
 
             return GestureDetector(
               onTap: outOfStock ? null : () => onSelected(variant),
@@ -612,22 +621,31 @@ class _ColorVariantPicker extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: swatch,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: swatch.withOpacity(0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                    if (hasColor)
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: swatch,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.white, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: swatch.withOpacity(0.35),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Icon(
+                        Icons.tune_rounded,
+                        size: 17,
+                        color: isSelected
+                            ? AppColors.accent
+                            : AppColors.textMuted,
                       ),
-                    ),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -646,7 +664,9 @@ class _ColorVariantPicker extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          outOfStock ? 'Out of stock' : 'Ready to add',
+                          outOfStock
+                              ? 'Out of stock'
+                              : 'NPR ${variant.price.toStringAsFixed(0)}',
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 11,
@@ -668,10 +688,12 @@ class _ColorVariantPicker extends StatelessWidget {
     );
   }
 
-  String _variantColorLabel(ProductVariant variant) {
+  String _variantLabel(ProductVariant variant) {
     final color = variant.attributes.color?.trim();
-    if (color != null && color.isNotEmpty) return color;
     final label = variant.attributes.displayLabel.trim();
+    if (label.isNotEmpty) return label;
+    if (color != null && color.isNotEmpty) return color;
+    if (variant.sku.trim().isNotEmpty) return variant.sku.trim();
     return label.isEmpty ? 'Artisan tone' : label;
   }
 
@@ -1063,5 +1085,3 @@ class _BentoCard extends StatelessWidget {
     );
   }
 }
-
-

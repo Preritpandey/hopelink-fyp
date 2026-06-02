@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hope_link/features/Profile/pages/profile_page.dart';
 import 'package:hope_link/features/Profile/pages/profile_view_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';

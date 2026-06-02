@@ -11,10 +11,7 @@ class ProductsResponse {
 
   factory ProductsResponse.fromJson(Map<String, dynamic> json) {
     final rawProducts =
-        json['products'] ??
-        json['data'] ??
-        json['items'] ??
-        const <dynamic>[];
+        json['products'] ?? json['data'] ?? json['items'] ?? const <dynamic>[];
     final products = (rawProducts as List<dynamic>)
         .whereType<Map<String, dynamic>>()
         .map(ProductModel.fromJson)
@@ -68,12 +65,15 @@ class ProductModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: _idFromDynamic(json['_id']) ?? _idFromDynamic(json['id']) ?? '',
-      org: OrgModel.fromJson(json['orgId'] ?? json['organization'] ?? json['org']),
+      org: OrgModel.fromJson(
+        json['orgId'] ?? json['organization'] ?? json['org'],
+      ),
       name: json['name'] as String? ?? '',
       description: json['description'] as String? ?? '',
       beneficiaryDescription: json['beneficiaryDescription'] as String? ?? '',
       category: _categoryLabel(json['category']),
-      images: (json['images'] as List<dynamic>?)
+      images:
+          (json['images'] as List<dynamic>?)
               ?.map(_imageUrlFromJson)
               .whereType<String>()
               .toList() ??
@@ -86,7 +86,8 @@ class ProductModel {
       basePrice: (json['price'] as num?)?.toDouble() ?? 0.0,
       sku: json['sku'] as String? ?? '',
       stock: _asInt(json['stock']) ?? 0,
-      variants: (json['variants'] as List<dynamic>?)
+      variants:
+          (json['variants'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
               .map(ProductVariant.fromJson)
               .toList() ??
@@ -104,8 +105,13 @@ class ProductModel {
     return variants;
   }
 
-  ProductVariant? get defaultVariant =>
-      displayVariants.isEmpty ? null : displayVariants.first;
+  ProductVariant? get defaultVariant {
+    if (displayVariants.isEmpty) return null;
+    return displayVariants.firstWhere(
+      (variant) => variant.inStock,
+      orElse: () => displayVariants.first,
+    );
+  }
 
   double get minPrice => displayVariants.isEmpty
       ? basePrice
@@ -173,12 +179,16 @@ class ProductVariant {
   });
 
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
+    final attributes = <String, dynamic>{
+      if (json['attributes'] is Map<String, dynamic>)
+        ...(json['attributes'] as Map<String, dynamic>),
+      ...json,
+    };
+
     return ProductVariant(
-      id: _idFromDynamic(json['_id']) ?? '',
+      id: _idFromDynamic(json['_id']) ?? _idFromDynamic(json['id']) ?? '',
       productId: _idFromDynamic(json['productId']) ?? '',
-      attributes: VariantAttributes.fromJson(
-        json['attributes'] as Map<String, dynamic>? ?? const {},
-      ),
+      attributes: VariantAttributes.fromJson(attributes),
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       sku: json['sku'] as String? ?? '',
       stock: _asInt(json['stock']) ?? 0,
@@ -199,8 +209,16 @@ class VariantAttributes {
 
   factory VariantAttributes.fromJson(Map<String, dynamic> json) {
     return VariantAttributes(
-      color: json['color'] as String?,
-      size: json['size'] as String?,
+      color: _asTrimmedString(
+        json['color'] ??
+            json['colour'] ??
+            json['colorName'] ??
+            json['colourName'] ??
+            json['variantColor'],
+      ),
+      size: _asTrimmedString(
+        json['size'] ?? json['sizeName'] ?? json['variantSize'],
+      ),
       extra: json,
     );
   }
@@ -209,7 +227,36 @@ class VariantAttributes {
     final parts = <String>[];
     if (color != null && color!.isNotEmpty) parts.add(color!);
     if (size != null && size!.isNotEmpty) parts.add(size!);
-    return parts.join(' - ');
+    if (parts.isNotEmpty) return parts.join(' - ');
+
+    final label =
+        _asTrimmedString(extra['name']) ??
+        _asTrimmedString(extra['label']) ??
+        _asTrimmedString(extra['variantName']) ??
+        _asTrimmedString(extra['title']);
+    if (label != null) return label;
+
+    final ignoredKeys = {
+      '_id',
+      'id',
+      'productId',
+      'price',
+      'sku',
+      'stock',
+      'isActive',
+      'isDeleted',
+      'createdAt',
+      'updatedAt',
+      '__v',
+      'attributes',
+    };
+    final dynamicParts = extra.entries
+        .where((entry) => !ignoredKeys.contains(entry.key))
+        .map((entry) => _asTrimmedString(entry.value))
+        .whereType<String>()
+        .toList();
+
+    return dynamicParts.join(' - ');
   }
 }
 
@@ -226,6 +273,12 @@ String? _idFromDynamic(dynamic value) {
     return value['_id'] as String? ?? value['id'] as String?;
   }
   return null;
+}
+
+String? _asTrimmedString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  return text.isEmpty ? null : text;
 }
 
 String _categoryLabel(dynamic value) {

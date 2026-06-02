@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:hope_link/features/Donate%20Funds/pages/campaigns_list_page.dart';
@@ -91,20 +92,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Content
-          FadeTransition(
-            opacity: _contentFadeAnimation,
-            child: SlideTransition(
-              position: _contentSlideAnimation,
-              child: _getPageContent(),
-            ),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Content
+            FadeTransition(
+              opacity: _contentFadeAnimation,
+              child: SlideTransition(
+                position: _contentSlideAnimation,
+                child: _getPageContent(),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
+      ),
     );
   }
 

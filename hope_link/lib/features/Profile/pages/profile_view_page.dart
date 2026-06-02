@@ -254,9 +254,7 @@ class ProfileViewPage extends StatelessWidget {
                   alignment: WrapAlignment.center,
                   children: tags
                       .take(2)
-                      .map(
-                        (tag) => _buildMetaChip(tag, _chipColorForTag(tag)),
-                      )
+                      .map((tag) => _buildMetaChip(tag, _chipColorForTag(tag)))
                       .toList(),
                 ),
               ],
@@ -415,7 +413,9 @@ class ProfileViewPage extends StatelessWidget {
             : hasError
             ? Text(
                 creditController.errorMessage.value,
-                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.red[400]),
+                style: AppTextStyle.bodyMedium.copyWith(
+                  color: AppColors.red[400],
+                ),
               )
             : credits == null
             ? Text(
@@ -964,34 +964,34 @@ class ProfileViewPage extends StatelessWidget {
     );
   }
 
-  double _profileCompleteness(UserModel user) {
-    var completed = 0;
-    const total = 8;
+  // double _profileCompleteness(UserModel user) {
+  //   var completed = 0;
+  //   const total = 8;
 
-    if (user.profileImage.isNotEmpty) completed++;
-    if (user.phone.trim().isNotEmpty) completed++;
-    if (user.gender.trim().isNotEmpty) completed++;
-    if (user.bio.trim().isNotEmpty) completed++;
-    if (user.description.trim().isNotEmpty) completed++;
-    if (user.location.city.trim().isNotEmpty ||
-        user.location.country.trim().isNotEmpty) {
-      completed++;
-    }
-    if (user.interest.isNotEmpty) completed++;
-    if (user.cv.trim().isNotEmpty) completed++;
+  //   if (user.profileImage.isNotEmpty) completed++;
+  //   if (user.phone.trim().isNotEmpty) completed++;
+  //   if (user.gender.trim().isNotEmpty) completed++;
+  //   if (user.bio.trim().isNotEmpty) completed++;
+  //   if (user.description.trim().isNotEmpty) completed++;
+  //   if (user.location.city.trim().isNotEmpty ||
+  //       user.location.country.trim().isNotEmpty) {
+  //     completed++;
+  //   }
+  //   if (user.interest.isNotEmpty) completed++;
+  //   if (user.cv.trim().isNotEmpty) completed++;
 
-    return completed / total;
-  }
+  //   return completed / total;
+  // }
 
-  String _completionLabel(double value) {
-    if (value >= 0.9) {
-      return 'Your profile looks polished and ready for outreach.';
-    }
-    if (value >= 0.65) {
-      return 'A few more details would make this profile feel much stronger.';
-    }
-    return 'Adding bio, interests, resume, and contact details will improve trust fast.';
-  }
+  // String _completionLabel(double value) {
+  //   if (value >= 0.9) {
+  //     return 'Your profile looks polished and ready for outreach.';
+  //   }
+  //   if (value >= 0.65) {
+  //     return 'A few more details would make this profile feel much stronger.';
+  //   }
+  //   return 'Adding bio, interests, resume, and contact details will improve trust fast.';
+  // }
 
   String _formatLocation(UserModel user) {
     final city = user.location.city.trim();
@@ -1130,7 +1130,11 @@ class _LogoutButtonState extends State<_LogoutButton>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.logout_rounded, color: AppColors.white, size: 20),
+                      Icon(
+                        Icons.logout_rounded,
+                        color: AppColors.white,
+                        size: 20,
+                      ),
                       SizedBox(width: 10),
                       Text(
                         'Logout',
@@ -1378,7 +1382,9 @@ class _AnimatedButtonState extends State<AnimatedButton>
               boxShadow: [
                 BoxShadow(
                   color:
-                      (widget.isPrimary ? AppColors.red[400] : AppColors.grey400)!
+                      (widget.isPrimary
+                              ? AppColors.red[400]
+                              : AppColors.grey400)!
                           .withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -1396,7 +1402,9 @@ class _AnimatedButtonState extends State<AnimatedButton>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: widget.isPrimary ? AppColors.white : AppColors.black87,
+                      color: widget.isPrimary
+                          ? AppColors.white
+                          : AppColors.black87,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -1409,5 +1417,3 @@ class _AnimatedButtonState extends State<AnimatedButton>
     );
   }
 }
-
-
