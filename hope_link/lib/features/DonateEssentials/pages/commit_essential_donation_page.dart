@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,17 +15,18 @@ class CommitEssentialDonationPage extends StatelessWidget {
         ? Get.find<DonateEssentialsController>()
         : Get.put(DonateEssentialsController());
     return Scaffold(
-      backgroundColor: AppColors.inputFill,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         title: Text(
           'Commit Donation',
           style: GoogleFonts.dmSans(
-            color: AppColors.black87,
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: Obx(() {
         final request = controller.selectedRequest.value;
@@ -43,60 +42,60 @@ class CommitEssentialDonationPage extends StatelessWidget {
               _section(
                 title: request.title,
                 child: Column(
-                  children:
-                      request.reporting.items.map((item) {
-                        EssentialItemNeed? source;
-                        for (final need in request.itemsNeeded) {
-                          if (need.itemName.toLowerCase() == item.itemName.toLowerCase()) {
-                            source = need;
-                            break;
-                          }
-                        }
-                        if (source == null) {
-                          return const SizedBox.shrink();
-                        }
-                        final fieldController = controller.quantityControllers[source.id]!;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: TextFormField(
-                            controller: fieldController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText:
-                                  '${item.itemName} (${item.quantityRemaining} ${item.unit} remaining)',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              helperText: 'Enter 0 to skip this item',
-                            ),
+                  children: request.reporting.items.map((item) {
+                    EssentialItemNeed? source;
+                    for (final need in request.itemsNeeded) {
+                      if (need.itemName.toLowerCase() ==
+                          item.itemName.toLowerCase()) {
+                        source = need;
+                        break;
+                      }
+                    }
+                    if (source == null) {
+                      return const SizedBox.shrink();
+                    }
+                    final fieldController =
+                        controller.quantityControllers[source.id]!;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TextFormField(
+                        controller: fieldController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText:
+                              '${item.itemName} (${item.quantityRemaining} ${item.unit} remaining)',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        );
-                      }).toList(),
+                          helperText: 'Enter 0 to skip this item',
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 16),
               _section(
                 title: 'Pickup Location',
                 child: Column(
-                  children:
-                      request.pickupLocations.map((location) {
-                        return Obx(
-                          () => RadioListTile<String>(
-                            contentPadding: EdgeInsets.zero,
-                            value: location.id,
-                            groupValue: controller.selectedPickupLocationId.value,
-                            onChanged: (value) {
-                              if (value != null) {
-                                controller.selectedPickupLocationId.value = value;
-                              }
-                            },
-                            title: Text(location.address),
-                            subtitle: Text(
-                              '${location.contactPerson} | ${location.availableTimeSlots}',
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                  children: request.pickupLocations.map((location) {
+                    return Obx(
+                      () => RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        value: location.id,
+                        groupValue: controller.selectedPickupLocationId.value,
+                        onChanged: (value) {
+                          if (value != null) {
+                            controller.selectedPickupLocationId.value = value;
+                          }
+                        },
+                        title: Text(location.address),
+                        subtitle: Text(
+                          '${location.contactPerson} | ${location.availableTimeSlots}',
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -109,9 +108,9 @@ class CommitEssentialDonationPage extends StatelessWidget {
                     title: Text(
                       controller.selectedDeliveryDate.value == null
                           ? 'Choose a delivery date'
-                          : DateFormat('EEE, MMM d, yyyy').format(
-                              controller.selectedDeliveryDate.value!,
-                            ),
+                          : DateFormat(
+                              'EEE, MMM d, yyyy',
+                            ).format(controller.selectedDeliveryDate.value!),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () async {
@@ -171,6 +170,7 @@ class CommitEssentialDonationPage extends StatelessWidget {
         child: Obx(
           () => FilledButton(
             style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
@@ -228,7 +228,10 @@ class CommitEssentialDonationPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 18),
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
           ),
           const SizedBox(height: 12),
           child,
@@ -237,6 +240,3 @@ class CommitEssentialDonationPage extends StatelessWidget {
     );
   }
 }
-
-
-

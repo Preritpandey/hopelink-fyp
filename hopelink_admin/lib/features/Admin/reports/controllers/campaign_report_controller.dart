@@ -14,11 +14,13 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:hopelink_admin/core/api_endpoints.dart';
+
 import '../models/campaign_report_model.dart';
 import '../pages/report_pdf_view_page.dart';
 
 class CampaignReportController extends GetxController {
-  static const _base = 'http://localhost:3008/api/v1';
+  static final _base = ApiEndpoints.baseUrl;
   static const _tokenKey = 'auth_token';
 
   // ── State ────────────────────────────────────────────────────
@@ -232,7 +234,7 @@ class CampaignReportController extends GetxController {
     }
 
     if (endpoint.startsWith('/')) {
-      return 'http://localhost:3008$endpoint';
+      return '${ApiEndpoints.baseUrl}$endpoint';
     }
 
     return '$_base/$endpoint';

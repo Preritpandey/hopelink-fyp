@@ -12,6 +12,35 @@ class VolunteerApplicationController extends GetxController {
   final RxBool isSubmitting = false.obs;
   final RxString errorMessage = ''.obs;
 
+  String _extractErrorMessage(http.Response response) {
+    try {
+      final decoded = json.decode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded['message']?.toString() ??
+            decoded['error']?['message']?.toString() ??
+            decoded['error']?.toString() ??
+            'Failed to submit application';
+      }
+    } catch (_) {
+      // Fall through to a status-aware fallback below.
+    }
+
+    if (response.statusCode >= 500) {
+      return 'Server error. Please try again later.';
+    }
+    return 'Failed to submit application';
+  }
+
+  void _showError(String message) {
+    errorMessage.value = message;
+    Get.snackbar(
+      'Error',
+      message,
+      backgroundColor: Get.theme.colorScheme.error.withOpacity(0.1),
+      colorText: Get.theme.colorScheme.error,
+    );
+  }
+
   void setResume(File file) {
     resumeFile.value = file;
   }
@@ -42,13 +71,7 @@ class VolunteerApplicationController extends GetxController {
 
       final token = await _getAuthToken();
       if (token == null) {
-        errorMessage.value = 'Authentication token not found';
-        Get.snackbar(
-          'Error',
-          'Please log in again',
-          backgroundColor: Get.theme.colorScheme.error.withOpacity(0.1),
-          colorText: Get.theme.colorScheme.error,
-        );
+        _showError('Please log in again');
         isSubmitting.value = false;
         return false;
       }
@@ -95,36 +118,20 @@ class VolunteerApplicationController extends GetxController {
           resumeFile.value = null;
           return true;
         } else {
-          errorMessage.value = jsonData['message'] ?? 'Application failed';
-          Get.snackbar(
-            'Error',
-            errorMessage.value,
-            backgroundColor: Get.theme.colorScheme.error.withOpacity(0.1),
-            colorText: Get.theme.colorScheme.error,
+          _showError(
+            jsonData['message']?.toString() ??
+                jsonData['error']?['message']?.toString() ??
+                'Application failed',
           );
           return false;
         }
       } else {
-        final jsonData = json.decode(response.body);
-        errorMessage.value =
-            jsonData['message'] ?? 'Failed to submit application';
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          backgroundColor: Get.theme.colorScheme.error.withOpacity(0.1),
-          colorText: Get.theme.colorScheme.error,
-        );
+        _showError(_extractErrorMessage(response));
         return false;
       }
     } catch (e) {
-      errorMessage.value = 'Error: $e';
       print('Error submitting application: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to submit application. Please try again.',
-        backgroundColor: Get.theme.colorScheme.error.withOpacity(0.1),
-        colorText: Get.theme.colorScheme.error,
-      );
+      _showError('Failed to submit application. Please try again.');
       return false;
     } finally {
       isSubmitting.value = false;

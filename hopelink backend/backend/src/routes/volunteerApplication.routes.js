@@ -10,6 +10,7 @@ import {
   grantVolunteerCreditHours,
 } from '../controllers/volunteerApplication.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get(
   '/my',
   authenticate,
   authorize('user'),
-  getMyVolunteerApplications,
+  asyncHandler(getMyVolunteerApplications),
 );
 
 // Organization routes
@@ -26,43 +27,43 @@ router.get(
   '/job/:jobId',
   authenticate,
   authorize('organization'),
-  getApplicationsByJob,
+  asyncHandler(getApplicationsByJob),
 );
 router.get(
   '/job/:jobId/approved',
   authenticate,
   authorize('organization'),
-  getApprovedApplicationsByJob,
+  asyncHandler(getApprovedApplicationsByJob),
 );
 router.get(
   '/job/:jobId/rejected',
   authenticate,
   authorize('organization'),
-  getRejectedApplicationsByJob,
+  asyncHandler(getRejectedApplicationsByJob),
 );
 router.get(
   '/:id/resume',
   authenticate,
   authorize('organization'),
-  downloadApplicationResume,
+  asyncHandler(downloadApplicationResume),
 );
 router.patch(
   '/:id/approve',
   authenticate,
   authorize('organization'),
-  approveVolunteerApplication,
+  asyncHandler(approveVolunteerApplication),
 );
 router.patch(
   '/:id/reject',
   authenticate,
   authorize('organization'),
-  rejectVolunteerApplication,
+  asyncHandler(rejectVolunteerApplication),
 );
 router.patch(
   '/:id/credit-hours',
   authenticate,
   authorize('organization'),
-  grantVolunteerCreditHours,
+  asyncHandler(grantVolunteerCreditHours),
 );
 
 export default router;

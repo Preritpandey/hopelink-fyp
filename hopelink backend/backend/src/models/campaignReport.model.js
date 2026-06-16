@@ -115,7 +115,6 @@ const campaignReportSchema = new mongoose.Schema(
   }
 );
 
-campaignReportSchema.index({ campaign: 1 });
 campaignReportSchema.index({ organization: 1 });
 campaignReportSchema.index({ status: 1 });
 

@@ -1,4 +1,3 @@
-
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -50,7 +49,9 @@ class DonateEssentialsController extends GetxController {
     try {
       final result = await _service.fetchRequests(
         forceRefresh: forceRefresh,
-        category: selectedCategory.value == 'all' ? null : selectedCategory.value,
+        category: selectedCategory.value == 'all'
+            ? null
+            : selectedCategory.value,
         urgency: selectedUrgency.value == 'all' ? null : selectedUrgency.value,
       );
       requests.assignAll(result);
@@ -61,11 +62,18 @@ class DonateEssentialsController extends GetxController {
     }
   }
 
-  Future<void> loadRequestDetail(String requestId, {bool forceRefresh = true}) async {
-    final request = await _service.fetchRequestDetail(requestId, forceRefresh: forceRefresh);
+  Future<void> loadRequestDetail(
+    String requestId, {
+    bool forceRefresh = true,
+  }) async {
+    final request = await _service.fetchRequestDetail(
+      requestId,
+      forceRefresh: forceRefresh,
+    );
     if (request != null) {
       selectedRequest.value = request;
-      if (selectedPickupLocationId.value.isEmpty && request.pickupLocations.isNotEmpty) {
+      if (selectedPickupLocationId.value.isEmpty &&
+          request.pickupLocations.isNotEmpty) {
         selectedPickupLocationId.value = request.pickupLocations.first.id;
       }
       _ensureQuantityControllers(request);
@@ -75,7 +83,9 @@ class DonateEssentialsController extends GetxController {
   Future<void> loadMyCommitments({bool forceRefresh = false}) async {
     isLoadingCommitments.value = true;
     try {
-      final result = await _service.fetchMyCommitments(forceRefresh: forceRefresh);
+      final result = await _service.fetchMyCommitments(
+        forceRefresh: forceRefresh,
+      );
       myCommitments.assignAll(result);
     } finally {
       isLoadingCommitments.value = false;
@@ -90,8 +100,9 @@ class DonateEssentialsController extends GetxController {
 
   void startCommitFlow(EssentialRequest request) {
     selectedRequest.value = request;
-    selectedPickupLocationId.value =
-        request.pickupLocations.isNotEmpty ? request.pickupLocations.first.id : '';
+    selectedPickupLocationId.value = request.pickupLocations.isNotEmpty
+        ? request.pickupLocations.first.id
+        : '';
     selectedDeliveryDate.value = DateTime.now().add(const Duration(days: 1));
     proofImageBytes.value = null;
     proofImageName.value = '';
@@ -119,6 +130,10 @@ class DonateEssentialsController extends GetxController {
         'No items selected',
         'Add at least one item quantity to continue',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.white,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
       );
       return false;
     }
@@ -128,6 +143,10 @@ class DonateEssentialsController extends GetxController {
         'Pickup required',
         'Select a pickup location before continuing',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.white,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
       );
       return false;
     }
@@ -155,6 +174,10 @@ class DonateEssentialsController extends GetxController {
         'Commitment failed',
         'Please review quantities and try again',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.white,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
       );
       return false;
     } finally {
@@ -182,6 +205,10 @@ class DonateEssentialsController extends GetxController {
         'Update failed',
         'Unable to mark this commitment as delivered',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.white,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
       );
       return false;
     } finally {
@@ -227,7 +254,8 @@ class DonateEssentialsController extends GetxController {
 
   List<CommittedItem> _buildCommittedItems(EssentialRequest request) {
     final reportingMap = {
-      for (final item in request.reporting.items) item.itemName.toLowerCase(): item,
+      for (final item in request.reporting.items)
+        item.itemName.toLowerCase(): item,
     };
     final items = <CommittedItem>[];
 
@@ -267,6 +295,3 @@ class DonateEssentialsController extends GetxController {
     super.onClose();
   }
 }
-
-
-

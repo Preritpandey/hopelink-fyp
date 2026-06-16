@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:dio/dio.dart';
+import 'package:hope_link/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../config/constants/api_endpoints.dart';
 import '../models/event_model.dart';
@@ -23,6 +24,23 @@ class EventController extends GetxController {
 
   // Hive box
   late Box<Event> eventBox;
+
+  String _extractDioErrorMessage(DioException error, String fallback) {
+    final data = error.response?.data;
+    if (data is Map<String, dynamic>) {
+      return data['message']?.toString() ??
+          data['error']?['message']?.toString() ??
+          fallback;
+    }
+    if (data is Map) {
+      return data['message']?.toString() ??
+          (data['error'] is Map
+              ? (data['error'] as Map)['message']?.toString()
+              : null) ??
+          fallback;
+    }
+    return fallback;
+  }
 
   @override
   void onInit() {
@@ -59,9 +77,7 @@ class EventController extends GetxController {
       final response = await _dio.get(
         ApiEndpoints.events,
         options: Options(
-          headers: {
-            if (token.isNotEmpty) 'Authorization': 'Bearer $token',
-          },
+          headers: {if (token.isNotEmpty) 'Authorization': 'Bearer $token'},
         ),
       );
       print(response.data);
@@ -225,7 +241,7 @@ class EventController extends GetxController {
           'Success',
           'Enrollment request sent successfully.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.primaryColor,
+          backgroundColor: AppColors.primary,
           colorText: Get.theme.colorScheme.onPrimary,
         );
 
@@ -236,9 +252,11 @@ class EventController extends GetxController {
       }
       return false;
     } on DioException catch (e) {
+      final message = _extractDioErrorMessage(e, 'Failed to enroll in event');
+      errorMessage.value = message;
       Get.snackbar(
         'Error',
-        e.response?.data['message'] ?? 'Failed to enroll in event',
+        message,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Get.theme.colorScheme.error,
         colorText: Get.theme.colorScheme.onError,

@@ -13,12 +13,13 @@ import {
   authenticateIfPresent,
   authorize,
 } from '../middleware/auth.middleware.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import { uploadResume } from '../middleware/multer.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', authenticateIfPresent, getVolunteerJobs);
+router.get('/', authenticateIfPresent, asyncHandler(getVolunteerJobs));
 
 // User apply
 router.post(
@@ -26,7 +27,7 @@ router.post(
   authenticate,
   authorize('user'),
   uploadResume.single('resume'),
-  applyToVolunteerJob,
+  asyncHandler(applyToVolunteerJob),
 );
 
 // Organization routes
@@ -34,18 +35,18 @@ router.get(
   '/org/my',
   authenticate,
   authorize('organization'),
-  getMyOrganizationJobs,
+  asyncHandler(getMyOrganizationJobs),
 );
-router.post('/', authenticate, authorize('organization'), createVolunteerJob);
-router.patch('/:jobId', authenticate, authorize('organization'), updateVolunteerJob);
+router.post('/', authenticate, authorize('organization'), asyncHandler(createVolunteerJob));
+router.patch('/:jobId', authenticate, authorize('organization'), asyncHandler(updateVolunteerJob));
 router.patch(
   '/:jobId/close',
   authenticate,
   authorize('organization'),
-  closeVolunteerJob,
+  asyncHandler(closeVolunteerJob),
 );
 
 // Public job detail (keep after /org/my to avoid conflict)
-router.get('/:jobId', authenticateIfPresent, getVolunteerJobById);
+router.get('/:jobId', authenticateIfPresent, asyncHandler(getVolunteerJobById));
 
 export default router;

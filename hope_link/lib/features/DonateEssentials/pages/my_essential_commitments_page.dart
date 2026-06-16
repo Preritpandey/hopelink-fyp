@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -19,17 +18,18 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
         : Get.put(DonateEssentialsController());
 
     return Scaffold(
-      backgroundColor: AppColors.inputFill,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         title: Text(
           'My Commitments',
           style: GoogleFonts.dmSans(
-            color: AppColors.black87,
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.loadMyCommitments(forceRefresh: true),
@@ -43,7 +43,8 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
               .where((item) => item.status == 'verified')
               .fold<int>(
                 0,
-                (sum, item) => sum + controller.impactFamiliesForCommitment(item),
+                (sum, item) =>
+                    sum + controller.impactFamiliesForCommitment(item),
               );
 
           return ListView(
@@ -59,7 +60,10 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
                   verifiedFamilies > 0
                       ? 'You helped about $verifiedFamilies families through verified essentials.'
                       : 'Your pending and delivered pledges will show their impact here once verified.',
-                  style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.dmSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -83,10 +87,7 @@ class MyEssentialCommitmentsPage extends StatelessWidget {
 }
 
 class _CommitmentCard extends StatelessWidget {
-  const _CommitmentCard({
-    required this.commitment,
-    required this.controller,
-  });
+  const _CommitmentCard({required this.commitment, required this.controller});
 
   final DonationCommitment commitment;
   final DonateEssentialsController controller;
@@ -110,18 +111,27 @@ class _CommitmentCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   commitment.requestId.title,
-                  style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 16),
+                  style: GoogleFonts.dmSans(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   label,
-                  style: GoogleFonts.dmSans(color: color, fontWeight: FontWeight.w800),
+                  style: GoogleFonts.dmSans(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -130,14 +140,12 @@ class _CommitmentCard extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                commitment.itemsDonating
-                    .map(
-                      (item) => Chip(
-                        label: Text('${item.itemName} | ${item.quantity}'),
-                      ),
-                    )
-                    .toList(),
+            children: commitment.itemsDonating
+                .map(
+                  (item) =>
+                      Chip(label: Text('${item.itemName} | ${item.quantity}')),
+                )
+                .toList(),
           ),
           const SizedBox(height: 12),
           _timeline(commitment),
@@ -175,11 +183,13 @@ class _CommitmentCard extends StatelessWidget {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
                                     child: const Text('Cancel'),
                                   ),
                                   FilledButton(
-                                    onPressed: () => Navigator.pop(context, true),
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
                                     child: const Text('Confirm'),
                                   ),
                                 ],
@@ -248,16 +258,10 @@ class _CommitmentCard extends StatelessWidget {
               child: const Icon(Icons.check, size: 14, color: AppColors.white),
             ),
             const SizedBox(height: 6),
-            Text(
-              labels[step],
-              style: GoogleFonts.dmSans(fontSize: 11),
-            ),
+            Text(labels[step], style: GoogleFonts.dmSans(fontSize: 11)),
           ],
         );
       }),
     );
   }
 }
-
-
-

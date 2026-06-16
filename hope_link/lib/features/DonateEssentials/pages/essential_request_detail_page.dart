@@ -18,17 +18,18 @@ class EssentialRequestDetailPage extends StatelessWidget {
         ? Get.find<DonateEssentialsController>()
         : Get.put(DonateEssentialsController());
     return Scaffold(
-      backgroundColor: AppColors.inputFill,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         title: Text(
           'Request Details',
           style: GoogleFonts.dmSans(
-            color: AppColors.black87,
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: Obx(() {
         final request = controller.selectedRequest.value;
@@ -60,6 +61,7 @@ class EssentialRequestDetailPage extends StatelessWidget {
           minimum: const EdgeInsets.all(16),
           child: FilledButton.icon(
             style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),

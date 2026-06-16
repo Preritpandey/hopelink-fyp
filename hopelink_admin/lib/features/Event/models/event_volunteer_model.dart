@@ -11,8 +11,21 @@ class VolunteerUserInfo {
   final String email;
   final String? profilePicture;
   final String? phone;
+  final String? phoneNumber;
+  final String? gender;
+  final String? status;
+  final String? description;
   final String? bio;
+  final List<String> interests;
   final List<String> skills;
+  final Map<String, dynamic>? location;
+  final String? cv;
+  final int? age;
+  final int totalVolunteerHours;
+  final int totalPoints;
+  final double rating;
+  final bool isVerified;
+  final DateTime? createdAt;
 
   const VolunteerUserInfo({
     required this.id,
@@ -20,11 +33,26 @@ class VolunteerUserInfo {
     required this.email,
     this.profilePicture,
     this.phone,
+    this.phoneNumber,
+    this.gender,
+    this.status,
+    this.description,
     this.bio,
+    this.interests = const [],
     this.skills = const [],
+    this.location,
+    this.cv,
+    this.age,
+    this.totalVolunteerHours = 0,
+    this.totalPoints = 0,
+    this.rating = 0,
+    this.isVerified = false,
+    this.createdAt,
   });
 
   factory VolunteerUserInfo.fromJson(Map<String, dynamic> json) {
+    final location = json['location'];
+
     return VolunteerUserInfo(
       id: json['_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
@@ -32,8 +60,24 @@ class VolunteerUserInfo {
       profilePicture:
           json['profileImage'] as String? ?? json['profilePicture'] as String?,
       phone: json['phone'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      gender: json['gender'] as String?,
+      status: json['status'] as String?,
+      description: json['description'] as String?,
       bio: json['bio'] as String?,
+      interests: (json['interest'] as List? ?? [])
+          .map((e) => e.toString())
+          .toList(),
       skills: (json['skills'] as List? ?? []).map((e) => e.toString()).toList(),
+      location: location is Map ? Map<String, dynamic>.from(location) : null,
+      cv: json['cv'] as String?,
+      age: (json['age'] as num?)?.toInt(),
+      totalVolunteerHours:
+          (json['totalVolunteerHours'] as num?)?.toInt() ?? 0,
+      totalPoints: (json['totalPoints'] as num?)?.toInt() ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 0,
+      isVerified: json['isVerified'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
     );
   }
 
@@ -43,9 +87,36 @@ class VolunteerUserInfo {
     'email': email,
     'profilePicture': profilePicture,
     'phone': phone,
+    'phoneNumber': phoneNumber,
+    'gender': gender,
+    'status': status,
+    'description': description,
     'bio': bio,
+    'interest': interests,
     'skills': skills,
+    'location': location,
+    'cv': cv,
+    'age': age,
+    'totalVolunteerHours': totalVolunteerHours,
+    'totalPoints': totalPoints,
+    'rating': rating,
+    'isVerified': isVerified,
+    'createdAt': createdAt?.toIso8601String(),
   };
+
+  String? get primaryPhone =>
+      (phone != null && phone!.trim().isNotEmpty) ? phone : phoneNumber;
+
+  String get locationLabel {
+    final loc = location;
+    if (loc == null) return '';
+    final parts = [
+      loc['address']?.toString(),
+      loc['city']?.toString(),
+      loc['country']?.toString(),
+    ].where((part) => part != null && part.trim().isNotEmpty).toList();
+    return parts.join(', ');
+  }
 }
 
 // ── Event Volunteer Enrollment ───────────────────────────────
@@ -82,6 +153,11 @@ class EventVolunteer {
       return DateTime.tryParse(s) ?? DateTime.now();
     }
 
+    DateTime? _parseNullable(String? s) {
+      if (s == null || s.isEmpty) return null;
+      return DateTime.tryParse(s);
+    }
+
     return EventVolunteer(
       id: json['_id'] as String? ?? '',
       eventId: json['event'] as String? ?? json['eventId'] as String? ?? '',
@@ -96,12 +172,12 @@ class EventVolunteer {
             json['createdAt'] as String? ??
             json['CreatedAt'] as String?,
       ),
-      approvedAt: _parse(json['approvedAt'] as String?),
+      approvedAt: _parseNullable(json['approvedAt'] as String?),
       approverNotes: json['approverNotes'] as String?,
       attendance: json['attendance'] as bool? ?? false,
       creditHoursGranted: (json['creditHoursGranted'] as num?)?.toInt() ?? 0,
-      enrollmentDate: _parse(json['enrollmentDate'] as String?),
-      creditGrantedAt: _parse(json['creditGrantedAt'] as String?),
+      enrollmentDate: _parseNullable(json['enrollmentDate'] as String?),
+      creditGrantedAt: _parseNullable(json['creditGrantedAt'] as String?),
     );
   }
 

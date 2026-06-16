@@ -289,7 +289,8 @@ class VolunteerCard extends StatelessWidget {
                   color: evBlue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: volunteer.userId.profilePicture != null
+                child: volunteer.userId.profilePicture != null &&
+                        volunteer.userId.profilePicture!.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -297,7 +298,7 @@ class VolunteerCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Center(
                             child: Text(
-                              volunteer.userId.name[0].toUpperCase(),
+                              _initial,
                               style: evHeadingMd().copyWith(color: evBlue),
                             ),
                           ),
@@ -305,7 +306,7 @@ class VolunteerCard extends StatelessWidget {
                       )
                     : Center(
                         child: Text(
-                          volunteer.userId.name[0].toUpperCase(),
+                          _initial,
                           style: evHeadingMd().copyWith(color: evBlue),
                         ),
                       ),
@@ -348,14 +349,14 @@ class VolunteerCard extends StatelessWidget {
             ),
           ],
 
-          if (volunteer.userId.phone != null) ...[
+          if (volunteer.userId.primaryPhone != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
                 Icon(Icons.phone_rounded, size: 14, color: evTextMute),
                 const SizedBox(width: 6),
                 Text(
-                  volunteer.userId.phone!,
+                  volunteer.userId.primaryPhone!,
                   style: evBodyXs().copyWith(color: evTextSub),
                 ),
               ],
@@ -543,6 +544,11 @@ class VolunteerCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
+
+  String get _initial {
+    final name = volunteer.userId.name.trim();
+    return name.isEmpty ? '?' : name[0].toUpperCase();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -558,138 +564,271 @@ class VolunteerProfileDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: evR12),
       backgroundColor: evSurf,
-      child: Container(
-        width: 400,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Header ───────────────────────────────────────
-            Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: evBlue.withOpacity(0.1),
-                    borderRadius: evR12,
-                  ),
-                  child: volunteer.userId.profilePicture != null
-                      ? ClipRRect(
-                          borderRadius: evR12,
-                          child: Image.network(
-                            volunteer.userId.profilePicture!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            volunteer.userId.name[0].toUpperCase(),
-                            style: evHeadingXl().copyWith(color: evBlue),
-                          ),
-                        ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(volunteer.userId.name, style: evHeadingMd()),
-                      EventStatusBadge(status: volunteer.status),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: evText),
-                  onPressed: () => Get.back(),
-                  iconSize: 20,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 720),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 20),
+              EventDivider(),
+              const SizedBox(height: 20),
+              _buildContactSection(),
+              if (_hasPersonalInfo) ...[
+                const SizedBox(height: 18),
+                _buildPersonalSection(),
+              ],
+              if (_text(volunteer.userId.bio) != null ||
+                  _text(volunteer.userId.description) != null) ...[
+                const SizedBox(height: 18),
+                _buildTextBlock(
+                  'About',
+                  _text(volunteer.userId.bio) ??
+                      _text(volunteer.userId.description)!,
                 ),
               ],
-            ),
-
-            const SizedBox(height: 20),
-            EventDivider(),
-            const SizedBox(height: 20),
-
-            // ── Contact Info ──────────────────────────────────
-            EventDetailRow(
-              icon: Icons.email,
-              label: 'Email',
-              value: volunteer.userId.email,
-            ),
-            if (volunteer.userId.phone != null)
-              EventDetailRow(
-                icon: Icons.phone,
-                label: 'Phone',
-                value: volunteer.userId.phone!,
-              ),
-
-            const SizedBox(height: 20),
-
-            // ── Bio ───────────────────────────────────────────
-            if (volunteer.userId.bio != null &&
-                volunteer.userId.bio!.isNotEmpty) ...[
-              Text(
-                'Bio',
-                style: evBodySm().copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                volunteer.userId.bio!,
-                style: evBodyXs().copyWith(color: evTextSub),
-              ),
+              if (volunteer.userId.interests.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                _buildChips('Interests', volunteer.userId.interests, evGreen),
+              ],
+              if (volunteer.userId.skills.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                _buildChips('Skills', volunteer.userId.skills, evBlue),
+              ],
+              const SizedBox(height: 18),
+              _buildStatsSection(),
+              if (_text(volunteer.userId.cv) != null) ...[
+                const SizedBox(height: 18),
+                EventDetailRow(
+                  icon: Icons.description,
+                  label: 'CV',
+                  value: volunteer.userId.cv!,
+                ),
+              ],
               const SizedBox(height: 20),
-            ],
-
-            // ── Skills ────────────────────────────────────────
-            if (volunteer.userId.skills.isNotEmpty) ...[
-              Text(
-                'Skills',
-                style: evBodySm().copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: volunteer.userId.skills
-                    .map((skill) => EventTag(label: skill, color: evBlue))
-                    .toList(),
-              ),
+              _buildTimelineSection(),
               const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: EventBtn(
+                  label: 'Close',
+                  accentColor: evBlue,
+                  onTap: () => Get.back(),
+                ),
+              ),
             ],
-
-            // ── Timeline ──────────────────────────────────────
-            Text(
-              'Timeline',
-              style: evBodySm().copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            _buildTimelineItem(
-              'Applied',
-              _formatDateTime(volunteer.appliedAt),
-              evAmber,
-            ),
-            if (volunteer.approvedAt != null)
-              _buildTimelineItem(
-                'Approved',
-                _formatDateTime(volunteer.approvedAt!),
-                evGreen,
-              ),
-
-            const SizedBox(height: 20),
-
-            // ── Close Button ──────────────────────────────────
-            SizedBox(
-              width: double.infinity,
-              child: EventBtn(
-                label: 'Close',
-                accentColor: evBlue,
-                onTap: () => Get.back(),
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: evBlue.withOpacity(0.1),
+            borderRadius: evR12,
+          ),
+          child: volunteer.userId.profilePicture != null &&
+                  volunteer.userId.profilePicture!.isNotEmpty
+              ? ClipRRect(
+                  borderRadius: evR12,
+                  child: Image.network(
+                    volunteer.userId.profilePicture!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _avatarFallback(),
+                  ),
+                )
+              : _avatarFallback(),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      volunteer.userId.name,
+                      style: evHeadingMd(),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (volunteer.userId.isVerified) ...[
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 16,
+                      color: evBlue,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 6),
+              EventStatusBadge(status: volunteer.status),
+            ],
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close, color: evText),
+          onPressed: () => Get.back(),
+          iconSize: 20,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactSection() {
+    return _buildSection('Contact', [
+      EventDetailRow(
+        icon: Icons.email,
+        label: 'Email',
+        value: volunteer.userId.email,
+      ),
+      if (volunteer.userId.primaryPhone != null)
+        EventDetailRow(
+          icon: Icons.phone,
+          label: 'Phone',
+          value: volunteer.userId.primaryPhone!,
+        ),
+      if (volunteer.userId.locationLabel.isNotEmpty)
+        EventDetailRow(
+          icon: Icons.location_on,
+          label: 'Location',
+          value: volunteer.userId.locationLabel,
+        ),
+    ]);
+  }
+
+  Widget _buildPersonalSection() {
+    return _buildSection('Personal Info', [
+      if (volunteer.userId.age != null)
+        EventDetailRow(
+          icon: Icons.cake,
+          label: 'Age',
+          value: volunteer.userId.age.toString(),
+        ),
+      if (_text(volunteer.userId.gender) != null)
+        EventDetailRow(
+          icon: Icons.person_outline,
+          label: 'Gender',
+          value: _label(volunteer.userId.gender!),
+        ),
+      if (_text(volunteer.userId.status) != null)
+        EventDetailRow(
+          icon: Icons.work_outline,
+          label: 'Status',
+          value: _label(volunteer.userId.status!),
+        ),
+    ]);
+  }
+
+  Widget _buildStatsSection() {
+    return _buildSection('Volunteer Stats', [
+      EventDetailRow(
+        icon: Icons.schedule,
+        label: 'Hours',
+        value: '${volunteer.userId.totalVolunteerHours}',
+      ),
+      EventDetailRow(
+        icon: Icons.stars,
+        label: 'Points',
+        value: '${volunteer.userId.totalPoints}',
+      ),
+      EventDetailRow(
+        icon: Icons.grade,
+        label: 'Rating',
+        value: volunteer.userId.rating.toStringAsFixed(1),
+      ),
+    ]);
+  }
+
+  Widget _buildTimelineSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Timeline', style: evBodySm().copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        _buildTimelineItem(
+          'Applied',
+          _formatDateTime(volunteer.appliedAt),
+          evAmber,
+        ),
+        if (volunteer.approvedAt != null)
+          _buildTimelineItem(
+            'Approved',
+            _formatDateTime(volunteer.approvedAt!),
+            evGreen,
+          ),
+        if (volunteer.creditGrantedAt != null)
+          _buildTimelineItem(
+            'Credit granted',
+            _formatDateTime(volunteer.creditGrantedAt!),
+            evBlue,
+          ),
+        if (volunteer.userId.createdAt != null)
+          _buildTimelineItem(
+            'Joined HopeLink',
+            _formatDateTime(volunteer.userId.createdAt!),
+            evTextMute,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSection(String title, List<Widget> rows) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: evBodySm().copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        ...rows,
+      ],
+    );
+  }
+
+  Widget _buildTextBlock(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: evBodySm().copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        Text(value, style: evBodyXs().copyWith(color: evTextSub)),
+      ],
+    );
+  }
+
+  Widget _buildChips(String title, List<String> values, Color color) {
+    final visibleValues = values.where((v) => v.trim().isNotEmpty).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: evBodySm().copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: visibleValues
+              .map((value) => EventTag(label: value, color: color))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _avatarFallback() {
+    return Center(
+      child: Text(
+        _initial,
+        style: evHeadingXl().copyWith(color: evBlue),
       ),
     );
   }
@@ -716,5 +855,25 @@ class VolunteerProfileDialog extends StatelessWidget {
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  bool get _hasPersonalInfo =>
+      volunteer.userId.age != null ||
+      _text(volunteer.userId.gender) != null ||
+      _text(volunteer.userId.status) != null;
+
+  String? _text(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  String _label(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1);
+  }
+
+  String get _initial {
+    final name = volunteer.userId.name.trim();
+    return name.isEmpty ? '?' : name[0].toUpperCase();
   }
 }

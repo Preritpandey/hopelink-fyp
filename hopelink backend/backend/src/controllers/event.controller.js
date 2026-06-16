@@ -22,6 +22,10 @@ import {
   buildInteractionMap,
   deleteInteractionsForPost,
 } from '../services/postInteraction.service.js';
+
+const volunteerProfileSelect =
+  'name email phone phoneNumber gender status description bio interest skills location profileImage cv age totalVolunteerHours totalPoints rating isVerified createdAt';
+
 export const createEvent = async (req, res, next) => {
   try {
     const {
@@ -638,12 +642,16 @@ export const getEventVolunteers = async (req, res, next) => {
     }
 
     const { page = 1, limit = 20 } = req.query;
-    const query = { event: event._id, status: 'pending' };
+    const { status } = req.query;
+    const query = { event: event._id };
+    if (status && status !== 'all') {
+      query.status = status;
+    }
 
     const enrollments = await VolunteerEnrollment.find(query)
       .populate({
         path: 'user',
-        select: 'name email phone profileImage skills',
+        select: volunteerProfileSelect,
       })
       .sort({ enrollmentDate: -1 })
       .skip((page - 1) * limit)
@@ -682,7 +690,7 @@ export const updateVolunteerStatus = async (req, res, next) => {
       req.params.enrollmentId,
     )
       .populate('event')
-      .populate('user', 'name email');
+      .populate('user', volunteerProfileSelect);
 
     if (!enrollment) {
       throw new NotFoundError('Enrollment not found');
@@ -816,7 +824,7 @@ export const getEventApprovedVolunteers = async (req, res, next) => {
     const enrollments = await VolunteerEnrollment.find(query)
       .populate({
         path: 'user',
-        select: 'name email phone profileImage skills',
+        select: volunteerProfileSelect,
       })
       .sort({ enrollmentDate: -1 })
       .skip((page - 1) * limit)
@@ -869,7 +877,7 @@ export const getEventRejectedEnrollments = async (req, res, next) => {
     const enrollments = await VolunteerEnrollment.find(query)
       .populate({
         path: 'user',
-        select: 'name email phone profileImage skills',
+        select: volunteerProfileSelect,
       })
       .sort({ enrollmentDate: -1 })
       .skip((page - 1) * limit)

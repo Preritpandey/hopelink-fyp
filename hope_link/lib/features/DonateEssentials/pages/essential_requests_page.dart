@@ -28,22 +28,29 @@ class _EssentialRequestsPageState extends State<EssentialRequestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.inputFill,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         title: Text(
           'Donate Essentials',
           style: GoogleFonts.dmSans(
-            color: AppColors.black87,
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
+        iconTheme: const IconThemeData(color: AppColors.white),
         actions: [
           TextButton.icon(
             onPressed: () => Get.toNamed('/essential-commitments'),
-            icon: const Icon(Icons.inventory_2_outlined),
-            label: const Text('My Commitments'),
+            icon: const Icon(
+              Icons.inventory_2_outlined,
+              color: AppColors.white,
+            ),
+            label: const Text(
+              'My Commitments',
+              style: TextStyle(color: AppColors.white),
+            ),
           ),
           const SizedBox(width: 8),
         ],
